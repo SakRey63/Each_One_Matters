@@ -1,15 +1,18 @@
+using System;
 using UnityEngine;
 
 public class FireRateBooster : MonoBehaviour
 {
     private bool _isBuffConsumed;
+
+    public event Action<FireRateBooster> OnFirstOfficerEntered; 
         
     private void OnTriggerEnter(Collider other)
     {
-        if (_isBuffConsumed == false && other.TryGetComponent(out PoliceOfficer police))
+        if (_isBuffConsumed == false && other.TryGetComponent<PoliceOfficer>(out _))
         {
-             _isBuffConsumed = true;
-             police.ApplyFireRateBoost();
+            OnFirstOfficerEntered?.Invoke(this);
+            _isBuffConsumed = true;
         }
     }
 }

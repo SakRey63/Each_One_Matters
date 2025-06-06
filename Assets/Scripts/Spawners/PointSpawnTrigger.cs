@@ -5,13 +5,13 @@ public class PointSpawnTrigger : MonoBehaviour
 {
     [SerializeField] private Transform _zombieSpawnArea;
     
-    public event Action<Transform> OnHordeSpawning;
+    public event Action<PointSpawnTrigger,Transform> OnHordeSpawning;
     
     private void OnTriggerEnter(Collider other)
     {
         if (other.TryGetComponent<PoliceOfficer>(out _))
         {
-            OnHordeSpawning?.Invoke(_zombieSpawnArea);
+            OnHordeSpawning?.Invoke(this, _zombieSpawnArea);
         }
     }
 

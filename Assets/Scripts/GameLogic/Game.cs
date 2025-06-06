@@ -1,9 +1,9 @@
-using System;
 using UnityEngine;
 
 public class Game : MonoBehaviour
 {
     [SerializeField] private Player _player;
+    [SerializeField] private int _startingUnitCount = 1;
     [SerializeField] private SpawnerZombie _spawnerZombie;
     [SerializeField] private int _levelPlayer = 1;
     [SerializeField] private float _baseLengthBridge = 100f;
@@ -11,7 +11,7 @@ public class Game : MonoBehaviour
     
     private PlayerInput _playerInput;
     private BridgeGenerator _bridgeGenerator;
-    private PointSpawnTrigger _spawnTrigger;
+    private Monster _monster;
 
     private void Awake()
     {
@@ -23,17 +23,62 @@ public class Game : MonoBehaviour
     {
         _playerInput.DirectionChanged += OnDirectionChanged;
         _bridgeGenerator.OnPointSpawnedTrigger += SpawnedTrigger;
+        _bridgeGenerator.OnFireRateBoostedCreated += SubscribeToFireRateCreated;
+        _bridgeGenerator.OnRecruitPoliceCreated += SubscribeToRecruitPoliced;
+
     }
 
     private void OnDisable()
     {
         _playerInput.DirectionChanged -= OnDirectionChanged;
         _bridgeGenerator.OnPointSpawnedTrigger -= SpawnedTrigger;
+        _bridgeGenerator.OnFireRateBoostedCreated -= SubscribeToFireRateCreated;
+        _bridgeGenerator.OnRecruitPoliceCreated -= SubscribeToRecruitPoliced;
     }
-
+    
     private void Start()
     {
+        _player.SpawnPoliceOfficer(_startingUnitCount);
         _bridgeGenerator.Generate(CalculateLengthBridge());
+    }
+
+    private void SubscribeToFireRateCreated(FireRateBooster fireRateBooster)
+    {
+        fireRateBooster.OnFirstOfficerEntered += IncreaseGroupFireRate;
+    }
+    
+    private void SubscribeToRecruitPoliced(RecruitPolice recruitPolice)
+    {
+        recruitPolice.OnRecruitPoliceTriggered += IncreasePoliceOfficerSize;
+    }
+
+    private void IncreasePoliceOfficerSize(int number, bool isMultiplication, RecruitPolice recruitPolice)
+    {
+        recruitPolice.OnRecruitPoliceTriggered -= IncreasePoliceOfficerSize;
+
+        if (isMultiplication)
+        {
+            int spawnUnitCount = (_player.PoliceCount * number) - _player.PoliceCount;
+            
+            Debug.Log($"Умножить отряд в: {number} раз. Надо заспавнить {spawnUnitCount} полицейских" );
+
+            if (spawnUnitCount > 0)
+            {
+                _player.SpawnPoliceOfficer(spawnUnitCount);
+            }
+        }
+        else
+        {
+            Debug.Log($"Увеличить отряд на: {number} человек");
+            _player.SpawnPoliceOfficer(number);
+        }
+        
+    }
+
+    private void IncreaseGroupFireRate(FireRateBooster fireRateBooster)
+    {
+        fireRateBooster.OnFirstOfficerEntered -= IncreaseGroupFireRate;
+        _player.ApplyBuffToParty();
     }
 
     private float CalculateLengthBridge()
@@ -43,14 +88,13 @@ public class Game : MonoBehaviour
     
     private void SpawnedTrigger(PointSpawnTrigger spawnTrigger)
     {
-        _spawnTrigger = spawnTrigger;
-        _spawnTrigger.OnHordeSpawning += SpawnZombie;
+        spawnTrigger.OnHordeSpawning += SpawnZombie;
     }
 
-    private void SpawnZombie(Transform transform)
+    private void SpawnZombie(PointSpawnTrigger spawnTrigger, Transform spawnPoint)
     {
-        _spawnTrigger.OnHordeSpawning -= SpawnZombie;
-        _spawnerZombie.SpawnAdaptiveWave(transform, _player.PoliceCount);
+        spawnTrigger.OnHordeSpawning -= SpawnZombie;
+        _spawnerZombie.SpawnAdaptiveWave(spawnPoint, _player.PoliceCount);
     }
 
     private void OnDirectionChanged(float direction)
