@@ -6,8 +6,8 @@ using Random = UnityEngine.Random;
 public class RecruitPolice : MonoBehaviour
 {
     [SerializeField] private int _minNumber = 1;
-    [SerializeField] private int _maxCumulativeIncrease = 16;
-    [SerializeField] private int _maxPopulationMultiplier = 10;
+    [SerializeField] private int _maxCumulativeIncrease = 6;
+    [SerializeField] private int _maxPopulationMultiplier = 4;
     [SerializeField] private TextMeshProUGUI _populationMultiplierText;
     [SerializeField] private TextMeshProUGUI _cumulativeIncreaseText;
     [SerializeField] private RectTransform _leftPositionText;
@@ -17,34 +17,17 @@ public class RecruitPolice : MonoBehaviour
     private int _populationMultiplier;
     private bool _isMultiplication;
 
-    public event Action<int, bool, RecruitPolice> OnRecruitPoliceTriggered;
+    public bool IsMultiplication => _isMultiplication;
+    public int PopulationMultiplier => _populationMultiplier;
+    public int CumulativeIncrease => _cumulativeIncrease;
+
+    public event Action<RecruitPolice> OnRecruitPoliceTriggered;
     
     private void OnTriggerEnter(Collider other)
     {
-        if (other.TryGetComponent(out PoliceOfficer policeOfficer))
+        if (other.TryGetComponent<PoliceOfficer>(out _))
         {
-            if (policeOfficer.transform.position.x >= 0)
-            {
-                if (_isMultiplication)
-                {
-                    OnRecruitPoliceTriggered?.Invoke(_populationMultiplier, true, this);
-                }
-                else
-                {
-                    OnRecruitPoliceTriggered?.Invoke(_cumulativeIncrease, false, this);
-                }
-            }
-            else
-            {
-                if (_isMultiplication == false)
-                {
-                    OnRecruitPoliceTriggered?.Invoke(_populationMultiplier, true, this);
-                }
-                else
-                {
-                    OnRecruitPoliceTriggered?.Invoke(_cumulativeIncrease, false, this);
-                }
-            }
+            OnRecruitPoliceTriggered?.Invoke(this);
         }
     }
 

@@ -1,138 +1,124 @@
 using System;
-using Unity.Mathematics;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 public class BridgeGenerator : MonoBehaviour
 {
-    [SerializeField] private int _zSectionOffset = 4;
-    [SerializeField] private int _xSectionOffset = 4;
+    [SerializeField] private int _sectionOffset = 4;
     [SerializeField] private int _indexLevelSpawnObject = 3;
     [SerializeField] private int _maxIndexZombieWaveTrigget = 7;
-    [SerializeField] private int _countBridgeObstacle = 2;
     [SerializeField] private  int _laneCount = 3;
-    [SerializeField] private float _monsterOffset = 3.5f;
-    [SerializeField] private float _heateFireBoosterTrigger = 0.75f;
-    [SerializeField] private float _zBaseOffset = 13;
     [SerializeField] private Transform _startPositionBridgeSegments;
-    [SerializeField] private Transform _startPositionAllTriggers;
-    [SerializeField] private Transform _righePositionMonster;
     [SerializeField] private Transform _positionZombieWaveTrigger;
-    [SerializeField] private SegmentNormalBrige _normalBrige;
-    [SerializeField] private PointSpawnTrigger _pointSpawnPrefab;
-    [SerializeField] private FireRateBooster _fireRateBooster;
-    [SerializeField] private Monster _monster;
-    [SerializeField] private Base _base;
-    [SerializeField] private RecruitPolice _recruitPolice;
-    [SerializeField] private GameObject[] _bridgeObstacles;
-    [SerializeField] private GameObject[] _playerUpgrades;
-    
-    private float _countLevel;
+
+    private BridgeObjectSelector _objectSelector;
+    private BridgeLengthCalculator _lengthCalculator;
+    private SegmentPositionGenerator _positionGenerator;
+    private BridgeCheckpointStore _checkpointStore;
+    private SpawnerSegmentBridge _spawnerSegmentBridge;
+    private SpawnerZombieWaveTrigger _spawnerZombieWaveTrigger;
+    private MonsterSpawner _monsterSpawner;
+    private BuffSpawner _buffSpawner;
     private int _indexZombieWaveTrigger;
-    private int _indexLevel;
-    private int _indexSpawnObject;
-    private bool _isDamagedSegment;
-    private bool _isMonsterActive;
-    private bool _isFireRateBoosted;
-    private bool _isRecruitedPolice;
-    private float _randomXSectionOffset;
-    private int _minRandomValue = -1;
-    private int _maxRandomValue = 2;
-    private int _randomFirstSpawnObject;
-    private GameObject _objectSpawnOfBridge;
+    private Vector3 _randomPositionSection;
+    private Quaternion _targetRotation;
+
+    public int BridgeSpanCount => _lengthCalculator.SpanCount;
+    public bool IsTurnRight => _positionGenerator.IsTurnRight;
 
     public event Action<PointSpawnTrigger> OnPointSpawnedTrigger;
     public event Action<FireRateBooster> OnFireRateBoostedCreated;
     public event Action<RecruitPolice> OnRecruitPoliceCreated;
+    public event Action<BridgeConnector> OnBridgeConnectorCreated;
 
-    public void Generate(float lengthBridge)
+    private void Awake()
     {
-        _randomFirstSpawnObject = GetRandomIndex(0, _maxRandomValue);
-        
-        _countLevel = lengthBridge / _zSectionOffset;
-
-        Vector3 nextSpawnPositionZ = _startPositionBridgeSegments.position;
-        
-        CreateZombieWaveTrigger(nextSpawnPositionZ);
-        
-        for (int i = 0; i < _countLevel; i++)
-        {
-            _indexLevel++;
-
-            if (_indexLevel == _indexLevelSpawnObject)
-            {
-                _indexLevel = 0;
-                ChoseObjectToBridge();
-            }
-
-            if (_indexZombieWaveTrigger >= _maxIndexZombieWaveTrigget)
-            {
-                CreateZombieWaveTrigger(nextSpawnPositionZ);
-            }
-            
-            CreateLevel(nextSpawnPositionZ);
-            
-            nextSpawnPositionZ = new Vector3(nextSpawnPositionZ.x, nextSpawnPositionZ.y,
-                nextSpawnPositionZ.z + _zSectionOffset);
-            
-            _indexZombieWaveTrigger++;
-        }
-
-        nextSpawnPositionZ = new Vector3(_startPositionAllTriggers.position.x, _startPositionAllTriggers.position.y, nextSpawnPositionZ.z + _zBaseOffset);
-
-        Instantiate(_base, nextSpawnPositionZ, quaternion.identity);
+        _monsterSpawner = GetComponent<MonsterSpawner>();
+        _buffSpawner = GetComponent<BuffSpawner>();
+        _spawnerZombieWaveTrigger = GetComponent<SpawnerZombieWaveTrigger>();
+        _spawnerSegmentBridge = GetComponent<SpawnerSegmentBridge>();
+        _checkpointStore = GetComponent<BridgeCheckpointStore>();
+        _objectSelector = GetComponent<BridgeObjectSelector>();
+        _positionGenerator = GetComponent<SegmentPositionGenerator>();
+        _lengthCalculator = GetComponent<BridgeLengthCalculator>();
+        _targetRotation = _startPositionBridgeSegments.rotation;
     }
 
-    private void ChoseObjectToBridge()
+    private void OnEnable()
     {
-        if (_randomFirstSpawnObject > 0)
-        {
-            _indexSpawnObject++;
-            _objectSpawnOfBridge = GetObjectBridge(_bridgeObstacles);
-           
-            if (_indexSpawnObject == _countBridgeObstacle)
-            {
-                _randomFirstSpawnObject--;
-                _indexSpawnObject = 0;
-            }
-        }
-        else
-        {
-            _objectSpawnOfBridge = GetObjectBridge(_playerUpgrades);
-            _randomFirstSpawnObject++;
-        }
-        
-        _randomXSectionOffset = _xSectionOffset * GetRandomIndex(_minRandomValue, _maxRandomValue);
+        _buffSpawner.OnPoliceRecruitSpawned += HandlePoliceRecruitSpawned;
+        _buffSpawner.OnFireRateBoostSpawned += HandleFireRateBoostSpawned;
+        _spawnerSegmentBridge.OnBridgeConnectorSpawned += HandleBridgeConnectorSpawned;
+    }
 
-        if (_objectSpawnOfBridge.TryGetComponent<SegmentDamagedBridge>(out _))
+    private void OnDisable()
+    {
+        _buffSpawner.OnPoliceRecruitSpawned -= HandlePoliceRecruitSpawned;
+        _buffSpawner.OnFireRateBoostSpawned -= HandleFireRateBoostSpawned;
+        _spawnerSegmentBridge.OnBridgeConnectorSpawned -= HandleBridgeConnectorSpawned;
+        
+    }
+
+    public void Generate(int level)
+    {
+        _objectSelector.CreateFirstSpawnObject();
+        _lengthCalculator.CalculateLengthBridge(level);
+        _checkpointStore.CreateCheckpointArray(_lengthCalculator.SpanCount);
+
+        for (int i = 0; i < _lengthCalculator.SpanCount; i++)
         {
-            _isDamagedSegment = true;
-        }
-        else if(_objectSpawnOfBridge.TryGetComponent<Monster>(out _))
-        {
-            _isMonsterActive = true;
-        }
-        else if (_objectSpawnOfBridge.TryGetComponent<FireRateBooster>(out _))
-        {
-            _isFireRateBoosted = true;
-        }
-        else if(_objectSpawnOfBridge.TryGetComponent<RecruitPolice>(out _))
-        {
-            _isRecruitedPolice = true;
+            float countLevel = _lengthCalculator.LenghtBridge / _sectionOffset;
+
+            Vector3 nextSpawnPosition = _startPositionBridgeSegments.position;
+
+            int indexLevel = 0;
+            
+            for (int y = 0; y < countLevel; y++)
+            {
+                indexLevel++;
+
+                if (indexLevel == _indexLevelSpawnObject)
+                {
+                    indexLevel = 0;
+                    _objectSelector.ChoseObjectToBridge();
+                    _randomPositionSection = _positionGenerator.GetRandomPositionToLevel(nextSpawnPosition);
+                }
+
+                if (_indexZombieWaveTrigger == 0 || _indexZombieWaveTrigger >= _maxIndexZombieWaveTrigget)
+                {
+                    CreateZombieWaveTrigger(nextSpawnPosition);
+                }
+            
+                CreateLevel(nextSpawnPosition);
+            
+                nextSpawnPosition = _positionGenerator.GetNextPositionAlongLength(nextSpawnPosition);
+            
+                _indexZombieWaveTrigger++;
+            }
+
+            _spawnerSegmentBridge.SetBridgeConnectorOrFinish(i, nextSpawnPosition, _positionGenerator, _targetRotation, _checkpointStore, _lengthCalculator.SpanCount);
         }
     }
 
-    private GameObject GetObjectBridge(GameObject[] objectsBridge)
+    public Transform GetTargetPoint(int index)
     {
-        return objectsBridge[Random.Range(0, objectsBridge.Length)];
-    }
+        Transform point = _checkpointStore.GetCheckpointAtIndex(index);
 
+        return point;
+    }
+    
+    private void HandleBridgeConnectorSpawned(BridgeConnector connector, Quaternion targetRotation, Transform startPositionBridgeSegments)
+    {
+        OnBridgeConnectorCreated?.Invoke(connector);
+        _startPositionBridgeSegments = startPositionBridgeSegments;
+        _targetRotation = targetRotation;
+        _indexZombieWaveTrigger = 0;
+    }
+    
     private void CreateZombieWaveTrigger(Vector3 position)
     {
         _indexZombieWaveTrigger = 0;
-        
-        position = new Vector3(_positionZombieWaveTrigger.position.x, _positionZombieWaveTrigger.position.y, position.z);
-        var waveTrigger = Instantiate(_pointSpawnPrefab, position, quaternion.identity);
+
+        PointSpawnTrigger waveTrigger = _spawnerZombieWaveTrigger.GetZombieTrigger(position, _targetRotation, _positionGenerator);
         
         OnPointSpawnedTrigger?.Invoke(waveTrigger);
     }
@@ -141,96 +127,31 @@ public class BridgeGenerator : MonoBehaviour
     {
         for (int j = 0; j < _laneCount; j++)
         {
-            CreateSegmentBridge(position);
+            _spawnerSegmentBridge.CreateSegmentBridge(position, _objectSelector, _positionGenerator.IsHorizontatl, _targetRotation, _randomPositionSection);
+            SpawnMonster(position);
+            SpawnPowerUp(position);
             
-            if (_randomXSectionOffset == position.x)
-            { 
-                SpawnMonster(position);
-                SpawnPowerUp(position);
-            }
-            
-            position = new Vector3(position.x + _xSectionOffset, position.y, position.z);
-        }
-    }
-
-    private void CreateSegmentBridge(Vector3 positionSegment)
-    {
-        if (_isDamagedSegment && positionSegment.x == _randomXSectionOffset)
-        {
-            _isDamagedSegment = false;
-            Instantiate(_objectSpawnOfBridge, positionSegment, quaternion.identity);
-        }
-        else
-        {
-            Instantiate(_normalBrige, positionSegment, quaternion.identity);
+            position = _positionGenerator.GetNextPositionAlongWidth(position);
         }
     }
     
     private void SpawnPowerUp(Vector3 basePosition)
     {
-        if (_isFireRateBoosted || _isRecruitedPolice)
-        {
-            if (_isFireRateBoosted)
-            {
-                basePosition = new Vector3(basePosition.x, _heateFireBoosterTrigger, basePosition.z);
-                _isFireRateBoosted = false;
-                
-                var fireRateBooster = Instantiate(_fireRateBooster, basePosition, quaternion.identity);
-                
-                OnFireRateBoostedCreated?.Invoke(fireRateBooster);
-            }
-            
-            if (_isRecruitedPolice)
-            {
-                int randomPositionSquad = GetRandomIndex(0, _maxRandomValue);
-                
-                basePosition = new Vector3(_startPositionAllTriggers.position.x, _startPositionAllTriggers.position.y, basePosition.z);
-                _isRecruitedPolice = false;
-                
-                var recruitPolice = Instantiate(_recruitPolice, basePosition, quaternion.identity);
+        _buffSpawner.ConditionalSpawnBuffs(_positionGenerator, _objectSelector, basePosition, _targetRotation, _randomPositionSection);
+    }
 
-                if (randomPositionSquad == 0)
-                {
-                    recruitPolice.SetBonusCount(false);
-                }
-                else
-                {
-                    recruitPolice.SetBonusCount(true);
-                }
-                
-                OnRecruitPoliceCreated?.Invoke(recruitPolice);
-            }
-        }
+    private void HandleFireRateBoostSpawned(FireRateBooster fireRateBooster)
+    {
+        OnFireRateBoostedCreated?.Invoke(fireRateBooster);
+    }
+    
+    private void HandlePoliceRecruitSpawned(RecruitPolice recruitPolice)
+    {
+        OnRecruitPoliceCreated?.Invoke(recruitPolice);
     }
 
     private void SpawnMonster(Vector3 positionMonster)
     {
-        if (_isMonsterActive)
-        {
-            float zOffset = 2.5f;
-            
-            _isMonsterActive = false;
-
-            Monster monster = Instantiate(_monster);
-
-            if (_randomXSectionOffset < 0)
-            {
-                monster.transform.position = new Vector3(_righePositionMonster.position.x, _righePositionMonster.position.y,
-                    positionMonster.z);
-                monster.transform.rotation = _righePositionMonster.rotation;
-            }
-            else
-            {
-                monster.transform.position = new Vector3(_xSectionOffset + _monsterOffset, positionMonster.y, positionMonster.z);
-                zOffset = -zOffset;
-            } 
-            
-            monster.SetPositionScannerZombie(zOffset);
-        }
-    }
-
-    private int GetRandomIndex(int minValue, int maxValue)
-    {
-        return Random.Range(minValue, maxValue);
+        _monsterSpawner.CreateAndSetupMonster(positionMonster, _objectSelector, _positionGenerator, _targetRotation);
     }
 }

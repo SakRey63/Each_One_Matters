@@ -11,7 +11,6 @@ public class SegmentDamagedBridge : MonoBehaviour
             if (policeOfficer.IsDead == false)
             {
                 policeOfficer.SetCenterPoint(_centrPoint);
-                policeOfficer.TakeDamage();
             }
         }
     }

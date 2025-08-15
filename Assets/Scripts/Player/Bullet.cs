@@ -6,6 +6,7 @@ public class Bullet : MonoBehaviour
 {
     [SerializeField] private float _speed = 3f;
     [SerializeField] private float _delay = 5f;
+    [SerializeField] private int _damage = 50;
 
     public event Action<Bullet> OnHit;
 
@@ -28,7 +29,7 @@ public class Bullet : MonoBehaviour
     {
         if (other.gameObject.GetComponent<Zombie>())
         {
-            other.gameObject.GetComponent<Zombie>().TakeDamage();
+            other.gameObject.GetComponent<Zombie>().TakeDamage(_damage);
         }
         
         OnHit?.Invoke(this);
@@ -45,6 +46,6 @@ public class Bullet : MonoBehaviour
 
     private void Move()
     {
-        transform.Translate(Vector3.back * _speed * Time.deltaTime, Space.World);
+        transform.Translate(Vector3.forward * _speed * Time.deltaTime, Space.Self);
     }
 }

@@ -4,6 +4,10 @@ using UnityEngine;
 public class PointSpawnTrigger : MonoBehaviour
 {
     [SerializeField] private Transform _zombieSpawnArea;
+
+    private bool _isHorizontal;
+
+    public bool IsHorizontal => _isHorizontal;
     
     public event Action<PointSpawnTrigger,Transform> OnHordeSpawning;
     
@@ -15,6 +19,11 @@ public class PointSpawnTrigger : MonoBehaviour
         }
     }
 
+    public void SetDirection(bool isHorizontal)
+    {
+        _isHorizontal = isHorizontal;
+    }
+    
     private void OnDrawGizmos()
     {
         BoxCollider collider = GetComponent<BoxCollider>();

@@ -4,15 +4,17 @@ using UnityEngine;
 public class PoleceOfficerSpawner : ObjectPool<PoliceOfficer>
 {
     private Transform _transformSpawn;
-    public PoliceOfficer CreatePoliceUnits(Transform transformSpawn)
+    
+    public PoliceOfficer CreatePoliceUnits(Transform transformSpawn, BulletPool bulletPool)
     {
         _transformSpawn = transformSpawn;
         
         PoliceOfficer policeOfficer = GetObject();
 
-        policeOfficer.transform.parent = _transformSpawn.parent;
+        policeOfficer.transform.parent = _transformSpawn;
         policeOfficer.transform.position = _transformSpawn.position;
         policeOfficer.transform.rotation = _transformSpawn.rotation;
+        policeOfficer.SetPoliceOfficerActive(bulletPool);
         policeOfficer.OnDeathAnimationFinished += ReturnPoliceOfficer;
         
         return policeOfficer;
@@ -21,8 +23,6 @@ public class PoleceOfficerSpawner : ObjectPool<PoliceOfficer>
     private void ReturnPoliceOfficer(PoliceOfficer policeOfficer)
     {
         policeOfficer.OnDeathAnimationFinished -= ReturnPoliceOfficer;
-        policeOfficer.transform.position = _transformSpawn.position;
-        policeOfficer.transform.rotation = _transformSpawn.rotation;
         
         ReturnObject(policeOfficer);
     }

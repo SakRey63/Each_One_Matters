@@ -1,0 +1,22 @@
+{
+    "intExample": 5,
+    "strExample": "Hello!",
+    "boolExample": [
+        false,
+        false,
+        false,
+        false
+    ],
+    "idSave": 130,
+    "PlayerName": "Sergey",
+    "Level": 4,
+    "Score": 740,
+    "CountPoliceOfficer": 5,
+    "IncreaseSquadPrices": 1000,
+    "ExtendFireRateDurationPrices": 1200,
+    "CallHelpOnBasePrices": 1200,
+    "CountHelpPoliceOfficer": 3,
+    "BuffDuration": 6.0,
+    "HasSavedPlayer": true,
+    "IsCallHelpUpgradePurchased": true
+}

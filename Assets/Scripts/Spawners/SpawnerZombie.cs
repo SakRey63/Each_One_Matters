@@ -1,27 +1,25 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-public class SpawnerZombie : MonoBehaviour
+public class SpawnerZombie : ObjectPool<Zombie>
 {
-    [SerializeField] private int _zombieMultiplier = 5;
-    [SerializeField] private int _minCounZombie = 10;
-    [SerializeField] private float _spawnDelay = 0.2f;
-    [SerializeField] private float _borderX = 5.7f;
-
+    [SerializeField] private float _spawnDelay = 0.1f;
+    [SerializeField] private float _border = 5.5f;
+    [SerializeField] private int _healthPoint = 75;
+    
     private Transform _spawnPosition;
-    private ZombiePool _zombiePool;
+    private Transform _targetPosition;
+    private bool _isHorizontal;
 
-    private void Awake()
-    {
-        _zombiePool = GetComponent<ZombiePool>();
-    }
+    public event Action<bool> OnZombieKilled;
 
-    public void SpawnAdaptiveWave(Transform spawnPosition, int policeCount)
+    public void SpawnAdaptiveWave(Transform spawnPosition, int count, Transform targetPosition, bool isHorizontal)
     {
+        _isHorizontal = isHorizontal;
         _spawnPosition = spawnPosition;
-
-        int count = GetCalculateCountZombies(policeCount);
+        _targetPosition = targetPosition;
 
         StartCoroutine(SpawnWithDelay(count));
     }
@@ -30,29 +28,37 @@ public class SpawnerZombie : MonoBehaviour
     {
         for (int i = 0; i < count; i++)
         {
-            Zombie zombie = _zombiePool.GetZombie();
+            Zombie zombie = GetObject();
             zombie.transform.position = GetRandomPositionSpawn();
             zombie.transform.rotation = _spawnPosition.rotation;
+            zombie.SetFinish(_targetPosition);
+            zombie.SetHealthPoint(_healthPoint);
+            zombie.SetMovementSpeed();
+            zombie.SetScanEnemy();
+            zombie.OnZombieDeath += ReturnZombie;
             yield return new WaitForSeconds(_spawnDelay);
         }
     }
 
-    private int GetCalculateCountZombies(int policeCount)
+    private void ReturnZombie(Zombie zombie)
     {
-        int count = policeCount * _zombieMultiplier;
-
-        if (count < _minCounZombie)
-        {
-            count = _minCounZombie;
-        }
-        
-        return count;
+        zombie.OnZombieDeath -= ReturnZombie;
+        OnZombieKilled?.Invoke(zombie.IsKilledByBullet);
+        ReturnObject(zombie);
     }
-        
+
     private Vector3 GetRandomPositionSpawn()
     {
-        Vector3 position = new Vector3(Random.Range(-_borderX, _borderX), _spawnPosition.position.y,
-            _spawnPosition.position.z);
+        Vector3 position;
+        
+        if (_isHorizontal)
+        {
+            position = new Vector3(_spawnPosition.position.x, _spawnPosition.position.y, Random.Range(_spawnPosition.position.z -_border, _spawnPosition.position.z + _border));
+        }
+        else
+        {
+            position = new Vector3(Random.Range(_spawnPosition.position.x -_border, _spawnPosition.position.x + _border), _spawnPosition.position.y, _spawnPosition.position.z);
+        }
         
         return position;
     }

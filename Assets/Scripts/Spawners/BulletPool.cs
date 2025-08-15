@@ -6,6 +6,7 @@ public class BulletPool : ObjectPool<Bullet>
     {
         Bullet bullet = GetObject();
         bullet.transform.position = weaponBulletSpawnPosition.position;
+        bullet.transform.rotation = Quaternion.LookRotation(weaponBulletSpawnPosition.forward);
         bullet.OnHit += ReturnBullet;
     }
 
