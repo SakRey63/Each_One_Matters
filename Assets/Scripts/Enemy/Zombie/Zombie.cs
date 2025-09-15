@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
 public class Zombie : MonoBehaviour
@@ -60,7 +61,6 @@ public class Zombie : MonoBehaviour
         EvaluateTargetChange();
         _zombieMovement.Move(_target); 
         _zombieRotation.Rotate(_target.transform.position);
-        
     }
 
     public void SetMovementSpeed()

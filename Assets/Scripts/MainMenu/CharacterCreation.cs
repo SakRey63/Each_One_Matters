@@ -17,8 +17,6 @@ public class CharacterCreation : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _nameChangeWarning;
     [SerializeField] private TMP_InputField _inputField;
     [SerializeField] private int _maxLimit = 10;
-    [SerializeField] private int _startLevel = 1;
-    [SerializeField] private int _startScore = 0;
 
     public void ActivatedInputField()
     {

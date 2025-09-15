@@ -7,6 +7,8 @@ public class BridgeConnector : MonoBehaviour
     [SerializeField] private Transform _bridgeStartPointLeft;
     [SerializeField] private Transform _bridgeStartPointRight;
     [SerializeField] private Transform _placeholderPoint;
+    [SerializeField] private Transform _obstacleCratesBlocking;
+    [SerializeField] private float _xOffset = 16;
 
     private int _index;
     public Transform RotationTarget => _target;
@@ -24,8 +26,25 @@ public class BridgeConnector : MonoBehaviour
         }
     }
     
-    public void SetIndex(int index)
+    public void SetIndex(int index, bool isTurnRight)
     {
         _index = index;
+        SetObstaclePosition(isTurnRight);
+    }
+
+    private void SetObstaclePosition(bool isTurnRight)
+    {
+        Vector3 position = _obstacleCratesBlocking.localPosition;
+
+        if (isTurnRight)
+        {
+            position = new Vector3(-_xOffset, position.y, position.z);
+        }
+        else
+        {
+            position = new Vector3(_xOffset, position.y, position.z);
+        }
+
+        _obstacleCratesBlocking.localPosition = position;
     }
 }

@@ -13,7 +13,9 @@ public class Upgrade : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _balanceText;
     [SerializeField] private TextMeshProUGUI _callHelpOnBaseText;
     [SerializeField] private TextMeshProUGUI _uguipgradeCallHelpOnBaseText;
+    [SerializeField] private LevelSounds _levelSounds;
     [SerializeField] private float _duration = 1.5f;
+    [SerializeField] private int _callHelpUpgradeButtonPrice = 50;
     
     private Shop _shop;
     private Coroutine _coroutine;
@@ -22,14 +24,22 @@ public class Upgrade : MonoBehaviour
     private bool _canCallHelpOnBase;
     private string _defaultText;
 
-    private void Start()
+    private void Awake()
     {
         _defaultText = _balanceText.text;
+    }
+
+    private void OnEnable()
+    {
+        UpdateTextMenu();
+    }
+
+    private void Start()
+    {
         _shop = new Shop();
         _increaseSquadPrices.text = Convert.ToString(YG2.saves.IncreaseSquadPrices);
         _extendFireRateDurationPrices.text = Convert.ToString(YG2.saves.ExtendFireRateDurationPrices);
         _callHelpOnBasePrices.text = Convert.ToString(YG2.saves.CallHelpOnBasePrices);
-        UpdateTextMenu();
     }
 
     public void AddPoliceToSquad()
@@ -48,6 +58,14 @@ public class Upgrade : MonoBehaviour
     {
         _canCallHelpOnBase = true;
         TryApplyUpgrade(YG2.saves.CallHelpOnBasePrices);
+    }
+    
+    private void UpdatePriceText()
+    {
+        string newText = _defaultText;
+        string allScore = Convert.ToString(YG2.saves.Score);
+        newText += " " + allScore;
+        _balanceText.text = newText;
     }
 
     private void TryApplyUpgrade(int price)
@@ -81,17 +99,22 @@ public class Upgrade : MonoBehaviour
                     int countHelpPoliceOfficer = YG2.saves.CountHelpPoliceOfficer;
                     countHelpPoliceOfficer++;
                     YG2.saves.CountHelpPoliceOfficer = countHelpPoliceOfficer;
+                    int priceButton = YG2.saves.CallHelpButtonPrice;
+                    priceButton += _callHelpUpgradeButtonPrice;
+                    YG2.saves.CallHelpButtonPrice = priceButton;
                 }
                 else
                 {
                     YG2.saves.IsCallHelpUpgradePurchased = true;
                 }
                 
+                
                 YG2.saves.CallHelpOnBasePrices = newPrice;
                 _callHelpOnBasePrices.text = Convert.ToString(newPrice);
                 _canCallHelpOnBase = false;
             }
             
+            _levelSounds.CreateUpgradeMusic();
             YG2.SaveProgress();
             UpdateTextMenu();
         }
@@ -108,9 +131,7 @@ public class Upgrade : MonoBehaviour
 
     private void UpdateTextMenu()
     {
-        string newText = _defaultText;
-        newText += " " + Convert.ToString(YG2.saves.Score);
-        _balanceText.text = newText;
+        UpdatePriceText();
 
         if (YG2.saves.IsCallHelpUpgradePurchased)
         {
@@ -127,6 +148,7 @@ public class Upgrade : MonoBehaviour
     private IEnumerator ShowErrorMessage()
     {
         float delay = _duration;
+        _levelSounds.CreateErrorMusic();
         _balanceText.gameObject.SetActive(false);
         _errorText.gameObject.SetActive(true);
         
@@ -139,6 +161,7 @@ public class Upgrade : MonoBehaviour
         
         _errorText.gameObject.SetActive(false);
         _balanceText.gameObject.SetActive(true);
+        UpdatePriceText();
         _coroutine = null;
     }
 }

@@ -12,13 +12,13 @@ public class BridgeLengthCalculator : MonoBehaviour
     private int _lengthBridge;
     private int _countBridgeConnector;
     
-    public int SpanCount { get; private set; }
+    public int BridgePieceCount { get; private set; }
 
     public int LenghtBridge => _lengthBridge;
     
     public void CalculateLengthBridge(int levelPlayer)
     {
-        SpanCount = (int)Math.Ceiling((double)levelPlayer / _maxLevelsBeforeTurn);
+        BridgePieceCount = (int)Math.Ceiling((double)levelPlayer / _maxLevelsBeforeTurn);
 
         _stageNumber = levelPlayer % _maxLevelsBeforeTurn;
 

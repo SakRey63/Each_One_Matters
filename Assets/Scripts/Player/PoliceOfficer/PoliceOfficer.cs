@@ -9,15 +9,16 @@ public class PoliceOfficer : MonoBehaviour
     [SerializeField] private float _tiltAngle = 90f;
     [SerializeField] private float _duration = 1f;
     [SerializeField] private Transform _basePoint;
-    [SerializeField] private MeshRenderer _meshRenderer;
-    [SerializeField] private Color _color;
+    [SerializeField] private Animations _animations;
 
     private Transform _startPositionGenerationSquad;
     private Quaternion _rotationPositionToDamageBridge;
     private PoliceOfficerMovement _officerMovement;
+    private PoliceOfficerSound _policeOfficerSound;
     private Health _health = new Health();
     private Weapon _weapon;
     private BulletPool _bulletPool;
+    private ChunkPool _chunkPool;
     private Coroutine _coroutineRepeatShooting;
     private float _repeatShoot;
     private Transform _targetCenterPoint;
@@ -36,10 +37,11 @@ public class PoliceOfficer : MonoBehaviour
     public event Action<PoliceOfficer> OnPoliceDeath;
     public event Action<PoliceOfficer> OnDeathAnimationFinished;
     public event Action<PoliceOfficer> OnPoliceReachedToGeneratePositionOnBase;
-    public event Action<PoliceOfficer> OnPoliceReachedBase;
+    public event Action<PoliceOfficer, Base> OnPoliceReachedBase;
     
     private void Awake()
     {
+        _policeOfficerSound = GetComponent<PoliceOfficerSound>();
         _officerMovement = GetComponent<PoliceOfficerMovement>();
         _weapon = GetComponentInChildren<Weapon>();
     }
@@ -67,9 +69,6 @@ public class PoliceOfficer : MonoBehaviour
         {
             _isDead = true;
             _officerMovement.StopMove(false);
-
-            gameObject.GetComponent<CapsuleCollider>().isTrigger = true;
-            gameObject.GetComponent<Rigidbody>().useGravity = false;
             
             OnPoliceDeath?.Invoke(this);
             
@@ -78,7 +77,8 @@ public class PoliceOfficer : MonoBehaviour
                 StopCoroutine(_coroutineRepeatShooting);
             }
                     
-            StartCoroutine(PlayDeathAnimationAndReturn());
+            _chunkPool.GetEffect(transform);
+            OnDeathAnimationFinished?.Invoke(this);
         }
     }
 
@@ -86,15 +86,14 @@ public class PoliceOfficer : MonoBehaviour
     {
         _rotationPositionToDamageBridge = rotation;
     }
-    public void SetPoliceOfficerActive(BulletPool bulletPool)
+    
+    public void SetPoliceOfficerActive(BulletPool bulletPool, ChunkPool chunkPool, bool isBaseEntryCompleted)
     {
+        _chunkPool = chunkPool;
         _bulletPool = bulletPool;
-        _meshRenderer.material.color = _color;
-        gameObject.GetComponent<CapsuleCollider>().isTrigger = false;
-        gameObject.GetComponent<Rigidbody>().useGravity = true;
         _isDead = false;
-        _isFoundBase = false;
-        _isBaseEntryCompleted = false;
+        _isFoundBase = isBaseEntryCompleted;
+        _isBaseEntryCompleted = isBaseEntryCompleted;
     }
 
     public void SetTargetPositionInGroup(Vector3 position)
@@ -114,7 +113,13 @@ public class PoliceOfficer : MonoBehaviour
 
     public void SetCenterPoint(Transform point)
     {
+        _policeOfficerSound.PlayScream();
         _targetCenterPoint = point;
+
+        if (_coroutineRepeatShooting != null)
+        {
+            StopCoroutine(_coroutineRepeatShooting);
+        }
 
         StartCoroutine(TurnModelToCenter());
     }
@@ -141,6 +146,7 @@ public class PoliceOfficer : MonoBehaviour
     
     public void SetSpeed(float backwardMovementSpeed)
     {
+        _animations.MoveRunAnimation(true);
         _officerMovement.SetSpeed(backwardMovementSpeed);
     }
     
@@ -163,6 +169,7 @@ public class PoliceOfficer : MonoBehaviour
                 if (_isBaseEntryCompleted)
                 {
                     _officerMovement.SetSpeed(0);
+                    _animations.MoveRunAnimation(false);
                 }
                 else
                 {
@@ -173,19 +180,20 @@ public class PoliceOfficer : MonoBehaviour
         }
     }
 
-    public void AssignPoliceDestination(Transform enterBase, Transform startGenerationSquad)
+    public void AssignPoliceDestination(Base basePolice)
     {
-        _startPositionGenerationSquad = startGenerationSquad;
+        _startPositionGenerationSquad = basePolice.StartPositionGeneration;
         _isFoundBase = true;
         _isReachedBaseEntry = true;
-        _officerMovement.SetTargetPosition(enterBase.localPosition, true); 
-        OnPoliceReachedBase?.Invoke(this);
+        _officerMovement.SetTargetPosition(basePolice.BaseEntryTransform.localPosition, true); 
+        OnPoliceReachedBase?.Invoke(this, basePolice);
     }
     
     private IEnumerator TurnModelToCenter()
     {
         _isDead = true;
         _officerMovement.StopMove(false);
+        _animations.MoveFallingAnimation();
         OnPoliceDeath?.Invoke(this);
         transform.rotation = _rotationPositionToDamageBridge;
         
@@ -210,8 +218,6 @@ public class PoliceOfficer : MonoBehaviour
 
     private IEnumerator PlayDeathAnimationAndReturn()
     {
-        _meshRenderer.material.color = Color.red;
-        
         yield return new WaitForSeconds(_delay);
 
         _basePoint.localRotation = Quaternion.identity;
@@ -225,6 +231,7 @@ public class PoliceOfficer : MonoBehaviour
             while (enabled)
             {
                 _bulletPool.GetBullet(_weapon.BulletSpawnPosition);
+                _policeOfficerSound.PlayShoot();
                 
                 yield return new WaitForSeconds(_repeatShoot);
             }

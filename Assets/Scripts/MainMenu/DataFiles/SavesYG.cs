@@ -1,12 +1,16 @@
+using UnityEngine.Serialization;
+
 namespace YG
 {
     public partial class SavesYG
     {
         private int _startScore = 0;
         private int _startLevel = 1;
+        private int _startNumberLanguage = 1;
         private int _startCountHelpPoliceOfficer = 3;
         private int _startCountPoliceOfficer = 5;
         private int _startPrice = 1000;
+        private int _startPriceCallHelpButton = 150;
         private float _startBuffDuration = 5f;
         
         public string PlayerName;
@@ -17,9 +21,14 @@ namespace YG
         public int ExtendFireRateDurationPrices;
         public int CallHelpOnBasePrices;
         public int CountHelpPoliceOfficer;
+        public int CallHelpButtonPrice;
+        public int NumberLanguage;
         public float BuffDuration;
         public bool HasSavedPlayer;
         public bool IsCallHelpUpgradePurchased;
+        public float VolumeMusic;
+        public float VolumeUi;
+        public float VolumeSFX;
         
 
         public void SetNewPlayer(string name)
@@ -35,6 +44,8 @@ namespace YG
             ExtendFireRateDurationPrices = _startPrice;
             CallHelpOnBasePrices = _startPrice;
             CountHelpPoliceOfficer = _startCountHelpPoliceOfficer;
+            CallHelpButtonPrice = _startPriceCallHelpButton;
+            NumberLanguage = _startNumberLanguage;
         }
     }
 }

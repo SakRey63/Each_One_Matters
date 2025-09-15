@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class SegmentPositionGenerator : MonoBehaviour
 {
-    [SerializeField] private float _sectionOffset = 4f;
+    [SerializeField] private float _sectionOffset = 5f;
     [SerializeField] private float _angleRotate = 90f;
     [SerializeField] private float _monsterRightOffset = 3.5f;
     [SerializeField] private float _monsterLeftOffset = 13.5f;
@@ -19,8 +19,9 @@ public class SegmentPositionGenerator : MonoBehaviour
 
     public Transform StartPositionBridgeSegments => _startPositionBridgeSegments;
     public bool IsMonsterPositionRight => _isMonsterPositionRight;
-    public bool IsHorizontatl => _isHorizontal;
-    public bool IsTurnRight => _isFirstTurnedRight;
+    public bool IsHorizontal => _isHorizontal;
+    public bool IsFirstTurnedRight => _isFirstTurnedRight;
+    public bool IsTurnedRight => _isTurnedRight;
 
     public void ToggleMovementDirection()
     {
@@ -175,7 +176,7 @@ public class SegmentPositionGenerator : MonoBehaviour
         return position;
     }
     
-    public Vector3 GetMonsterPosition(Vector3 positionMonster)
+    public Vector3 GetObstaclePosition(Vector3 positionMonster)
     {
         int randomMonsterPosition = GetRandomIndex(0, _maxRandomValue);
 

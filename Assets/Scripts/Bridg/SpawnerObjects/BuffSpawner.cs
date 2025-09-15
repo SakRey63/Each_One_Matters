@@ -13,42 +13,32 @@ public class BuffSpawner : MonoBehaviour
 
     public event Action<RecruitPolice> OnPoliceRecruitSpawned;
     public event Action<FireRateBooster> OnFireRateBoostSpawned;
-    
-    public void ConditionalSpawnBuffs(SegmentPositionGenerator positionGenerator, BridgeObjectSelector objectSelector, Vector3 basePosition, Quaternion targetRotation, Vector3 randomPositionSection)
-    {
-        if (objectSelector.IsFireRateBoosted)
-        { 
-            if (positionGenerator.IsHorizontatl == false && randomPositionSection.x == basePosition.x || positionGenerator.IsHorizontatl && randomPositionSection.z == basePosition.z)
-            {
-                basePosition = new Vector3(basePosition.x, _verticalPositionFireRateBoosted, basePosition.z);
-                FireRateBooster fireRateBooster = Instantiate(_fireRateBooster, basePosition, targetRotation);
-                OnFireRateBoostSpawned?.Invoke(fireRateBooster);
-                
-                objectSelector.ResetAllStats();
-            }
-        }
-            
-        if (objectSelector.IsRecruitedPolice)
-        {
-            int randomPositionSquad = GetRandomIndex(0, _maxRandomValue);
-                
-            basePosition =  positionGenerator.GetPositionCenterLevel(basePosition, _verticalPositionRecuruitPolicePoint);
-                
-            RecruitPolice recruitPolice = Instantiate(_recruitPolice, basePosition, targetRotation);
 
-            if (randomPositionSquad == 0)
-            { 
-                recruitPolice.SetBonusCount(false);
-            }
-            else
-            {
-                recruitPolice.SetBonusCount(true);
-            }
+    public void CreateFireRateBooster(Vector3 basePosition, Quaternion targetRotation, Vector3 randomPositionSection)
+    {
+        basePosition = new Vector3(randomPositionSection.x, _verticalPositionFireRateBoosted, randomPositionSection.z);
+        FireRateBooster fireRateBooster = Instantiate(_fireRateBooster, basePosition, targetRotation);
+        OnFireRateBoostSpawned?.Invoke(fireRateBooster);
+    }
+
+    public void CreateRecruitPolice(SegmentPositionGenerator positionGenerator, Vector3 basePosition, Quaternion targetRotation)
+    {
+        int randomPositionSquad = GetRandomIndex(0, _maxRandomValue);
                 
-            OnPoliceRecruitSpawned?.Invoke(recruitPolice);
-            
-            objectSelector.ResetAllStats();
+        basePosition =  positionGenerator.GetPositionCenterLevel(basePosition, _verticalPositionRecuruitPolicePoint);
+                
+        RecruitPolice recruitPolice = Instantiate(_recruitPolice, basePosition, targetRotation);
+
+        if (randomPositionSquad == 0)
+        { 
+            recruitPolice.SetBonusCount(false);
         }
+        else
+        {
+            recruitPolice.SetBonusCount(true);
+        }
+                
+        OnPoliceRecruitSpawned?.Invoke(recruitPolice);
     }
     
     private int GetRandomIndex(int minValue, int maxValue)

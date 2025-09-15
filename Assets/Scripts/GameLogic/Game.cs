@@ -1,25 +1,29 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor.Profiling.Memory.Experimental;
 using UnityEngine;
 using YG;
-using YG.Utils.LB;
 
 public class Game : MonoBehaviour
 {
+    private const string LeaderboardId = "EachOfMatersLB";
+    
     [SerializeField] private Player _player;
     [SerializeField] private SpawnerZombie _spawnerZombie;
     [SerializeField] private UnityEngine.UI.Image _buffTimerBar;
     [SerializeField] private float _normalRateOfFire = 0.8f;
     [SerializeField] private float _increasedRateOfFire = 0.4f;
+    [SerializeField] private float _xOffsetOcean = 59f;
+    [SerializeField] private float _searchRadius = 5f;
     [SerializeField] private int _zombieMultiplier = 3;
     [SerializeField] private int _minCounZombie = 10;
+    [SerializeField] private int _countAdRevival= 5;
     [SerializeField] private GameMenuHandler _gameMenuHandler;
     [SerializeField] private ScoreHandler _scoreHandler;
-    
+    [SerializeField] private Ocean _ocean;
+
+    private CameraController _cameraController;
     private PlayerInput _playerInput;
     private BridgeGenerator _bridgeGenerator;
-    private Monster _monster;
     private int _levelPlayer;
     private int _nextCountPoint;
     private int _countPoint;
@@ -34,14 +38,19 @@ public class Game : MonoBehaviour
 
     private void Awake()
     {
+        _cameraController = GetComponent<CameraController>();
         _connectors = new List<BridgeConnector>();
         _playerInput = GetComponent<PlayerInput>();
         _bridgeGenerator = GetComponent<BridgeGenerator>();
+        _cameraController.ConfigureCameraForPlatform();
     }
 
     private void OnEnable()
     {
         _gameMenuHandler.OnLevelUp += HandleOnLevelUp;
+        _gameMenuHandler.OnRewardedAdClicked += RevealAndRemoveKillerObstacle;
+        _gameMenuHandler.OnCallHelpPoliceOfficer += HandleCallHelpPolice;
+        _gameMenuHandler.OnRewardedAdWatched += SetupRevivalWithAd;
         _playerInput.OnEscapePressed += HandleEscapePressed;
         _playerInput.DirectionChanged += OnDirectionChanged;
         _bridgeGenerator.OnPointSpawnedTrigger += SpawnedTrigger;
@@ -52,12 +61,14 @@ public class Game : MonoBehaviour
         _player.OnAllPoliceOfficersDead += HandlePoliceOfficerDead;
         _player.OnPlayerReachedBase += ActivateCallHelpButton;
         _spawnerZombie.OnZombieKilled += HandleZombieKilled;
-
     }
 
     private void OnDisable()
     {
+        _gameMenuHandler.OnRewardedAdWatched -= SetupRevivalWithAd;
+        _gameMenuHandler.OnRewardedAdClicked -= RevealAndRemoveKillerObstacle;
         _gameMenuHandler.OnLevelUp -= HandleOnLevelUp;
+        _gameMenuHandler.OnCallHelpPoliceOfficer -= HandleCallHelpPolice;
         _bridgeGenerator.OnBridgeConnectorCreated -= SubscribeToBridgeConnectorCreation;
         _playerInput.OnEscapePressed -= HandleEscapePressed;
         _playerInput.DirectionChanged -= OnDirectionChanged;
@@ -85,6 +96,65 @@ public class Game : MonoBehaviour
         UpdatePlayerTargetPosition();
     }
     
+    private void RevealAndRemoveKillerObstacle()
+    {
+        Collider[] hits = Physics.OverlapSphere(_player.SquadPosition.position, _searchRadius);
+
+        foreach (Collider collider in hits)
+        {
+            if (collider.TryGetComponent<Hammer>(out _))
+            {
+                Destroy(collider.gameObject);
+            }
+            else if (collider.TryGetComponent<RotatingBlade>(out _))
+            {
+                Destroy(collider.gameObject);
+            }
+            else if (collider.TryGetComponent<SawBlade>(out _))
+            {
+                Destroy(collider.gameObject);
+            }
+            else if (collider.TryGetComponent<SpikedCylinder>(out _))
+            {
+                Destroy(collider.gameObject);
+            }
+            else if (collider.TryGetComponent<SpikePress>(out _))
+            {
+                Destroy(collider.gameObject);
+            }
+            else if (collider.TryGetComponent<ScannerObstacle>(out _))
+            {
+                Destroy(collider.gameObject);
+            }
+            else if (collider.TryGetComponent(out SegmentDamagedBridge damagedBridge))
+            {
+                Transform transform = damagedBridge.transform;
+                int number = damagedBridge.NumberPosition;
+                Destroy(collider.gameObject);
+                _bridgeGenerator.SpawnNormalSegment(transform, number);
+            }
+        }
+    }
+    
+    private void SetupRevivalWithAd()
+    {
+        _player.SpawnPoliceOfficer(_countAdRevival);
+    }
+
+    private void HandleCallHelpPolice()
+    {
+        if (_scoreHandler.CurrentScore >= YG2.saves.CallHelpButtonPrice)
+        {
+            _scoreHandler.DeductPointsForHelp(YG2.saves.CallHelpButtonPrice);
+            _gameMenuHandler.LockButtonDuringCooldown();
+            _player.SpawnPoliceOfficer(YG2.saves.CountHelpPoliceOfficer);
+        }
+        else
+        {
+            _gameMenuHandler.ShowNotEnoughPointsWindow();
+        }
+    }
+    
     private void ActivateCallHelpButton()
     {
         if (YG2.saves.IsCallHelpUpgradePurchased)
@@ -100,11 +170,6 @@ public class Game : MonoBehaviour
         YG2.SaveProgress();
     } 
     
-    private void HandlePoliceOfficerDead()
-    {
-        _gameMenuHandler.ShowGameOverMenu();
-    }
-    
     private void HandleEscapePressed()
     {
         _gameMenuHandler.ShowPauseGameMenu();
@@ -115,15 +180,6 @@ public class Game : MonoBehaviour
         _countPoint = _nextCountPoint;
         _nextCountPoint++;
         
-        if (_nextCountPoint == _bridgeGenerator.BridgeSpanCount)
-        {
-            _player.SetPlayerFinishPosition(_bridgeGenerator.GetTargetPoint(_countPoint), true, _isHorizontal);
-        }
-        else
-        {
-            _player.SetNextTargetPosition(_bridgeGenerator.GetTargetPoint(_countPoint), _isHorizontal);
-        }
-
         if (_countPoint == 0)
         {
             _isTurnRight = _bridgeGenerator.IsTurnRight;
@@ -134,10 +190,44 @@ public class Game : MonoBehaviour
 
             _isTurnRight = !_isTurnRight;
         }
+        
+        if (_nextCountPoint == _bridgeGenerator.BridgeSpanCount)
+        {
+            _player.SetPlayerFinishPosition(_bridgeGenerator.GetTargetPoint(_countPoint), true, _isHorizontal);
+        }
+        else
+        {
+            _player.SetNextTargetPosition(_bridgeGenerator.GetTargetPoint(_countPoint), _isHorizontal);
+        }
 
         _player.UpdatePoliceHorizontalStatus();
+
+        UpdateOceanPositionRelativeToPlayer();
         
         _isHorizontal = !_isHorizontal;
+    }
+
+    private void UpdateOceanPositionRelativeToPlayer()
+    {
+        Vector3 position = _player.transform.position;
+            
+        if (_isHorizontal)
+        {
+            if (_isTurnRight)
+            {
+                position = new Vector3(position.x - _xOffsetOcean, _ocean.transform.position.y, position.z);
+            }
+            else
+            {
+                position = new Vector3(position.x + _xOffsetOcean, _ocean.transform.position.y, position.z);
+            }
+        }
+        else
+        {
+            position = new Vector3(position.x, _ocean.transform.position.y, position.z + _xOffsetOcean);
+        }
+            
+        _ocean.gameObject.transform.position = position;
     }
     
     private void SubscribeToBridgeConnectorCreation(BridgeConnector bridgeConnector)
@@ -165,53 +255,28 @@ public class Game : MonoBehaviour
     {
         recruitPolice.OnRecruitPoliceTriggered -= IncreasePoliceOfficerSize;
         bool isPositiveX = _player.SquadPosition.transform.localPosition.x >= 0;
-        int spawnCount;
-
-        if (recruitPolice.IsMultiplication)
-        {
-            if (isPositiveX)
-            {
-                spawnCount = CalculateSpawnCount(recruitPolice);
-            }
-            else
-            {
-                spawnCount = recruitPolice.CumulativeIncrease;
-            }
-        }
-        else
-        {
-            if (isPositiveX)
-            {
-                spawnCount = recruitPolice.CumulativeIncrease;
-            }
-            else
-            {
-                spawnCount = CalculateSpawnCount(recruitPolice);
-            }
-        }
+        int spawnCount = recruitPolice.GetCountSpawnPoliceOfficers(isPositiveX, _player.PoliceCount);
 
         if (spawnCount > 0)
         {
             _player.SpawnPoliceOfficer(spawnCount);
         }
     }
-
-    private int CalculateSpawnCount(RecruitPolice recruitPolice)
-    {
-        return (_player.PoliceCount * recruitPolice.PopulationMultiplier) - _player.PoliceCount;
-    }
-
-    private void IncreaseGroupFireRate(FireRateBooster fireRateBooster)
+    
+    private void IncreaseGroupFireRate(FireRateBooster fireRateBooster, ParticleSystem effect)
     {
         fireRateBooster.OnFirstOfficerEntered -= IncreaseGroupFireRate;
-        
+
+        effect.transform.parent = _player.SquadPosition;
+        effect.transform.position = _player.SquadPosition.position;
         if (_buffCoroutine != null)
             StopCoroutine(_buffCoroutine);
-        _buffCoroutine = StartCoroutine(BuffTimer());
+        _buffCoroutine = StartCoroutine(BuffTimer(effect));
     } 
     
-    private IEnumerator BuffTimer()
+    private IEnumerator BuffTimer(ParticleSystem effect)
     {
+        effect.Play();
         _player.ApplyBuffToParty(_increasedRateOfFire);
         _buffTimerBar.gameObject.SetActive(true);
         float elapsed = 0f;
@@ -224,6 +289,7 @@ public class Game : MonoBehaviour
             yield return null;
         }
 
+        effect.Stop();
         _buffTimerBar.fillAmount = 0;
         _buffTimerBar.gameObject.SetActive(false);
         _player.ApplyBuffToParty(_normalRateOfFire);
@@ -261,6 +327,11 @@ public class Game : MonoBehaviour
         _player.MoveSideways(direction);
     }
     
+    private void HandlePoliceOfficerDead()
+    {
+        _gameMenuHandler.ShowGameOverMenu(_player.IsPoliceOfficerOnBase);
+    }
+    
     private void HandleZombieKilled(bool isKilledByBullet)
     {
         _countAllZombie--;
@@ -276,7 +347,7 @@ public class Game : MonoBehaviour
             int score = YG2.saves.Score;
             score += _scoreHandler.CurrentScore;
             YG2.saves.Score = score;
-            YG2.SetLeaderboard("EachOfMatersLB", score);
+            YG2.SetLeaderboard(LeaderboardId, score);
             YG2.SaveProgress();
             _gameMenuHandler.ShowWinGameMenu();
         }

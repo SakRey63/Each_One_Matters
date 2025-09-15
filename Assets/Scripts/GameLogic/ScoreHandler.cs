@@ -8,7 +8,7 @@ public class ScoreHandler : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _points;
     [SerializeField] private TextMeshProUGUI _allScore;
     [SerializeField] private TextMeshProUGUI _level;
-    [SerializeField] private int _spointsPerZombie;
+    [SerializeField] private int _pointsPerZombie;
 
     private int _currentScore;
 
@@ -24,7 +24,13 @@ public class ScoreHandler : MonoBehaviour
 
     public void AddPointsForZombie()
     {
-        _currentScore += _spointsPerZombie;
+        _currentScore += _pointsPerZombie;
         _points.text = Convert.ToString(_currentScore);
+    }
+
+    public void DeductPointsForHelp(int price)
+    {
+        _currentScore -= price;
+        _points.text = _currentScore.ToString();
     }
 }

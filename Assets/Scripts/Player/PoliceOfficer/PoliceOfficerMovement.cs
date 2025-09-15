@@ -7,14 +7,12 @@ public class PoliceOfficerMovement : MonoBehaviour
     private float _minBorderPosition;
     private float _speed;
     private Transform _transform;
-    private Vector3 _borderPosition;
     private Vector3 _targetPositionInGroup;
     private bool _isTargetToPoint;
     private bool _isHorizontal;
     private float _threshold = 0.01f;
 
     public float Speed => _speed;
-    public bool IsHorizontal => _isHorizontal;
 
     public event Action OnReachedRegroupPoint;
     
@@ -29,11 +27,13 @@ public class PoliceOfficerMovement : MonoBehaviour
         {
             if (_isHorizontal)
             {
-                if (_transform.position.z < _minBorderPosition || _transform.position.z > _maxBorderPosition)
+                if (_transform.position.z < _minBorderPosition)
                 { 
-                    _borderPosition = new Vector3(0, _transform.localPosition.y, _transform.localPosition.z);
-
-                    MoveTowardsTarget(_borderPosition);
+                    _transform.position = new Vector3(_transform.position.x, _transform.position.y, _minBorderPosition);
+                }
+                else if (_transform.position.z > _maxBorderPosition)
+                {
+                    _transform.position = new Vector3(_transform.position.x, _transform.position.y, _maxBorderPosition);
                 }
                 else
                 {
@@ -49,11 +49,13 @@ public class PoliceOfficerMovement : MonoBehaviour
             }
             else
             {
-                if (_transform.position.x < _minBorderPosition || _transform.position.x > _maxBorderPosition)
-                { 
-                    _borderPosition = new Vector3(0, _transform.localPosition.y, _transform.localPosition.z);
-
-                    MoveTowardsTarget(_borderPosition);
+                if (_transform.position.x < _minBorderPosition)
+                {
+                    _transform.position = new Vector3(_minBorderPosition, _transform.position.y, _transform.position.z);
+                }
+                else if (_transform.position.x > _maxBorderPosition)
+                {
+                    _transform.position = new Vector3(_maxBorderPosition, _transform.position.y, _transform.position.z);
                 }
                 else
                 {

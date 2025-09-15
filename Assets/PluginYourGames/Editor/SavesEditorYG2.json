@@ -1,22 +1,27 @@
 {
-    "intExample": 5,
-    "strExample": "Hello!",
-    "boolExample": [
-        false,
-        false,
-        false,
-        false
-    ],
-    "idSave": 130,
-    "PlayerName": "Sergey",
-    "Level": 4,
-    "Score": 740,
-    "CountPoliceOfficer": 5,
-    "IncreaseSquadPrices": 1000,
-    "ExtendFireRateDurationPrices": 1200,
-    "CallHelpOnBasePrices": 1200,
-    "CountHelpPoliceOfficer": 3,
-    "BuffDuration": 6.0,
-    "HasSavedPlayer": true,
-    "IsCallHelpUpgradePurchased": true
+  "intExample": 5,
+  "strExample": "Hello!",
+  "boolExample": [
+    false,
+    false,
+    false,
+    false
+  ],
+  "idSave": 1273,
+  "PlayerName": "petr",
+  "Level": 6,
+  "Score": 1081,
+  "CountPoliceOfficer": 6,
+  "IncreaseSquadPrices": 1200,
+  "ExtendFireRateDurationPrices": 1729,
+  "CallHelpOnBasePrices": 2075,
+  "CountHelpPoliceOfficer": 6,
+  "CallHelpButtonPrice": 300,
+  "NumberLanguage": 0,
+  "BuffDuration": 8.0,
+  "HasSavedPlayer": true,
+  "IsCallHelpUpgradePurchased": true,
+  "VolumeMusic": 0.0,
+  "VolumeUi": 0.0,
+  "VolumeSFX": 0.0
 }

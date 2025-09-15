@@ -4,7 +4,5 @@ using UnityEngine;
 
 public class BaseMenu : MonoBehaviour
 {
-    private const string LevelScene = "LevelScene";
-
     
 }

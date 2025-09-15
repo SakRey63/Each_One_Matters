@@ -4,6 +4,10 @@ public class SegmentDamagedBridge : MonoBehaviour
 {
     [SerializeField] private Transform _centrPoint;
 
+    private int _number;
+
+    public int NumberPosition => _number;
+
     private void OnTriggerEnter(Collider other)
     {
         if (other.TryGetComponent(out PoliceOfficer policeOfficer))
@@ -13,5 +17,10 @@ public class SegmentDamagedBridge : MonoBehaviour
                 policeOfficer.SetCenterPoint(_centrPoint);
             }
         }
+    }
+
+    public void SetStatus(int numberPosition)
+    {
+        _number = numberPosition;
     }
 }
