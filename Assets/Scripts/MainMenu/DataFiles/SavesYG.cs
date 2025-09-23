@@ -6,7 +6,6 @@ namespace YG
     {
         private int _startScore = 0;
         private int _startLevel = 1;
-        private int _startNumberLanguage = 1;
         private int _startCountHelpPoliceOfficer = 3;
         private int _startCountPoliceOfficer = 5;
         private int _startPrice = 1000;
@@ -22,10 +21,10 @@ namespace YG
         public int CallHelpOnBasePrices;
         public int CountHelpPoliceOfficer;
         public int CallHelpButtonPrice;
-        public int NumberLanguage;
         public float BuffDuration;
         public bool HasSavedPlayer;
         public bool IsCallHelpUpgradePurchased;
+        public bool IsLoadedMainMenu;
         public float VolumeMusic;
         public float VolumeUi;
         public float VolumeSFX;
@@ -45,7 +44,6 @@ namespace YG
             CallHelpOnBasePrices = _startPrice;
             CountHelpPoliceOfficer = _startCountHelpPoliceOfficer;
             CallHelpButtonPrice = _startPriceCallHelpButton;
-            NumberLanguage = _startNumberLanguage;
         }
     }
 }

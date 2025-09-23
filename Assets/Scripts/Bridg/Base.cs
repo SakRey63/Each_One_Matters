@@ -27,7 +27,6 @@ public class Base : MonoBehaviour
             policeOfficer.transform.parent = _parentToSquad;
             policeOfficer.AssignPoliceDestination(this);
             policeOfficer.OnPoliceReachedToGeneratePositionOnBase += AssignNewPositionOnBase;
-            
         }
     }
     

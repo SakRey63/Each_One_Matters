@@ -58,7 +58,7 @@ public class PoliceOfficer : MonoBehaviour
 
     private void Update()
     {
-        _officerMovement.Move();
+        _officerMovement.Move(_isFoundBase);
     }
 
     public void TakeDamage(int damage)
@@ -80,6 +80,12 @@ public class PoliceOfficer : MonoBehaviour
             _chunkPool.GetEffect(transform);
             OnDeathAnimationFinished?.Invoke(this);
         }
+    }
+
+    public void OnDeathAnimationComplete()
+    {
+        _basePoint.localRotation = Quaternion.identity;
+        OnDeathAnimationFinished?.Invoke(this);
     }
 
     public void SetRotationPositionToDamageBridge(Quaternion rotation)

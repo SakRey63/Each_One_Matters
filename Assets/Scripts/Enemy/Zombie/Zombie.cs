@@ -129,8 +129,12 @@ public class Zombie : MonoBehaviour
                 else
                 {
                     _target = _finish;
-                    _zombieMovement.ResetSpeed();
-                    _zombieVision.ScanForEnemies();
+
+                    if (_isBaseEntryCompleted == false)
+                    {
+                        _zombieMovement.ResetSpeed();    
+                        _zombieVision.ScanForEnemies();  
+                    }
                 }
             }
         }
@@ -156,11 +160,11 @@ public class Zombie : MonoBehaviour
         }
     }
     
-    private void ToggleVisionOnBaseDetected(Base obj)
+    private void ToggleVisionOnBaseDetected(Base policeBase)
     {
         _zombieMovement.ResetSpeed();
-        _enterToBase = obj.BaseEntryTransform;
-        _startPositionToScanEnemy = obj.StartPositionGeneration;
+        _enterToBase = policeBase.BaseEntryTransform;
+        _startPositionToScanEnemy = policeBase.StartPositionGeneration;
         _isBaseEntryCompleted = true;
         _finish.position = new Vector3(_enterToBase.position.x, _transform.position.y, _enterToBase.position.z); 
         _isTargetVisible = false;
@@ -172,7 +176,7 @@ public class Zombie : MonoBehaviour
         {
             _isAttacking = true;
             _policeOfficer = policeOfficer;
-            _target = _policeOfficer.transform;
+            _isTargetVisible = true;
             _zombieWeapon.Attack(_policeOfficer);
         }
     }

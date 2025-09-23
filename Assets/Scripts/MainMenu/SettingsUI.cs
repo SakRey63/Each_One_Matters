@@ -9,30 +9,51 @@ public class SettingsUI : MonoBehaviour
     private const string English = "en";
     private const string Russian = "ru";
     private const string Turkish = "tr";
+    private int _numberEnglish = 1;
+    private int _numberRussian = 0;
+    private int _numberTurkish = 2;
     
-    private string _language;
-
-    private void OnEnable()
+    private void Awake()
     {
-        _dropdown.SetValueWithoutNotify(YG2.saves.NumberLanguage);
+        _dropdown.onValueChanged.AddListener(OnLanguageChanged);
     }
 
-    public void OnLanguageChanged(int index)
+    public void CreateLanguageToSetting(string language)
     {
-        switch (index)
+        int number;
+        
+        switch (language)
         {
-            case 0:  _language = Russian;
+            case English: number = _numberEnglish;
                 break;
-            case 1: _language = English;
+            case Russian: number = _numberRussian;
                 break;
-            case 2:  _language = Turkish;
+            case Turkish: number = _numberTurkish;
                 break;
-            default:  _language = Russian;
+            default: number = _numberEnglish;
                 break;
         }
+        
+        OnLanguageChanged(number);
+        _dropdown.SetValueWithoutNotify(number);
+    }
 
-        YG2.saves.NumberLanguage = index;
-        YG2.SwitchLanguage(_language);
-        YG2.SaveProgress();
+    private void OnLanguageChanged(int index)
+    {
+        string language;
+        
+        switch (index)
+        {
+            case 0: language = Russian;
+                break;
+            case 1: language = English;
+                break;
+            case 2:  language = Turkish;
+                break;
+            default:  language = English;
+                break;
+        }
+        
+        YG2.SwitchLanguage(language);
     }
 }

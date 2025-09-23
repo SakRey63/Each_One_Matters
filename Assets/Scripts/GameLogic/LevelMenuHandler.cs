@@ -6,10 +6,10 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using YG;
 
-public class GameMenuHandler : MonoBehaviour
+public class LevelMenuHandler : MonoBehaviour
 {
-    private const string MainMenu = "MainMenuScene";
     private const string LevelScene = "LevelScene";
+    private const string RewardID = "newPolice";
 
     [SerializeField] private Image _displayAlert;
     [SerializeField] private TextMeshProUGUI _gameOverText;
@@ -30,7 +30,6 @@ public class GameMenuHandler : MonoBehaviour
     [SerializeField] private float _delay = 1;
     [SerializeField] private float _delayAlert = 1.5f;
     [SerializeField] private int _cooldown = 5;
-    [SerializeField] private string _rewardID = "newPolice";
 
     private bool _isEnableGameMenu;
     private bool _isEnableUpgradeMenu;
@@ -60,12 +59,18 @@ public class GameMenuHandler : MonoBehaviour
 
     private void Start()
     {
-        _levelSounds.CreateBackgroundMusic();
-        _elementToggler.gameObject.SetActive(true);
-        
-        if (YG2.envir.isMobile)
+        if (YG2.saves.IsLoadedMainMenu == false)
         {
-            _menuButton.gameObject.SetActive(true);
+            _levelSounds.CreateBackgroundMusic();
+            _elementToggler.gameObject.SetActive(true);
+            
+            if (YG2.envir.isMobile)
+            {
+                _menuButton.gameObject.SetActive(true);
+            }
+            
+            YG2.saves.IsLoadedMainMenu = true;
+            YG2.SaveProgress();
         }
     }
 
@@ -73,6 +78,7 @@ public class GameMenuHandler : MonoBehaviour
     {
         if (_isEnableGameMenu == false && _isEnableUpgradeMenu == false)
         {
+            Cursor.visible = true;
             _elementToggler.gameObject.SetActive(false);
             _isEnableGameMenu = true;
             _gameMenu.gameObject.SetActive(true);
@@ -85,6 +91,7 @@ public class GameMenuHandler : MonoBehaviour
 
     public void ResumeGame()
     {
+        Cursor.visible = false;
         _levelSounds.CreateBackgroundMusic();
         _elementToggler.gameObject.SetActive(true);
         _isEnableGameMenu = false;
@@ -97,16 +104,20 @@ public class GameMenuHandler : MonoBehaviour
     public void ReloadLevel()
     {
         _isEnableGameMenu = false;
-        SceneManager.LoadScene(LevelScene);
+        YG2.saves.IsLoadedMainMenu = false;
+        YG2.SaveProgress();
         YG2.InterstitialAdvShow();
         Time.timeScale = 1f;
+        SceneManager.LoadScene(LevelScene);
     }
 
     public void LoadMainMenu()
     {
+        YG2.saves.IsLoadedMainMenu = true;
+        YG2.SaveProgress();
         _isEnableGameMenu = false;
-        SceneManager.LoadScene(MainMenu); 
         Time.timeScale = 1f;
+        SceneManager.LoadScene(LevelScene); 
     }
 
     public void LoadNextLevel()
@@ -117,13 +128,15 @@ public class GameMenuHandler : MonoBehaviour
         _winText.gameObject.SetActive(false);
         _nextLevel.gameObject.SetActive(false);
         _upgradeButton.gameObject.SetActive(false);
-        SceneManager.LoadScene(LevelScene);
+        YG2.saves.IsLoadedMainMenu = false;
+        YG2.SaveProgress();
         YG2.InterstitialAdvShow();
-        Time.timeScale = 1f;
+        SceneManager.LoadScene(LevelScene);
     }
 
     public void ShowGameOverMenu(bool isPoliceOnBase)
     {
+        Cursor.visible = true;
         _elementToggler.gameObject.SetActive(false);
         _isEnableGameMenu = true;
         _gameMenu.gameObject.SetActive(true);
@@ -140,6 +153,7 @@ public class GameMenuHandler : MonoBehaviour
 
     public void ShowWinGameMenu()
     {
+        Cursor.visible = true;
         _elementToggler.gameObject.SetActive(false);
         _isEnableGameMenu = true;
         _gameMenu.gameObject.SetActive(true);
@@ -202,7 +216,8 @@ public class GameMenuHandler : MonoBehaviour
     public void ShowReviveWithAd()
     {
         Time.timeScale = 1f;
-        YG2.RewardedAdvShow(_rewardID);
+        Cursor.visible = false;
+        YG2.RewardedAdvShow(RewardID);
         _reviveWithAd.gameObject.SetActive(false);
         _levelSounds.CreateBackgroundMusic();
         OnRewardedAdClicked?.Invoke();
@@ -210,13 +225,17 @@ public class GameMenuHandler : MonoBehaviour
     
     private void OnReward(string id)
     {
-        if (id == _rewardID)
+        if (id == RewardID)
         {
             _elementToggler.gameObject.SetActive(true);
             _isEnableGameMenu = false;
             _gameMenu.gameObject.SetActive(false);
             _gameOverText.gameObject.SetActive(false);
             OnRewardedAdWatched?.Invoke();
+        }
+        else
+        {
+            Cursor.visible = true;
         }
     }
 

@@ -10,7 +10,6 @@ public class BaseMenuSound : MonoBehaviour
     private const string UiVolumeParam    = "UiVolume";
     
     [SerializeField] private AudioSource _baseMenuMusic;
-    [SerializeField] private AudioSource _onClickedSound;
     [SerializeField] private Slider _sliderMusic;
     [SerializeField] private Slider _sliderUi;
     [SerializeField] private Slider _sliderSFX;
@@ -31,14 +30,9 @@ public class BaseMenuSound : MonoBehaviour
         _sliderSFX.onValueChanged.AddListener(CreateVolumeSFX);
     }
 
-    public void CreateBaseMusic()
+    public void CreateMainMenuMusic()
     {
         _baseMenuMusic.Play();
-    }
-
-    public void CreateOnClickedMusic()
-    {
-        _onClickedSound.Play();
     }
 
     private void CreateVolumeMusic(float volume)

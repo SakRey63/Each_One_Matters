@@ -63,6 +63,7 @@ public class CharacterCreation : MonoBehaviour
            else
            {
                YG2.saves.SetNewPlayer(playerName);
+               YG2.saves.IsLoadedMainMenu = false;
                YG2.SaveProgress();
                SceneManager.LoadScene(LevelScene);
            }

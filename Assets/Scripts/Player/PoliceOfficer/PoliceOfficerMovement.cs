@@ -21,17 +21,17 @@ public class PoliceOfficerMovement : MonoBehaviour
         _transform = transform;
     }
 
-    public void Move()
+    public void Move(bool isFoundBase)
     {
         if (_isTargetToPoint)
         {
             if (_isHorizontal)
             {
-                if (_transform.position.z < _minBorderPosition)
-                { 
+                if (_transform.position.z <= _minBorderPosition && isFoundBase == false)
+                {
                     _transform.position = new Vector3(_transform.position.x, _transform.position.y, _minBorderPosition);
                 }
-                else if (_transform.position.z > _maxBorderPosition)
+                else if (_transform.position.z >= _maxBorderPosition && isFoundBase == false)
                 {
                     _transform.position = new Vector3(_transform.position.x, _transform.position.y, _maxBorderPosition);
                 }
@@ -43,17 +43,18 @@ public class PoliceOfficerMovement : MonoBehaviour
                     }                                                                                                                                                                                                                                                                                                                                                               
                     else
                     {
+                        
                         MoveTowardsTarget(_targetPositionInGroup);
                     }
                 }
             }
             else
             {
-                if (_transform.position.x < _minBorderPosition)
+                if (_transform.position.x <= _minBorderPosition && isFoundBase == false)
                 {
                     _transform.position = new Vector3(_minBorderPosition, _transform.position.y, _transform.position.z);
                 }
-                else if (_transform.position.x > _maxBorderPosition)
+                else if (_transform.position.x >= _maxBorderPosition && isFoundBase == false)
                 {
                     _transform.position = new Vector3(_maxBorderPosition, _transform.position.y, _transform.position.z);
                 }

@@ -220,9 +220,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _zombieVision: {fileID: 1881798834687319051}
   _zombieSensor: {fileID: 2388282474954286745}
-  _animations: {fileID: 7577548633926707289}
-  _delayDeadAnimations: 2.3
-  _stopSpeed: 0
 --- !u!114 &6184318563662895428
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -250,7 +247,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 27b72ec1f0b8bff4b8529a3bad65beac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _rotationSpeed: 7
+  _rotationSpeed: 8
 --- !u!114 &-9130965703447777145
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -353,15 +350,3 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 9083463103098263408}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &7577548633926707289 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 1668071036789767977, guid: b9cda9ff8a91b6849865a9b3e9503ef8,
-    type: 3}
-  m_PrefabInstance: {fileID: 9083463103098263408}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6239485a172ce144ca3e9e2acf9dc741, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 

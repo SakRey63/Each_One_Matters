@@ -13,6 +13,7 @@ public class Upgrade : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _balanceText;
     [SerializeField] private TextMeshProUGUI _callHelpOnBaseText;
     [SerializeField] private TextMeshProUGUI _uguipgradeCallHelpOnBaseText;
+    [SerializeField] private TextMeshProUGUI _defaultCallHelpOnBaseText;
     [SerializeField] private LevelSounds _levelSounds;
     [SerializeField] private float _duration = 1.5f;
     [SerializeField] private int _callHelpUpgradeButtonPrice = 50;
@@ -135,13 +136,11 @@ public class Upgrade : MonoBehaviour
 
         if (YG2.saves.IsCallHelpUpgradePurchased)
         {
-            _callHelpOnBaseText.gameObject.SetActive(false);
-            _uguipgradeCallHelpOnBaseText.gameObject.SetActive(true);
+            _defaultCallHelpOnBaseText.text = _uguipgradeCallHelpOnBaseText.text;
         }
         else
         {
-            _callHelpOnBaseText.gameObject.SetActive(true);
-            _uguipgradeCallHelpOnBaseText.gameObject.SetActive(false);
+            _defaultCallHelpOnBaseText.text = _callHelpOnBaseText.text;
         }
     }
 

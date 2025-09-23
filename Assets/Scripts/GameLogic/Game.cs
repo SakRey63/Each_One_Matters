@@ -17,7 +17,7 @@ public class Game : MonoBehaviour
     [SerializeField] private int _zombieMultiplier = 3;
     [SerializeField] private int _minCounZombie = 10;
     [SerializeField] private int _countAdRevival= 5;
-    [SerializeField] private GameMenuHandler _gameMenuHandler;
+    [SerializeField] private LevelMenuHandler _levelMenuHandler;
     [SerializeField] private ScoreHandler _scoreHandler;
     [SerializeField] private Ocean _ocean;
 
@@ -47,12 +47,10 @@ public class Game : MonoBehaviour
 
     private void OnEnable()
     {
-        _gameMenuHandler.OnLevelUp += HandleOnLevelUp;
-        _gameMenuHandler.OnRewardedAdClicked += RevealAndRemoveKillerObstacle;
-        _gameMenuHandler.OnCallHelpPoliceOfficer += HandleCallHelpPolice;
-        _gameMenuHandler.OnRewardedAdWatched += SetupRevivalWithAd;
-        _playerInput.OnEscapePressed += HandleEscapePressed;
-        _playerInput.DirectionChanged += OnDirectionChanged;
+        _levelMenuHandler.OnLevelUp += HandleOnLevelUp;
+        _levelMenuHandler.OnRewardedAdClicked += RevealAndRemoveKillerObstacle;
+        _levelMenuHandler.OnCallHelpPoliceOfficer += HandleCallHelpPolice;
+        _levelMenuHandler.OnRewardedAdWatched += SetupRevivalWithAd;
         _bridgeGenerator.OnPointSpawnedTrigger += SpawnedTrigger;
         _bridgeGenerator.OnFireRateBoostedCreated += SubscribeToFireRateCreated;
         _bridgeGenerator.OnRecruitPoliceCreated += SubscribeToRecruitPoliced;
@@ -65,13 +63,12 @@ public class Game : MonoBehaviour
 
     private void OnDisable()
     {
-        _gameMenuHandler.OnRewardedAdWatched -= SetupRevivalWithAd;
-        _gameMenuHandler.OnRewardedAdClicked -= RevealAndRemoveKillerObstacle;
-        _gameMenuHandler.OnLevelUp -= HandleOnLevelUp;
-        _gameMenuHandler.OnCallHelpPoliceOfficer -= HandleCallHelpPolice;
-        _bridgeGenerator.OnBridgeConnectorCreated -= SubscribeToBridgeConnectorCreation;
         _playerInput.OnEscapePressed -= HandleEscapePressed;
-        _playerInput.DirectionChanged -= OnDirectionChanged;
+        _levelMenuHandler.OnRewardedAdWatched -= SetupRevivalWithAd;
+        _levelMenuHandler.OnRewardedAdClicked -= RevealAndRemoveKillerObstacle;
+        _levelMenuHandler.OnLevelUp -= HandleOnLevelUp;
+        _levelMenuHandler.OnCallHelpPoliceOfficer -= HandleCallHelpPolice;
+        _bridgeGenerator.OnBridgeConnectorCreated -= SubscribeToBridgeConnectorCreation;
         _bridgeGenerator.OnPointSpawnedTrigger -= SpawnedTrigger;
         _bridgeGenerator.OnFireRateBoostedCreated -= SubscribeToFireRateCreated;
         _bridgeGenerator.OnRecruitPoliceCreated -= SubscribeToRecruitPoliced;
@@ -88,12 +85,18 @@ public class Game : MonoBehaviour
 
     private void Start()
     {
-        _buffDuration = YG2.saves.BuffDuration;
-        _levelPlayer = YG2.saves.Level;
-        _scoreHandler.SetInitialScore(_currentScore);
-        _bridgeGenerator.Generate(_levelPlayer);
-        _player.SpawnPoliceOfficer(YG2.saves.CountPoliceOfficer);
-        UpdatePlayerTargetPosition();
+        if (YG2.saves.IsLoadedMainMenu == false)
+        {
+            Cursor.visible = false;
+            _playerInput.OnEscapePressed += HandleEscapePressed;
+            _playerInput.DirectionChanged += OnDirectionChanged;
+            _buffDuration = YG2.saves.BuffDuration;
+            _levelPlayer = YG2.saves.Level;
+            _scoreHandler.SetInitialScore(_currentScore);
+            _bridgeGenerator.Generate(_levelPlayer);
+            _player.SpawnPoliceOfficer(YG2.saves.CountPoliceOfficer);
+            UpdatePlayerTargetPosition();
+        }
     }
     
     private void RevealAndRemoveKillerObstacle()
@@ -128,6 +131,13 @@ public class Game : MonoBehaviour
             }
             else if (collider.TryGetComponent(out SegmentDamagedBridge damagedBridge))
             {
+                foreach (Collider police in hits)
+                {
+                    if (police.TryGetComponent(out PoliceOfficer policeOfficer))
+                    {
+                        policeOfficer.OnDeathAnimationComplete();
+                    }
+                }
                 Transform transform = damagedBridge.transform;
                 int number = damagedBridge.NumberPosition;
                 Destroy(collider.gameObject);
@@ -146,20 +156,27 @@ public class Game : MonoBehaviour
         if (_scoreHandler.CurrentScore >= YG2.saves.CallHelpButtonPrice)
         {
             _scoreHandler.DeductPointsForHelp(YG2.saves.CallHelpButtonPrice);
-            _gameMenuHandler.LockButtonDuringCooldown();
+            _levelMenuHandler.LockButtonDuringCooldown();
             _player.SpawnPoliceOfficer(YG2.saves.CountHelpPoliceOfficer);
         }
         else
         {
-            _gameMenuHandler.ShowNotEnoughPointsWindow();
+            _levelMenuHandler.ShowNotEnoughPointsWindow();
         }
     }
     
     private void ActivateCallHelpButton()
     {
+        _playerInput.DirectionChanged -= OnDirectionChanged;
+        
+        Vector3 positionBuffTimerBar = _buffTimerBar.transform.position;
+        positionBuffTimerBar = new Vector3(_player.transform.position.x, positionBuffTimerBar.y, positionBuffTimerBar.z);
+        _buffTimerBar.transform.position = positionBuffTimerBar;
+        
         if (YG2.saves.IsCallHelpUpgradePurchased)
         {
-            _gameMenuHandler.ActivateCallHelp();
+            Cursor.visible = true;
+            _levelMenuHandler.ActivateCallHelp();
         }
     }
 
@@ -172,7 +189,7 @@ public class Game : MonoBehaviour
     
     private void HandleEscapePressed()
     {
-        _gameMenuHandler.ShowPauseGameMenu();
+        _levelMenuHandler.ShowPauseGameMenu();
     }
 
     private void UpdatePlayerTargetPosition()
@@ -329,7 +346,7 @@ public class Game : MonoBehaviour
     
     private void HandlePoliceOfficerDead()
     {
-        _gameMenuHandler.ShowGameOverMenu(_player.IsPoliceOfficerOnBase);
+        _levelMenuHandler.ShowGameOverMenu(_player.IsPoliceOfficerOnBase);
     }
     
     private void HandleZombieKilled(bool isKilledByBullet)
@@ -349,7 +366,7 @@ public class Game : MonoBehaviour
             YG2.saves.Score = score;
             YG2.SetLeaderboard(LeaderboardId, score);
             YG2.SaveProgress();
-            _gameMenuHandler.ShowWinGameMenu();
+            _levelMenuHandler.ShowWinGameMenu();
         }
     }
 }

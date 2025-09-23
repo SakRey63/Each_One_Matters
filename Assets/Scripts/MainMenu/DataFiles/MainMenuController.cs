@@ -4,10 +4,11 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using YG;
 
-public class GameManager : MonoBehaviour
+public class MainMenuController : MonoBehaviour
 {
     private const string LevelScene = "LevelScene";
     
+    [SerializeField] private MainMenu _mainMenu;
     [SerializeField] private BaseMenu _baseMenu;
     [SerializeField] private CharacterCreation _characterCreation;
     [SerializeField] private LeaderboardUI _leaderboardUI;
@@ -26,8 +27,13 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
-        UpdateGreetingText();
-        _menuSound.CreateBaseMusic();
+        if (YG2.saves.IsLoadedMainMenu)
+        {
+            _settingsUI.CreateLanguageToSetting(YG2.lang);
+            _menuSound.CreateMainMenuMusic();
+            _mainMenu.gameObject.SetActive(true);
+            UpdateGreetingText();
+        }
     }
     
     public void StartNewGame()
@@ -47,6 +53,8 @@ public class GameManager : MonoBehaviour
 
     public void ContinueGame()
     {
+        YG2.saves.IsLoadedMainMenu = false;
+        YG2.SaveProgress();
         SceneManager.LoadScene(LevelScene);
     }
 
@@ -71,17 +79,6 @@ public class GameManager : MonoBehaviour
         _leaderboardUI.gameObject.SetActive(true);
     }
     
-    public void ExitGame()
-    {
-        // В редакторе работает нормально, на сборке — закрывает игру
-        Application.Quit();
-
-        // Для редактора добавьте:
-#if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false;
-#endif
-    }
-    
     private void UpdateGreetingText()
     {
         _hasSavedPlayer = YG2.saves.HasSavedPlayer;
@@ -90,12 +87,11 @@ public class GameManager : MonoBehaviour
 
         if (_hasSavedPlayer)
         {
-            _settingsUI.OnLanguageChanged(YG2.saves.NumberLanguage);
             string text = _continueText.text;
             text += ", " + YG2.saves.PlayerName;
             _continueText.text = text;
         }
         
-        _continueButton.gameObject.SetActive(_hasSavedPlayer);
+        _continueButton.interactable = _hasSavedPlayer;
     }
 }

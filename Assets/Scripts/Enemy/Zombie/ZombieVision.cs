@@ -5,7 +5,7 @@ using UnityEngine;
 public class ZombieVision : MonoBehaviour
 {
     [SerializeField] private Transform _sphereCenter;
-    [SerializeField] private float _scanRadius = 20f;
+    [SerializeField] private float _scanRadius = 12f;
     [SerializeField] private float _delay = 0.5f;
     
     private bool _isTargetDetected;
@@ -46,13 +46,16 @@ public class ZombieVision : MonoBehaviour
             {
                 if (hit.TryGetComponent(out PoliceOfficer policeOfficer))
                 {
-                    DetectPoliceOfficer(policeOfficer);
+                    if (policeOfficer.IsDead == false)
+                    {
+                        _isTargetDetected = true; 
+                        OnPoliceDetected?.Invoke(policeOfficer);
+                    }
                 }
 
                 if (_isTargetDetected)
                 {
                     isEnemyFound = false;
-                    break;
                 }
             }
 
@@ -60,14 +63,5 @@ public class ZombieVision : MonoBehaviour
         }
 
         _coroutine = null;
-    }
-
-    private void DetectPoliceOfficer(PoliceOfficer policeOfficer)
-    {
-        if (policeOfficer.IsDead == false)
-        {
-            _isTargetDetected = true; 
-            OnPoliceDetected?.Invoke(policeOfficer);
-        }
     }
 }
