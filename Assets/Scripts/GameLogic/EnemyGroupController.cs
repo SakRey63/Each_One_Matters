@@ -67,6 +67,7 @@ public class EnemyGroupController : MonoBehaviour
     private void RemoveZombies(Zombie zombie)
     {
         _countAllZombies--;
+        
         zombie.OnZombieDeath -= RemoveZombies;
         OnZombieKilled?.Invoke(zombie.IsKilledByBullet);
 

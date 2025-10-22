@@ -12,6 +12,7 @@ public class FireRateBooster : MonoBehaviour
     [SerializeField] private float _increasedRateOfFire = 0.4f;
 
     private float _buffDuration;
+    private Coroutine _handleBuffEffect;
 
     public float BuffDuration => _buffDuration;
     public float IncreasedRateOfFire => _increasedRateOfFire;
@@ -23,8 +24,11 @@ public class FireRateBooster : MonoBehaviour
         if (other.TryGetComponent<PoliceOfficer>(out _))
         {
             OnFirstOfficerEntered?.Invoke(this);
-            _soundEffect.Play();
-            StartCoroutine(HandleBuffEffect());
+
+            if (_handleBuffEffect == null)
+            {
+                _handleBuffEffect = StartCoroutine(HandleBuffEffect());
+            }
         }
     }
 
@@ -36,6 +40,7 @@ public class FireRateBooster : MonoBehaviour
     private IEnumerator HandleBuffEffect()
     {
         WaitForSeconds delay = new WaitForSeconds(_delayEffect);
+        _soundEffect.Play();
         _meshRenderer.enabled = false;
         _constEffect.Stop();
         _buffEffect.Play();

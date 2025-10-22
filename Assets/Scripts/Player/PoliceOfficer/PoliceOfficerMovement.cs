@@ -10,7 +10,7 @@ public class PoliceOfficerMovement : MonoBehaviour
     private Vector3 _targetPositionInGroup;
     private bool _isTargetToPoint;
     private bool _isHorizontal;
-    private float _threshold = 0.01f;
+    private float _threshold = 0.001f;
 
     public float Speed => _speed;
 
@@ -37,7 +37,7 @@ public class PoliceOfficerMovement : MonoBehaviour
                 }
                 else
                 {
-                    if ((_transform.localPosition - _targetPositionInGroup).sqrMagnitude < _threshold * _threshold)
+                    if ((_transform.localPosition - _targetPositionInGroup).sqrMagnitude < _threshold)
                     {
                         OnReachedRegroupPoint?.Invoke();
                     }                                                                                                                                                                                                                                                                                                                                                               
@@ -60,7 +60,7 @@ public class PoliceOfficerMovement : MonoBehaviour
                 }
                 else
                 {
-                    if ((_transform.localPosition - _targetPositionInGroup).sqrMagnitude < _threshold * _threshold)
+                    if ((_transform.localPosition - _targetPositionInGroup).sqrMagnitude < _threshold)
                     {
                         OnReachedRegroupPoint?.Invoke();
                     }                                                                                                                                                                                                                                                                                                                                                               

@@ -7,7 +7,6 @@ public class PoliceOficcerVision : MonoBehaviour
     [SerializeField] private float _scanRadius = 12f;
     [SerializeField] private float _delay = 0.5f;
     
-    private bool _isTargetDetected;
     private Coroutine _coroutine;
 
     public event Action<Zombie> OnZombieDetected;
@@ -33,25 +32,16 @@ public class PoliceOficcerVision : MonoBehaviour
     {
         WaitForSeconds delay = new WaitForSeconds(_delay);
 
-        bool isEnemyFound = true;
-
-        while (isEnemyFound)
+        while (enabled && gameObject.activeInHierarchy)
         {
-            _isTargetDetected = false;
-        
             Collider[] hits = Physics.OverlapSphere(transform.position, _scanRadius);
        
             foreach (var hit in hits)
             {
-                if (hit.TryGetComponent(out Zombie zombie))
+                if (hit.TryGetComponent(out Zombie zombie) && !zombie.IsKilledByBullet)
                 {
-                    _isTargetDetected = true; 
                     OnZombieDetected?.Invoke(zombie);
-                }
-
-                if (_isTargetDetected)
-                {
-                    isEnemyFound = false;
+                    break; 
                 }
             }
 

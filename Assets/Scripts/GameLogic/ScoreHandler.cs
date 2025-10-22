@@ -1,7 +1,6 @@
 using System;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Serialization;
 using YG;
 
 public class ScoreHandler : MonoBehaviour

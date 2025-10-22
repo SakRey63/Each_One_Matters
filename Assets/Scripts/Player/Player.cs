@@ -5,7 +5,6 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    [SerializeField] private int _policeCount = 1;
     [SerializeField] private float _border = 5.7f;
     [SerializeField] private Transform _positionSpawnPoliceOfficer;
     [SerializeField] private float _delay = 0.7f;
@@ -27,12 +26,14 @@ public class Player : MonoBehaviour
     private ChunkPool _chunkPool;
     private PlayerView _playerView;
     private int _numberOfficer;
+    private int _policeCount;
     private Coroutine _coroutineReorganize;
     private Coroutine _coroutineBuff;
     private bool _isMoving;
     private bool _isFinished;
     private bool _isHorizontal;
     private bool _isPoliceOfficerOnBase;
+    private bool _isStoppedWar;
     private float _maxBorderPosition;
     private float _minBorderPosition;
     private float _repeatShooting;
@@ -149,6 +150,8 @@ public class Player : MonoBehaviour
 
     public void CeaseSquadFire()
     {
+        _isStoppedWar = true;
+        
         foreach (PoliceOfficer policeOfficer in _policeOfficers.Values)
         {
             policeOfficer.StopShooting();
@@ -179,12 +182,16 @@ public class Player : MonoBehaviour
             
             policeOfficer.SetNumberOfficer(_numberOfficer);
             policeOfficer.SetPoliceOfficerActive(_bulletPool, _chunkPool, _isPoliceOfficerOnBase);
-            policeOfficer.Shooting(_repeatShooting);
             policeOfficer.SetHorizontalAndBorderStatus(_isHorizontal, _minBorderPosition, _maxBorderPosition);
             policeOfficer.SetSpeed(_backwardMovement.Speed);
             policeOfficer.SetHealthPoint(_healthPoliceOfficer);
             policeOfficer.OnPoliceDeath += HandlePoliceDeath;
             policeOfficer.OnPoliceReachedBase += HandlePoliceReachedBase;
+
+            if (_isStoppedWar == false)
+            {
+                policeOfficer.Shooting(_repeatShooting);
+            }
             
             _policeOfficers.Add(policeOfficer.OfficerId, policeOfficer);
             _numberOfficer++;
@@ -243,10 +250,13 @@ public class Player : MonoBehaviour
         _buffTimerBar.gameObject.SetActive(false);
         _buffTimerBar.fillAmount = 0;
         _repeatShooting = _defaultRepeatShooting;
-        
-        foreach (PoliceOfficer policeOfficer in _policeOfficers.Values)
+
+        if (_isStoppedWar == false)
         {
-            policeOfficer.Shooting(_repeatShooting);
+            foreach (PoliceOfficer policeOfficer in _policeOfficers.Values)
+            {
+                policeOfficer.Shooting(_repeatShooting);
+            }
         }
         
         _coroutineBuff = null;
@@ -295,5 +305,10 @@ public class Player : MonoBehaviour
         }
         
         OnUnitDeath?.Invoke(_policeCount);
+    }
+
+    public void ResetPositionUiElements()
+    {
+        _playerSideMovement.ResetPositionSquad();
     }
 }

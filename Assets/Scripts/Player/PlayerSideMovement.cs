@@ -22,4 +22,9 @@ public class PlayerSideMovement : MonoBehaviour
         position.x = Mathf.Clamp(position.x +  (-direction) * _speed * Time.deltaTime, -_borderX, _borderX);
         _transformSquad.localPosition = position;
     }
+
+    public void ResetPositionSquad()
+    {
+        _transformSquad.localPosition = Vector3.zero;
+    }
 }

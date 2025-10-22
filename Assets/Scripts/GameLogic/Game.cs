@@ -173,6 +173,7 @@ public class Game : MonoBehaviour
     
     private void SetupRevivalWithAd()
     {
+        _playerInput.DirectionChanged += OnDirectionChanged;
         _player.SpawnPoliceOfficer(_countAdRevival);
         _player.KeepMoving();
         _enemyGroup.ResumeAllZombies();
@@ -195,6 +196,8 @@ public class Game : MonoBehaviour
     private void ActivateCallHelpButton()
     {
         _playerInput.DirectionChanged -= OnDirectionChanged;
+        _player.ResetPositionUiElements();
+        
         Cursor.visible = true;
         
         if (YG2.saves.IsCallHelpUpgradePurchased)
@@ -342,7 +345,9 @@ public class Game : MonoBehaviour
     
     private void HandleAllPoliceOfficerDead()
     {
+        _playerInput.DirectionChanged -= OnDirectionChanged;
         _player.StopMoving();
+        _player.ResetPositionUiElements();
         _enemyGroup.StopAllZombies();
         _levelMenuHandler.ShowGameOverMenu(_player.IsPoliceOfficerOnBase);
     }

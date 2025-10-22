@@ -6,12 +6,15 @@ public class PlayerInput : MonoBehaviour
 {
     private const string HorizontalAxis = "Mouse X";
     
-    [SerializeField] private float _swipeThreshold = 50f;    
-    [SerializeField] private float _deadZone = 0.1f;
-    [SerializeField] private float _direction = 1f;
+    [Header("Desktop")]
+    [SerializeField] private float _mouseDeadZone = 0.1f;
     
-    private Vector2 _startTouchPosition;
-    private bool _isTouchStarted;
+    [Header("Mobile")]
+    [SerializeField] private float _minSwipeDelta = 5f;  
+    [SerializeField] private float _sensitivity = 1f; 
+    [SerializeField] private float _maxOutput = 2f; 
+    
+    private Vector2 _previousTouchPosition;
     private bool _isTouchActive;
 
     public event Action<float> DirectionChanged;
@@ -34,9 +37,13 @@ public class PlayerInput : MonoBehaviour
     {
         float mouseX = Input.GetAxis(HorizontalAxis);
         
-        if (Mathf.Abs(mouseX) > _deadZone)
+        if (Mathf.Abs(mouseX) > _mouseDeadZone)
         {
-            DirectionChanged?.Invoke(mouseX);
+            DirectionChanged?.Invoke(Mathf.Clamp(mouseX, -_maxOutput, _maxOutput));
+        }
+        else
+        {
+            DirectionChanged?.Invoke(0f); 
         }
     }
 
@@ -44,7 +51,11 @@ public class PlayerInput : MonoBehaviour
     {
         if (Input.touchCount == 0)
         {
-            _isTouchActive = false;
+            if (_isTouchActive)
+            {
+                _isTouchActive = false;
+                DirectionChanged?.Invoke(0f); // остановка
+            }
             return;
         }
 
@@ -54,38 +65,35 @@ public class PlayerInput : MonoBehaviour
         {
             case TouchPhase.Began:
                 _isTouchActive = true;
-                _startTouchPosition = touch.position;
+                _previousTouchPosition = touch.position;
                 break;
 
             case TouchPhase.Moved:
-                
                 if (_isTouchActive)
                 {
                     Vector2 currentPos = touch.position;
-                    Vector2 delta = currentPos - _startTouchPosition;
+                    Vector2 delta = currentPos - _previousTouchPosition;
 
-                    if (Mathf.Abs(delta.x) > _swipeThreshold && Mathf.Abs(delta.y) < 30f)
+                    if (Mathf.Abs(delta.x) > _minSwipeDelta && Mathf.Abs(delta.y) < 30f)
                     {
-                        if (delta.x > 0)
-                        {
-                            DirectionChanged?.Invoke(_direction); 
-                        }
-                        else
-                        {
-                            DirectionChanged?.Invoke(-_direction); 
-                        }
-                        
-                        _startTouchPosition = currentPos;
+                        // Чем быстрее свайп — тем сильнее сигнал
+                        float direction = delta.x * _sensitivity / Screen.width;
+                        direction = Mathf.Clamp(direction * 10f, -_maxOutput, _maxOutput);
+
+                        DirectionChanged?.Invoke(direction);
                     }
+
+                    _previousTouchPosition = currentPos;
                 }
-                
                 break;
 
             case TouchPhase.Ended:
-                
             case TouchPhase.Canceled:
-                _isTouchActive = false;
-                _startTouchPosition = Vector2.zero;
+                if (_isTouchActive)
+                {
+                    _isTouchActive = false;
+                    DirectionChanged?.Invoke(0f);
+                }
                 break;
         }
     }

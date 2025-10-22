@@ -55,10 +55,10 @@ public class PointSpawnTrigger : MonoBehaviour
         for (int i = 0; i < count; i++)
         {
             Zombie zombie = _spawnerZombie.CreateEnemy();
-            zombie.transform.position = GetRandomPositionSpawn();
-            zombie.transform.rotation = _zombieSpawnArea.rotation;
             zombie.SetFinish(targetPosition);
             _enemyGroup.AddEnemy(zombie);
+            zombie.transform.position = GetRandomPositionSpawn();
+            zombie.transform.rotation = _zombieSpawnArea.rotation;
             yield return new WaitForSeconds(_spawnDelay);
         }
     }
