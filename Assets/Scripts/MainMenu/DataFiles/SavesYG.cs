@@ -1,5 +1,3 @@
-using UnityEngine.Serialization;
-
 namespace YG
 {
     public partial class SavesYG
@@ -25,9 +23,11 @@ namespace YG
         public bool HasSavedPlayer;
         public bool IsCallHelpUpgradePurchased;
         public bool IsLoadedMainMenu;
+        public bool IsPlayGameGuide = true;
         public float VolumeMusic;
         public float VolumeUi;
         public float VolumeSFX;
+        public float SpeedSideMovement = 18f;
         
 
         public void SetNewPlayer(string name)

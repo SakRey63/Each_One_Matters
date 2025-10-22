@@ -1,3 +1,4 @@
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -8,7 +9,6 @@ public class MainMenuController : MonoBehaviour
 {
     private const string LevelScene = "LevelScene";
     
-    [SerializeField] private MainMenu _mainMenu;
     [SerializeField] private BaseMenu _baseMenu;
     [SerializeField] private CharacterCreation _characterCreation;
     [SerializeField] private LeaderboardUI _leaderboardUI;
@@ -16,6 +16,11 @@ public class MainMenuController : MonoBehaviour
     [SerializeField] private Button _continueButton;
     [SerializeField] private TextMeshProUGUI _welcomeText;
     [SerializeField] private TextMeshProUGUI _continueText;
+    [SerializeField] private TextMeshProUGUI _nameGameText;
+    
+    [Header("Demo & Audio")]
+    [SerializeField] private Game _demoGame; 
+    [SerializeField] private GameObject _tapToStartPrompt; 
 
     private BaseMenuSound _menuSound;
     private bool _hasSavedPlayer;
@@ -30,9 +35,8 @@ public class MainMenuController : MonoBehaviour
         if (YG2.saves.IsLoadedMainMenu)
         {
             _settingsUI.CreateLanguageToSetting(YG2.lang);
-            _menuSound.CreateMainMenuMusic();
-            _mainMenu.gameObject.SetActive(true);
-            UpdateGreetingText();
+            _tapToStartPrompt?.SetActive(true);
+            StartCoroutine(WaitForFirstInput());
         }
     }
     
@@ -77,6 +81,18 @@ public class MainMenuController : MonoBehaviour
     {
         _baseMenu.gameObject.SetActive(false);
         _leaderboardUI.gameObject.SetActive(true);
+    }
+    
+    private IEnumerator WaitForFirstInput()
+    {
+        yield return new WaitUntil(() => Input.anyKeyDown);
+
+        _tapToStartPrompt?.SetActive(false);
+        _baseMenu.gameObject.SetActive(true);
+        _nameGameText.gameObject.SetActive(true);
+        UpdateGreetingText();
+        _menuSound.CreateMainMenuMusic();
+        _demoGame.StartDemoScene();
     }
     
     private void UpdateGreetingText()

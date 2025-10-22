@@ -5,6 +5,7 @@ public class PositionGeneratorSquad : MonoBehaviour
     [SerializeField] private float _xStepOffset = 1f; 
     [SerializeField] private float _zStepOffset = 1f; 
     [SerializeField] private float _xRowOffset = 0.5f;
+    [SerializeField] private Transform _positionSpawnPoliceOfficer;
 
     private Vector3 _lastPositionPoliceOfficerSpawn;
     private int _countRings;
@@ -33,19 +34,19 @@ public class PositionGeneratorSquad : MonoBehaviour
         _isExpandingRadius = false;
     }
     
-    public Vector3 CreateNextSpawnPosition(Vector3 positionSpawnPoliceOfficer)
+    public Vector3 CreateNextSpawnPosition()
     {
         if (_isCentered)
         {
             _isCentered = false;
-            _nexPositionSpawn = positionSpawnPoliceOfficer;
+            _nexPositionSpawn = _positionSpawnPoliceOfficer.localPosition;
             _isExpandingRadius = true;
         }
         else if(_isExpandingRadius)
         {
             _countRings++;
-            _nexPositionSpawn = new Vector3(positionSpawnPoliceOfficer.x - (_xStepOffset * _countRings), _nexPositionSpawn.y,
-                positionSpawnPoliceOfficer.z);
+            _nexPositionSpawn = new Vector3(_positionSpawnPoliceOfficer.localPosition.x - (_xStepOffset * _countRings), _nexPositionSpawn.y,
+                _positionSpawnPoliceOfficer.localPosition.z);
             _isExpandingRadius = false;
             _isMovingUpRight = true;
             _numberRings = 0;
@@ -123,20 +124,17 @@ public class PositionGeneratorSquad : MonoBehaviour
             if (_numberRings == _countRings)
             {
                 _isMovingUpLeft = false;
-                _isExpandingRadius = true;
-                CreateNextSpawnPosition(positionSpawnPoliceOfficer);
+                _countRings++;
+                _nexPositionSpawn = new Vector3(_positionSpawnPoliceOfficer.localPosition.x - (_xStepOffset * _countRings), _nexPositionSpawn.y,
+                    _positionSpawnPoliceOfficer.localPosition.z);
+                _isExpandingRadius = false;
+                _isMovingUpRight = true;
+                _numberRings = 0;
             }
             else
             {
-                _nexPositionSpawn = new Vector3(_lastPositionPoliceOfficerSpawn.x + _xRowOffset, _nexPositionSpawn.y,
-                    _lastPositionPoliceOfficerSpawn.z - _zStepOffset);
-                
-                if (_numberRings == _countRings)
-                {
-                    _numberRings = 0;
-                    _isMovingUpLeft = false;
-                    _isExpandingRadius = true;
-                }
+                _nexPositionSpawn = new Vector3(_lastPositionPoliceOfficerSpawn.x - _xRowOffset, _nexPositionSpawn.y,
+                    _lastPositionPoliceOfficerSpawn.z + _zStepOffset);
             }
         }
 

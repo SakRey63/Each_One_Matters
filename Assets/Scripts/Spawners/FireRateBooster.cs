@@ -6,29 +6,36 @@ public class FireRateBooster : MonoBehaviour
 {
     [SerializeField] private ParticleSystem _buffEffect;
     [SerializeField] private ParticleSystem _constEffect;
-    [SerializeField] private ParticleSystem _squadEffect;
     [SerializeField] private MeshRenderer _meshRenderer;
     [SerializeField] private AudioSource _soundEffect;
-    [SerializeField] private float _delay = 2;
+    [SerializeField] private float _delayEffect = 2;
+    [SerializeField] private float _increasedRateOfFire = 0.4f;
 
-    private bool _isBuffConsumed;
+    private float _buffDuration;
 
-    public event Action<FireRateBooster, ParticleSystem> OnFirstOfficerEntered;
+    public float BuffDuration => _buffDuration;
+    public float IncreasedRateOfFire => _increasedRateOfFire;
+    
+    public event Action<FireRateBooster> OnFirstOfficerEntered;
 
     private void OnTriggerEnter(Collider other)
     {
-        if (_isBuffConsumed == false && other.TryGetComponent<PoliceOfficer>(out _))
+        if (other.TryGetComponent<PoliceOfficer>(out _))
         {
-            OnFirstOfficerEntered?.Invoke(this, _squadEffect);
+            OnFirstOfficerEntered?.Invoke(this);
             _soundEffect.Play();
-            _isBuffConsumed = true;
             StartCoroutine(HandleBuffEffect());
         }
     }
 
+    public void SetDurationTimeImprovedRange(float buffDuration)
+    {
+        _buffDuration = buffDuration;
+    }
+
     private IEnumerator HandleBuffEffect()
     {
-        WaitForSeconds delay = new WaitForSeconds(_delay);
+        WaitForSeconds delay = new WaitForSeconds(_delayEffect);
         _meshRenderer.enabled = false;
         _constEffect.Stop();
         _buffEffect.Play();

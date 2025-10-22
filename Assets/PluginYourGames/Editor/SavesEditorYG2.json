@@ -7,10 +7,10 @@
     false,
     false
   ],
-  "idSave": 2047,
-  "PlayerName": "1",
-  "Level": 2,
-  "Score": 9300,
+  "idSave": 3835,
+  "PlayerName": "2",
+  "Level": 1,
+  "Score": 1790,
   "CountPoliceOfficer": 5,
   "IncreaseSquadPrices": 1000,
   "ExtendFireRateDurationPrices": 1000,
@@ -21,7 +21,9 @@
   "HasSavedPlayer": true,
   "IsCallHelpUpgradePurchased": true,
   "IsLoadedMainMenu": true,
-  "VolumeMusic": -27.040554,
-  "VolumeUi": 0.0,
-  "VolumeSFX": -21.5224743
+  "IsPlayGameGuide": false,
+  "VolumeMusic": -22.2953835,
+  "VolumeUi": -13.3395958,
+  "VolumeSFX": -15.6589174,
+  "SpeedSideMovement": 18.3748779
 }

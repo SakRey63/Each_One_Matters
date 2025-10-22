@@ -14,13 +14,12 @@ public class PoliceOfficer : MonoBehaviour
     private Transform _startPositionGenerationSquad;
     private Quaternion _rotationPositionToDamageBridge;
     private PoliceOfficerMovement _officerMovement;
+    private PoliceOfficerRotation _officerRotation;
+    private PoliceOficcerVision _officerVision;
     private PoliceOfficerSound _policeOfficerSound;
     private Health _health = new Health();
     private Weapon _weapon;
-    private BulletPool _bulletPool;
     private ChunkPool _chunkPool;
-    private Coroutine _coroutineRepeatShooting;
-    private float _repeatShoot;
     private Transform _targetCenterPoint;
     private int _officerId;
     private bool _isDead;
@@ -28,6 +27,7 @@ public class PoliceOfficer : MonoBehaviour
     private bool _isReachedBaseEntry;
     private bool _isFoundBase;
     private bool _isBaseEntryCompleted;
+    private bool _isLeadingZombie;
     
     public int OfficerId => _officerId;
     public float SpeedOfficer => _officerMovement.Speed;
@@ -41,6 +41,8 @@ public class PoliceOfficer : MonoBehaviour
     
     private void Awake()
     {
+        _officerVision = GetComponent<PoliceOficcerVision>();
+        _officerRotation = GetComponent<PoliceOfficerRotation>();
         _policeOfficerSound = GetComponent<PoliceOfficerSound>();
         _officerMovement = GetComponent<PoliceOfficerMovement>();
         _weapon = GetComponentInChildren<Weapon>();
@@ -48,17 +50,24 @@ public class PoliceOfficer : MonoBehaviour
 
     private void OnEnable()
     {
+        _officerVision.OnZombieDetected += ToggleVisionOnZombieDetected;
         _officerMovement.OnReachedRegroupPoint += SubscribeAndHandleBaseDetection;
     }
 
     private void OnDisable()
     {
+        _officerVision.OnZombieDetected -= ToggleVisionOnZombieDetected;
         _officerMovement.OnReachedRegroupPoint -= SubscribeAndHandleBaseDetection;
     }
 
     private void Update()
     {
         _officerMovement.Move(_isFoundBase);
+
+        if (_isLeadingZombie)
+        {
+            _officerRotation.Rotation();
+        }
     }
 
     public void TakeDamage(int damage)
@@ -69,14 +78,10 @@ public class PoliceOfficer : MonoBehaviour
         {
             _isDead = true;
             _officerMovement.StopMove(false);
-            
+            _officerVision.ScanOff();
+            _weapon.StopShooting();
             OnPoliceDeath?.Invoke(this);
             
-            if (_coroutineRepeatShooting != null)
-            {
-                StopCoroutine(_coroutineRepeatShooting);
-            }
-                    
             _chunkPool.GetEffect(transform);
             OnDeathAnimationFinished?.Invoke(this);
         }
@@ -96,8 +101,9 @@ public class PoliceOfficer : MonoBehaviour
     public void SetPoliceOfficerActive(BulletPool bulletPool, ChunkPool chunkPool, bool isBaseEntryCompleted)
     {
         _chunkPool = chunkPool;
-        _bulletPool = bulletPool;
+        _weapon.SetBulletPool(bulletPool, _policeOfficerSound);
         _isDead = false;
+        _isLeadingZombie = false;
         _isFoundBase = isBaseEntryCompleted;
         _isBaseEntryCompleted = isBaseEntryCompleted;
     }
@@ -112,6 +118,11 @@ public class PoliceOfficer : MonoBehaviour
         _officerId = number;
     }
 
+    public void ScanningEnemiesActive()
+    {
+        _officerVision.ScanForEnemies();
+    }
+
     public void SetHealthPoint(int healthPoint)
     {
         _health.SetHealthPoint(healthPoint);
@@ -121,33 +132,20 @@ public class PoliceOfficer : MonoBehaviour
     {
         _policeOfficerSound.PlayScream();
         _targetCenterPoint = point;
-
-        if (_coroutineRepeatShooting != null)
-        {
-            StopCoroutine(_coroutineRepeatShooting);
-        }
+        _weapon.StopShooting();
 
         StartCoroutine(TurnModelToCenter());
     }
 
     public void Shooting(float repeat)
     {
-        _repeatShoot = repeat;
-        
-        _coroutineRepeatShooting = StartCoroutine(RepeatShooting());
+        _weapon.Shooting(repeat);
     }
 
     public void StopShooting()
     {
-        if (_coroutineRepeatShooting != null)
-        {
-            StopCoroutine(_coroutineRepeatShooting);
-        }
-    }
-    
-    public void ChangeFireRate(float repeat)
-    {
-        _repeatShoot = repeat;
+        _animations.MoveWinAnimation();
+        _weapon.StopShooting();
     }
     
     public void SetSpeed(float backwardMovementSpeed)
@@ -161,6 +159,20 @@ public class PoliceOfficer : MonoBehaviour
         _officerMovement.SetHorizontalAndBorder(isHorizontal, maxBorderPosition, minBorderPosition);
     }
     
+    private void ToggleVisionOnZombieDetected(Zombie zombie)
+    {
+        zombie.OnZombieDeath += LookingNewTarget;
+        _officerRotation.SetTarget(zombie);
+        _isLeadingZombie = true;
+    }
+
+    private void LookingNewTarget(Zombie zombie)
+    {
+        zombie.OnZombieDeath -= LookingNewTarget;
+        _officerVision.ScanForEnemies();
+        _isLeadingZombie = false;
+    }
+
     private void SubscribeAndHandleBaseDetection()
     {
         if (_isFoundBase)
@@ -176,6 +188,11 @@ public class PoliceOfficer : MonoBehaviour
                 {
                     _officerMovement.SetSpeed(0);
                     _animations.MoveRunAnimation(false);
+
+                    if (_isLeadingZombie == false)
+                    {
+                        _officerVision.ScanForEnemies();
+                    }
                 }
                 else
                 {
@@ -228,19 +245,5 @@ public class PoliceOfficer : MonoBehaviour
 
         _basePoint.localRotation = Quaternion.identity;
         OnDeathAnimationFinished?.Invoke(this);
-    }
-
-    private IEnumerator RepeatShooting()
-    {
-        if (_bulletPool != null)
-        {
-            while (enabled)
-            {
-                _bulletPool.GetBullet(_weapon.BulletSpawnPosition);
-                _policeOfficerSound.PlayShoot();
-                
-                yield return new WaitForSeconds(_repeatShoot);
-            }
-        }
     }
 }

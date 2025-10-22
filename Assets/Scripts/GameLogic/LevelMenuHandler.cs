@@ -61,7 +61,7 @@ public class LevelMenuHandler : MonoBehaviour
     {
         if (YG2.saves.IsLoadedMainMenu == false)
         {
-            _levelSounds.CreateBackgroundMusic();
+            _levelSounds.PlayBackgroundMusic();
             _elementToggler.gameObject.SetActive(true);
             
             if (YG2.envir.isMobile)
@@ -85,14 +85,14 @@ public class LevelMenuHandler : MonoBehaviour
             Time.timeScale = 0f;
             _pauseText.gameObject.SetActive(true);
             _continueGame.gameObject.SetActive(true);
-            _levelSounds.CreateMusicMenuPause();
+            _levelSounds.PlayPauseMusic();
         }
     }
 
     public void ResumeGame()
     {
         Cursor.visible = false;
-        _levelSounds.CreateBackgroundMusic();
+        _levelSounds.PlayBackgroundMusic();
         _elementToggler.gameObject.SetActive(true);
         _isEnableGameMenu = false;
         _gameMenu.gameObject.SetActive(false);
@@ -140,7 +140,6 @@ public class LevelMenuHandler : MonoBehaviour
         _elementToggler.gameObject.SetActive(false);
         _isEnableGameMenu = true;
         _gameMenu.gameObject.SetActive(true);
-        Time.timeScale = 0f;
         _gameOverText.gameObject.SetActive(true);
         
         if (isPoliceOnBase == false)
@@ -148,7 +147,7 @@ public class LevelMenuHandler : MonoBehaviour
             _reviveWithAd.gameObject.SetActive(true);
         }
 
-        _levelSounds.CreateGameOverMusic();
+        _levelSounds.PlayGameOverMusic();
     }
 
     public void ShowWinGameMenu()
@@ -160,7 +159,7 @@ public class LevelMenuHandler : MonoBehaviour
         _winText.gameObject.SetActive(true);
         _nextLevel.gameObject.SetActive(true);
         _upgradeButton.gameObject.SetActive(true);
-        _levelSounds.CreateWinMusic();
+        _levelSounds.PlayWinMusic();
     }
 
     public void ShowUpgradeMenu()
@@ -215,11 +214,10 @@ public class LevelMenuHandler : MonoBehaviour
     
     public void ShowReviveWithAd()
     {
-        Time.timeScale = 1f;
         Cursor.visible = false;
         YG2.RewardedAdvShow(RewardID);
         _reviveWithAd.gameObject.SetActive(false);
-        _levelSounds.CreateBackgroundMusic();
+        _levelSounds.PlayBackgroundMusic();
         OnRewardedAdClicked?.Invoke();
     }
     

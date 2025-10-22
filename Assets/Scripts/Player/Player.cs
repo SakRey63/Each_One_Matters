@@ -6,11 +6,13 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
     [SerializeField] private int _policeCount = 1;
-    [SerializeField] private float _repeatShooting = 0.8f;
     [SerializeField] private float _border = 5.7f;
     [SerializeField] private Transform _positionSpawnPoliceOfficer;
     [SerializeField] private float _delay = 0.7f;
     [SerializeField] private int _healthPoliceOfficer = 75;
+    [SerializeField] private ParticleSystem _effectPlexus;
+    [SerializeField] private UnityEngine.UI.Image _buffTimerBar;
+    [SerializeField] private float _defaultRepeatShooting = 0.8f;
 
     private Base _base;
     private Transform _moveTarget;
@@ -25,21 +27,25 @@ public class Player : MonoBehaviour
     private ChunkPool _chunkPool;
     private PlayerView _playerView;
     private int _numberOfficer;
-    private Coroutine _coroutine;
+    private Coroutine _coroutineReorganize;
+    private Coroutine _coroutineBuff;
     private bool _isMoving;
     private bool _isFinished;
     private bool _isHorizontal;
     private bool _isPoliceOfficerOnBase;
     private float _maxBorderPosition;
     private float _minBorderPosition;
+    private float _repeatShooting;
     
     public int PoliceCount => _policeCount;
     public Transform SquadPosition => _playerSideMovement.SquadPosition;
     public bool IsPoliceOfficerOnBase => _isPoliceOfficerOnBase;
+    public PoleceOfficerSpawner PoliceOfficerSpawner => _officerSpawner;
 
     public event Action OnCheckpointReached;
     public event Action OnAllPoliceOfficersDead;
     public event Action OnPlayerReachedBase;
+    public event Action<int> OnUnitDeath;
 
     private void OnEnable()
     {
@@ -53,9 +59,8 @@ public class Player : MonoBehaviour
 
     private void Awake()
     {
-        _chunkPool = GetComponent<ChunkPool>();
+        _repeatShooting = _defaultRepeatShooting;
         _playerView = GetComponent<PlayerView>();
-        _bulletPool = GetComponent<BulletPool>();
         _playerRotation = GetComponent<PlayerRotation>();
         _policeOfficers = new Dictionary<int, PoliceOfficer>();
         _backwardMovement = GetComponent<PlayerBackwardMovement>();
@@ -71,17 +76,31 @@ public class Player : MonoBehaviour
             _backwardMovement.MoveBackward();
         }
     }
-
-    public void ApplyBuffToParty(float repeatShooting)
+    
+    public void SetupObjectsPool(BulletPool bulletPool, ChunkPool chunkPool)
     {
-        _repeatShooting = repeatShooting;
-
-        foreach (PoliceOfficer policeOfficer in _policeOfficers.Values)
-        {
-            policeOfficer.ChangeFireRate(_repeatShooting);
-        }
+        _bulletPool = bulletPool;
+        _chunkPool = chunkPool;
     }
 
+    public void ApplyBuffToParty(float buffDuration, float repeatShooting)
+    {
+        _effectPlexus.Play();
+        _repeatShooting = repeatShooting;
+        
+        foreach (PoliceOfficer policeOfficer in _policeOfficers.Values)
+        {
+            policeOfficer.Shooting(_repeatShooting);
+        }
+
+        if (_coroutineBuff != null)
+        {
+            StopCoroutine(_coroutineBuff);
+        }
+
+        _coroutineBuff = StartCoroutine(BuffTimer(buffDuration));
+    }
+    
     public void SetNextTargetPosition(Transform moveTarget, bool isHorizontal)
     {
         _isHorizontal = isHorizontal;
@@ -140,10 +159,10 @@ public class Player : MonoBehaviour
     {
         for (int i = 0; i < spawnUnitCount; i++)
         {
-            Vector3 positionToGroup = _positionGeneratorSquad.CreateNextSpawnPosition(_positionSpawnPoliceOfficer.localPosition);
+            Vector3 positionToGroup = _positionGeneratorSquad.CreateNextSpawnPosition();
 
             PoliceOfficer policeOfficer = _officerSpawner.CreatePoliceUnits();
-
+            
             if (_isPoliceOfficerOnBase == false)
             {
                 policeOfficer.transform.parent = _positionSpawnPoliceOfficer;
@@ -151,17 +170,18 @@ public class Player : MonoBehaviour
                 policeOfficer.transform.rotation = _positionSpawnPoliceOfficer.rotation;
                 policeOfficer.SetRotationPositionToDamageBridge(_positionSpawnPoliceOfficer.localRotation);
                 policeOfficer.SetTargetPositionInGroup(positionToGroup);
+                
             }
             else
             {
                 _base.SetPolicemanTarget(policeOfficer);
             }
             
+            policeOfficer.SetNumberOfficer(_numberOfficer);
             policeOfficer.SetPoliceOfficerActive(_bulletPool, _chunkPool, _isPoliceOfficerOnBase);
+            policeOfficer.Shooting(_repeatShooting);
             policeOfficer.SetHorizontalAndBorderStatus(_isHorizontal, _minBorderPosition, _maxBorderPosition);
             policeOfficer.SetSpeed(_backwardMovement.Speed);
-            policeOfficer.Shooting(_repeatShooting);
-            policeOfficer.SetNumberOfficer(_numberOfficer);
             policeOfficer.SetHealthPoint(_healthPoliceOfficer);
             policeOfficer.OnPoliceDeath += HandlePoliceDeath;
             policeOfficer.OnPoliceReachedBase += HandlePoliceReachedBase;
@@ -172,6 +192,16 @@ public class Player : MonoBehaviour
             _playerView.ShowPoliceCount(_policeCount);
         }
     }
+    
+    public void StopMoving()
+    {
+        _isMoving = false;
+    }
+
+    public void KeepMoving()
+    {
+        _isMoving = true;
+    }
 
     private void HandlePoliceReachedBase(PoliceOfficer policeOfficer, Base basePolice)
     {
@@ -180,8 +210,8 @@ public class Player : MonoBehaviour
         if (_isPoliceOfficerOnBase == false)
         {
             _base = basePolice;
-            OnPlayerReachedBase?.Invoke();
             _isPoliceOfficerOnBase = true;
+            OnPlayerReachedBase?.Invoke();
         }
     }
 
@@ -196,6 +226,31 @@ public class Player : MonoBehaviour
             OnCheckpointReached?.Invoke();
         }
     }
+    
+    private IEnumerator BuffTimer(float buffDuration)
+    {
+        _buffTimerBar.gameObject.SetActive(true);
+        float elapsed = 0f;
+        float maxFillAmount = 1;
+
+        while (elapsed < buffDuration)
+        {
+            _buffTimerBar.fillAmount = maxFillAmount - (elapsed / buffDuration);
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+        
+        _buffTimerBar.gameObject.SetActive(false);
+        _buffTimerBar.fillAmount = 0;
+        _repeatShooting = _defaultRepeatShooting;
+        
+        foreach (PoliceOfficer policeOfficer in _policeOfficers.Values)
+        {
+            policeOfficer.Shooting(_repeatShooting);
+        }
+        
+        _coroutineBuff = null;
+    }
 
     private IEnumerator ReorganizeSquadAfterDeath()
     {
@@ -207,11 +262,11 @@ public class Player : MonoBehaviour
         
         foreach (PoliceOfficer policeOfficer in _policeOfficers.Values)
         {
-            Vector3 positionToGroup = _positionGeneratorSquad.CreateNextSpawnPosition(_positionSpawnPoliceOfficer.localPosition);
+            Vector3 positionToGroup = _positionGeneratorSquad.CreateNextSpawnPosition();
             policeOfficer.SetTargetPositionInGroup(positionToGroup);
         }
 
-        _coroutine = null;
+        _coroutineReorganize = null;
     }
 
     private void HandlePoliceDeath(PoliceOfficer officer)
@@ -222,21 +277,23 @@ public class Player : MonoBehaviour
         _policeCount = _policeOfficers.Count;
         _playerView.ShowPoliceCount(_policeCount);
         
-        if(_coroutine == null && officer.IsFoundBase == false && _policeCount > 0)
+        if(_coroutineReorganize == null && officer.IsFoundBase == false && _policeCount > 0)
         {
-            _coroutine = StartCoroutine(ReorganizeSquadAfterDeath());
+            _coroutineReorganize = StartCoroutine(ReorganizeSquadAfterDeath());
         }
         
         if (_policeCount == 0)
         {
-            if (_coroutine != null)
+            if (_coroutineReorganize != null)
             {
-                StopCoroutine(_coroutine);
-                _coroutine = null;
+                StopCoroutine(_coroutineReorganize);
+                _coroutineReorganize = null;
             }
             
             _positionGeneratorSquad.ResetAllPositions();
             OnAllPoliceOfficersDead?.Invoke();
         }
+        
+        OnUnitDeath?.Invoke(_policeCount);
     }
 }

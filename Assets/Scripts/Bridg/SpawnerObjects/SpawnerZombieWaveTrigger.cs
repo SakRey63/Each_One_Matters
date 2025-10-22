@@ -7,10 +7,9 @@ public class SpawnerZombieWaveTrigger : MonoBehaviour
     
     public PointSpawnTrigger GetZombieTrigger(Vector3 position, Quaternion targetRotation, SegmentPositionGenerator segmentPositionGenerator)
     {
-        position = segmentPositionGenerator.GetPositionCenterLevel(position, _verticalPositionZombieWaveTrigger);
+        Vector3 newPosition = segmentPositionGenerator.GetPositionCenterLevel(position, _verticalPositionZombieWaveTrigger);
         
-        PointSpawnTrigger spawnTrigger = Instantiate(_pointSpawnPrefab, position, targetRotation);
-        spawnTrigger.SetDirection(segmentPositionGenerator.IsHorizontal);
+        PointSpawnTrigger spawnTrigger = Instantiate(_pointSpawnPrefab, newPosition, targetRotation);
 
         return spawnTrigger;
     }

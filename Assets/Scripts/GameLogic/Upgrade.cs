@@ -13,7 +13,7 @@ public class Upgrade : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _balanceText;
     [SerializeField] private TextMeshProUGUI _callHelpOnBaseText;
     [SerializeField] private TextMeshProUGUI _uguipgradeCallHelpOnBaseText;
-    [SerializeField] private TextMeshProUGUI _defaultCallHelpOnBaseText;
+    [SerializeField] private TextMeshProUGUI _allScore;
     [SerializeField] private LevelSounds _levelSounds;
     [SerializeField] private float _duration = 1.5f;
     [SerializeField] private int _callHelpUpgradeButtonPrice = 50;
@@ -23,12 +23,6 @@ public class Upgrade : MonoBehaviour
     private bool _canIncreaseSquad;
     private bool _canExtendFireRate;
     private bool _canCallHelpOnBase;
-    private string _defaultText;
-
-    private void Awake()
-    {
-        _defaultText = _balanceText.text;
-    }
 
     private void OnEnable()
     {
@@ -63,10 +57,7 @@ public class Upgrade : MonoBehaviour
     
     private void UpdatePriceText()
     {
-        string newText = _defaultText;
-        string allScore = Convert.ToString(YG2.saves.Score);
-        newText += " " + allScore;
-        _balanceText.text = newText;
+        _allScore.text = Convert.ToString(YG2.saves.Score);
     }
 
     private void TryApplyUpgrade(int price)
@@ -109,13 +100,12 @@ public class Upgrade : MonoBehaviour
                     YG2.saves.IsCallHelpUpgradePurchased = true;
                 }
                 
-                
                 YG2.saves.CallHelpOnBasePrices = newPrice;
                 _callHelpOnBasePrices.text = Convert.ToString(newPrice);
                 _canCallHelpOnBase = false;
             }
             
-            _levelSounds.CreateUpgradeMusic();
+            _levelSounds.PlayUpgradeSound();
             YG2.SaveProgress();
             UpdateTextMenu();
         }
@@ -136,18 +126,18 @@ public class Upgrade : MonoBehaviour
 
         if (YG2.saves.IsCallHelpUpgradePurchased)
         {
-            _defaultCallHelpOnBaseText.text = _uguipgradeCallHelpOnBaseText.text;
+            _uguipgradeCallHelpOnBaseText.gameObject.SetActive(true);
         }
         else
         {
-            _defaultCallHelpOnBaseText.text = _callHelpOnBaseText.text;
+            _callHelpOnBaseText.gameObject.SetActive(true);
         }
     }
 
     private IEnumerator ShowErrorMessage()
     {
         float delay = _duration;
-        _levelSounds.CreateErrorMusic();
+        _levelSounds.PlayErrorSound();
         _balanceText.gameObject.SetActive(false);
         _errorText.gameObject.SetActive(true);
         

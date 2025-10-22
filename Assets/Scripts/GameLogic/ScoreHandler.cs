@@ -1,12 +1,12 @@
 using System;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 using YG;
 
 public class ScoreHandler : MonoBehaviour
 {
-    [SerializeField] private TextMeshProUGUI _points;
-    [SerializeField] private TextMeshProUGUI _allScore;
+    [SerializeField] private TextMeshProUGUI _score;
     [SerializeField] private TextMeshProUGUI _level;
     [SerializeField] private int _pointsPerZombie;
 
@@ -17,20 +17,19 @@ public class ScoreHandler : MonoBehaviour
     public void SetInitialScore(int score)
     {
         _currentScore = score;
-        _allScore.text = Convert.ToString(YG2.saves.Score);
-        _points.text = Convert.ToString(_currentScore);
+        _score.text = Convert.ToString(_currentScore);
         _level.text = Convert.ToString(YG2.saves.Level);
     }
 
     public void AddPointsForZombie()
     {
         _currentScore += _pointsPerZombie;
-        _points.text = Convert.ToString(_currentScore);
+        _score.text = Convert.ToString(_currentScore);
     }
 
     public void DeductPointsForHelp(int price)
     {
         _currentScore -= price;
-        _points.text = _currentScore.ToString();
+        _score.text = _currentScore.ToString();
     }
 }

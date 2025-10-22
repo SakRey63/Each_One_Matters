@@ -1,38 +1,22 @@
 using System;
-using System.Collections;
 using UnityEngine;
 
 public class ZombieWeapon : MonoBehaviour
 {
     [SerializeField] private int _damage = 75;
-    [SerializeField] private float _durationAttack = 0.4f;
-
-    private Coroutine _coroutine;
-
-    public event Action OnAttackFinished;
+    
+    public event Action<bool> OnAttackFinished; 
     
     public void Attack(PoliceOfficer policeOfficer)
     {
-        if (_coroutine == null && policeOfficer.IsDead == false)
-        {
-            _coroutine = StartCoroutine(PerformAttack(policeOfficer));
-        }
-    }
-
-    private IEnumerator PerformAttack(PoliceOfficer policeOfficer)
-    {
-        float duration = 0;
-        policeOfficer.TakeDamage(_damage);
+        bool isKilledUnit = false;
         
-        while (duration < _durationAttack)
+        if (policeOfficer.IsDead == false)
         {
-            duration += Time.deltaTime;
-            
-            yield return null;
+            policeOfficer.TakeDamage(_damage);
+            isKilledUnit = true;
         }
-
-        OnAttackFinished?.Invoke();
         
-        _coroutine = null;
+        OnAttackFinished?.Invoke(isKilledUnit);
     }
 }

@@ -131,6 +131,7 @@ GameObject:
   - component: {fileID: 2081298949874691891}
   - component: {fileID: -9130965703447777145}
   - component: {fileID: -6352978413582704344}
+  - component: {fileID: 8985922546669168873}
   m_Layer: 8
   m_Name: Zombie
   m_TagString: Untagged
@@ -232,8 +233,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7df1c3f2003a3814795712d75ff2ac5f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _normalSpeed: 6
-  _boostedSpeed: 7
+  _normalSpeed: 7
+  _boostedSpeed: 9
   _minBorderY: 1
 --- !u!114 &2081298949874691891
 MonoBehaviour:
@@ -247,7 +248,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 27b72ec1f0b8bff4b8529a3bad65beac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _rotationSpeed: 8
+  _rotationSpeed: 10
 --- !u!114 &-9130965703447777145
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -275,7 +276,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _damage: 75
-  _durationAttack: 0.4
+--- !u!114 &8985922546669168873
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6714367104420357935}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80c0d1cbc57760747b3ba97727ee08c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _animator: {fileID: 1395693291144529768}
 --- !u!1001 &9083463103098263408
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -344,6 +357,12 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b9cda9ff8a91b6849865a9b3e9503ef8, type: 3}
+--- !u!95 &1395693291144529768 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 7876952118175387672, guid: b9cda9ff8a91b6849865a9b3e9503ef8,
+    type: 3}
+  m_PrefabInstance: {fileID: 9083463103098263408}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &5025545991192648978 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4301116740817324642, guid: b9cda9ff8a91b6849865a9b3e9503ef8,

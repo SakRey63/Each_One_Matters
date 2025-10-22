@@ -9,7 +9,7 @@ public class ZombieMovement : MonoBehaviour
 
     private float _movementSpeed;
     private Transform _transform;
-    private float _threshold = 0.01f;
+    private float _threshold = 0.001f;
 
     public event Action OnTargetReached;
     private void Awake()
@@ -17,21 +17,26 @@ public class ZombieMovement : MonoBehaviour
         _transform = transform;
     }
 
-    public void Move(Transform target)
+    public void Move(bool isMoving, Transform target)
     {
-        if (( _transform.position - target.position).sqrMagnitude < _threshold * _threshold)
+        if (isMoving)
         {
-            OnTargetReached?.Invoke();
-        }
-        else
-        {
-            _transform.position = Vector3.MoveTowards(_transform.position, target.position, _movementSpeed * Time.deltaTime);
-        }
+            float distanceSqr = (target.position - _transform.position).sqrMagnitude;
+        
+            if (distanceSqr < _threshold)
+            {
+                OnTargetReached?.Invoke();
+            }
+            else
+            {
+                _transform.position = Vector3.MoveTowards(_transform.position, target.position, _movementSpeed * Time.deltaTime);
+            }
 
-        if (_transform.position.y < _minBorderY)
-        {
-            Vector3 stabilizationOffsetY = new Vector3(_transform.position.x, _minBorderY, _transform.position.z);
-            _transform.position = stabilizationOffsetY;
+            if (_transform.position.y < _minBorderY)
+            {
+                Vector3 stabilizationOffsetY = new Vector3(_transform.position.x, _minBorderY, _transform.position.z);
+                _transform.position = stabilizationOffsetY;
+            }
         }
     }
 

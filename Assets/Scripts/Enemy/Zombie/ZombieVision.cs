@@ -8,17 +8,18 @@ public class ZombieVision : MonoBehaviour
     [SerializeField] private float _scanRadius = 12f;
     [SerializeField] private float _delay = 0.5f;
     
-    private bool _isTargetDetected;
     private Coroutine _coroutine;
 
     public event Action<PoliceOfficer> OnPoliceDetected;
 
     public void ScanForEnemies()
     {
-        if (_coroutine == null)
+        if (_coroutine != null)
         {
-            _coroutine = StartCoroutine(RepeatScanRoutine());
+            StopCoroutine(_coroutine);
         }
+        
+        _coroutine = StartCoroutine(RepeatScanRoutine());
     }
     
     public void ScanOff()
@@ -34,34 +35,20 @@ public class ZombieVision : MonoBehaviour
     {
         WaitForSeconds delay = new WaitForSeconds(_delay);
 
-        bool isEnemyFound = true;
-
-        while (isEnemyFound)
+        while (true)
         {
-            _isTargetDetected = false;
-        
             Collider[] hits = Physics.OverlapSphere(transform.position, _scanRadius);
-       
+
             foreach (var hit in hits)
             {
-                if (hit.TryGetComponent(out PoliceOfficer policeOfficer))
+                if (hit.TryGetComponent<PoliceOfficer>(out var police) && !police.IsDead)
                 {
-                    if (policeOfficer.IsDead == false)
-                    {
-                        _isTargetDetected = true; 
-                        OnPoliceDetected?.Invoke(policeOfficer);
-                    }
-                }
-
-                if (_isTargetDetected)
-                {
-                    isEnemyFound = false;
+                    OnPoliceDetected?.Invoke(police);
+                    yield break;
                 }
             }
 
             yield return delay;
         }
-
-        _coroutine = null;
     }
 }

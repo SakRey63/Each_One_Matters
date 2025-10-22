@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using YG;
 using Random = UnityEngine.Random;
 
 public class BuffSpawner : MonoBehaviour
@@ -18,6 +19,7 @@ public class BuffSpawner : MonoBehaviour
     {
         basePosition = new Vector3(randomPositionSection.x, _verticalPositionFireRateBoosted, randomPositionSection.z);
         FireRateBooster fireRateBooster = Instantiate(_fireRateBooster, basePosition, targetRotation);
+        fireRateBooster.SetDurationTimeImprovedRange(YG2.saves.BuffDuration);
         OnFireRateBoostSpawned?.Invoke(fireRateBooster);
     }
 

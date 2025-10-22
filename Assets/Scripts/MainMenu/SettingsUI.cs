@@ -1,10 +1,15 @@
+using System;
+using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 using YG;
 
 public class SettingsUI : MonoBehaviour
 {
     [SerializeField] private TMP_Dropdown _dropdown;
+    [SerializeField] private Toggle _tutorialToggle;
+    [SerializeField] private Slider _mouseSensitivity;
     
     private const string English = "en";
     private const string Russian = "ru";
@@ -12,11 +17,29 @@ public class SettingsUI : MonoBehaviour
     private int _numberEnglish = 1;
     private int _numberRussian = 0;
     private int _numberTurkish = 2;
-    
+
+    private Coroutine _waitForSaves;
+
     private void Awake()
     {
         _dropdown.onValueChanged.AddListener(OnLanguageChanged);
+        _tutorialToggle.onValueChanged.AddListener(OnTutorialChanged);
+        _mouseSensitivity.onValueChanged.AddListener(ChangedMouseSensitivity);
     }
+
+    private void OnDisable()
+    {
+        if (_waitForSaves != null)
+        {
+            StopCoroutine(_waitForSaves);
+        }
+    }
+
+    private void Start()
+    {
+        _waitForSaves = StartCoroutine(WaitForSaves());
+    }
+    
 
     public void CreateLanguageToSetting(string language)
     {
@@ -36,6 +59,27 @@ public class SettingsUI : MonoBehaviour
         
         OnLanguageChanged(number);
         _dropdown.SetValueWithoutNotify(number);
+    }
+
+    private IEnumerator WaitForSaves()
+    {
+        while (YG2.saves == null) 
+            yield return null;
+        
+        _tutorialToggle.SetIsOnWithoutNotify(YG2.saves.IsPlayGameGuide);
+        _mouseSensitivity.SetValueWithoutNotify(YG2.saves.SpeedSideMovement);
+    }
+    
+    private void ChangedMouseSensitivity(float speed)
+    {
+        YG2.saves.SpeedSideMovement = speed;
+        YG2.SaveProgress();
+    }
+    
+    private void OnTutorialChanged(bool isPlayGameGuide)
+    {
+        YG2.saves.IsPlayGameGuide = isPlayGameGuide;
+        YG2.SaveProgress();
     }
 
     private void OnLanguageChanged(int index)

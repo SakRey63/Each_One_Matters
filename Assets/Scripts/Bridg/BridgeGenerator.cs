@@ -24,6 +24,7 @@ public class BridgeGenerator : MonoBehaviour
 
     public int BridgeSpanCount => _lengthCalculator.BridgePieceCount;
     public bool IsTurnRight => _positionGenerator.IsFirstTurnedRight;
+    public Transform EndPositionPlayer => _spawnerSegmentBridge.EndPositionPlayer;
 
     public event Action<PointSpawnTrigger> OnPointSpawnedTrigger;
     public event Action<FireRateBooster> OnFireRateBoostedCreated;
@@ -90,7 +91,7 @@ public class BridgeGenerator : MonoBehaviour
 
                 if (_indexZombieWaveTrigger == 0 || _indexZombieWaveTrigger >= _maxIndexZombieWaveTrigget)
                 {
-                    CreateZombieWaveTrigger(nextSpawnPosition);
+                    CreateZombieWaveTrigger(nextSpawnPosition, i);
                 }
             
                 CreateLevel(nextSpawnPosition);
@@ -106,9 +107,7 @@ public class BridgeGenerator : MonoBehaviour
 
     public Transform GetTargetPoint(int index)
     {
-        Transform point = _checkpointStore.GetCheckpointAtIndex(index);
-
-        return point;
+        return _checkpointStore.GetCheckpointAtIndex(index);
     }
     
     private void HandleBridgeConnectorSpawned(BridgeConnector connector, Quaternion targetRotation, Transform startPositionBridgeSegments)
@@ -119,11 +118,12 @@ public class BridgeGenerator : MonoBehaviour
         _indexZombieWaveTrigger = 0;
     }
     
-    private void CreateZombieWaveTrigger(Vector3 position)
+    private void CreateZombieWaveTrigger(Vector3 position, int index)
     {
         _indexZombieWaveTrigger = 0;
 
         PointSpawnTrigger waveTrigger = _spawnerZombieWaveTrigger.GetZombieTrigger(position, _targetRotation, _positionGenerator);
+        waveTrigger.SetDirectionAndIndex(_positionGenerator.IsHorizontal, index);
         
         OnPointSpawnedTrigger?.Invoke(waveTrigger);
     }

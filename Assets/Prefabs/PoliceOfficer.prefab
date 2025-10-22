@@ -13,6 +13,8 @@ GameObject:
   - component: {fileID: 4983967580279224671}
   - component: {fileID: 3279435155743971349}
   - component: {fileID: 3735614992959210735}
+  - component: {fileID: 6366611899764562366}
+  - component: {fileID: 2086356865560112315}
   - component: {fileID: 7217019130691709110}
   m_Layer: 6
   m_Name: PoliceOfficer
@@ -117,6 +119,34 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 83175a27db99aad4e88c38c10796929a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &6366611899764562366
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1343794127456622132}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d00372fbd43aae4182ea2fc93f6f723, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _basePoint: {fileID: 4011727563928251536}
+  _rotationSpeed: 8
+--- !u!114 &2086356865560112315
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1343794127456622132}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96214b681782a3243bba072b7046efbe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _scanRadius: 12
+  _delay: 0.5
 --- !u!114 &7217019130691709110
 MonoBehaviour:
   m_ObjectHideFlags: 0

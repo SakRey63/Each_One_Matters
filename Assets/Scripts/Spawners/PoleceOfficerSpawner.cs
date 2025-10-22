@@ -3,8 +3,6 @@ using UnityEngine;
 
 public class PoleceOfficerSpawner : ObjectPool<PoliceOfficer>
 {
-    private Transform _transformSpawn;
-    
     public PoliceOfficer CreatePoliceUnits()
     {
         PoliceOfficer policeOfficer = GetObject();
