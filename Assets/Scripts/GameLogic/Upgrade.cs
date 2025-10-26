@@ -127,6 +127,7 @@ public class Upgrade : MonoBehaviour
         if (YG2.saves.IsCallHelpUpgradePurchased)
         {
             _uguipgradeCallHelpOnBaseText.gameObject.SetActive(true);
+            _callHelpOnBaseText.gameObject.SetActive(false);
         }
         else
         {

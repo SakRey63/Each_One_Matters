@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using TMPro;
 using UnityEngine;
@@ -63,8 +62,10 @@ public class SettingsUI : MonoBehaviour
 
     private IEnumerator WaitForSaves()
     {
-        while (YG2.saves == null) 
+        while (YG2.saves == null)
+        {
             yield return null;
+        }
         
         _tutorialToggle.SetIsOnWithoutNotify(YG2.saves.IsPlayGameGuide);
         _mouseSensitivity.SetValueWithoutNotify(YG2.saves.SpeedSideMovement);

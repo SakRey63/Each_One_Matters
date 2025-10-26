@@ -9,21 +9,41 @@ public class MainMenuController : MonoBehaviour
 {
     private const string LevelScene = "LevelScene";
     
-    [SerializeField] private BaseMenu _baseMenu;
-    [SerializeField] private CharacterCreation _characterCreation;
-    [SerializeField] private LeaderboardUI _leaderboardUI;
-    [SerializeField] private SettingsUI _settingsUI;
-    [SerializeField] private Button _continueButton;
-    [SerializeField] private TextMeshProUGUI _welcomeText;
-    [SerializeField] private TextMeshProUGUI _continueText;
+    [SerializeField] private BaseMenu _desctopBaseMenu;
+    [SerializeField] private BaseMenu _mobileBaseMenu;
+    [SerializeField] private CharacterCreation _desctopCharacterCreation;
+    [SerializeField] private CharacterCreation _mobileCharacterCreation;
+    [SerializeField] private LeaderboardUI _desctopLeaderboardUI;
+    [SerializeField] private LeaderboardUI _mobileLeaderboardUI;
+    [SerializeField] private SettingsUI _desctopSettingsUI;
+    [SerializeField] private SettingsUI _mobileSettingsUI;
+    [SerializeField] private Button _desctopContinueButton;
+    [SerializeField] private Button _mobileContinueButton;
+    [SerializeField] private TextMeshProUGUI _desctopWelcomeText;
+    [SerializeField] private TextMeshProUGUI _mobileWelcomeText;
+    [SerializeField] private TextMeshProUGUI _desctopContinueText;
+    [SerializeField] private TextMeshProUGUI _mobileContinueText;
     [SerializeField] private TextMeshProUGUI _nameGameText;
+    [SerializeField] private Image _desctopStartMenuPanel;
+    [SerializeField] private Image _mobileStartMenuPanel;
+    [SerializeField] private Image _desctopContinueMenuPanel;
+    [SerializeField] private Image _mobileContinueMenuPanel;
     
     [Header("Demo & Audio")]
     [SerializeField] private Game _demoGame; 
     [SerializeField] private GameObject _tapToStartPrompt; 
 
+    private BaseMenu _baseMenu;
+    private CharacterCreation _characterCreation;
+    private LeaderboardUI _leaderboardUI;
+    private SettingsUI _settingsUI;
+    private Button _continueButton;
     private BaseMenuSound _menuSound;
     private bool _hasSavedPlayer;
+    private TextMeshProUGUI _welcomeText;
+    private TextMeshProUGUI _continueText;
+    private Image _startMenuPanel;
+    private Image _continueMenuPanel;
 
     private void Awake()
     {
@@ -34,7 +54,6 @@ public class MainMenuController : MonoBehaviour
     {
         if (YG2.saves.IsLoadedMainMenu)
         {
-            _settingsUI.CreateLanguageToSetting(YG2.lang);
             _tapToStartPrompt?.SetActive(true);
             StartCoroutine(WaitForFirstInput());
         }
@@ -43,15 +62,15 @@ public class MainMenuController : MonoBehaviour
     public void StartNewGame()
     {
         _baseMenu.gameObject.SetActive(false);
-        _characterCreation.gameObject.SetActive(true);
 
         if (_hasSavedPlayer)
         {
+            _characterCreation.gameObject.SetActive(true);
             _characterCreation.ShowWarningAndConfirm();
         }
         else
         {
-            _characterCreation.ActivatedInputField();
+            _characterCreation.TryCreatePlayer();
         }
     }
 
@@ -85,6 +104,7 @@ public class MainMenuController : MonoBehaviour
     
     private IEnumerator WaitForFirstInput()
     {
+        CreateMenuToDevise();
         yield return new WaitUntil(() => Input.anyKeyDown);
 
         _tapToStartPrompt?.SetActive(false);
@@ -98,16 +118,39 @@ public class MainMenuController : MonoBehaviour
     private void UpdateGreetingText()
     {
         _hasSavedPlayer = YG2.saves.HasSavedPlayer;
+        _settingsUI.CreateLanguageToSetting(YG2.lang);
         _welcomeText.gameObject.SetActive(!_hasSavedPlayer);
         _continueText.gameObject.SetActive(_hasSavedPlayer);
+        _startMenuPanel.gameObject.SetActive(!_hasSavedPlayer);
+        _continueMenuPanel.gameObject.SetActive(_hasSavedPlayer);
+        _continueButton.gameObject.SetActive(_hasSavedPlayer);
+    }
 
-        if (_hasSavedPlayer)
+    private void CreateMenuToDevise()
+    {
+        if (YG2.envir.isMobile)
         {
-            string text = _continueText.text;
-            text += ", " + YG2.saves.PlayerName;
-            _continueText.text = text;
+            _baseMenu = _mobileBaseMenu;
+            _characterCreation = _mobileCharacterCreation;
+            _continueButton = _mobileContinueButton;
+            _leaderboardUI = _mobileLeaderboardUI;
+            _settingsUI = _mobileSettingsUI;
+            _welcomeText = _mobileWelcomeText;
+            _continueText = _mobileContinueText;
+            _startMenuPanel = _mobileStartMenuPanel;
+            _continueMenuPanel = _mobileContinueMenuPanel;
         }
-        
-        _continueButton.interactable = _hasSavedPlayer;
+        else
+        {
+            _baseMenu = _desctopBaseMenu;
+            _characterCreation = _desctopCharacterCreation;
+            _continueButton = _desctopContinueButton;
+            _leaderboardUI = _desctopLeaderboardUI;
+            _settingsUI = _desctopSettingsUI;
+            _welcomeText = _desctopWelcomeText;
+            _continueText = _desctopContinueText;
+            _startMenuPanel = _desctopStartMenuPanel;
+            _continueMenuPanel = _desctopContinueMenuPanel;
+        }
     }
 }

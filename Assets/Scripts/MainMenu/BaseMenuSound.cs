@@ -15,13 +15,16 @@ public class BaseMenuSound : MonoBehaviour
     [SerializeField] private AudioSource _baseMenuMusic;
 
     [Tooltip("Слайдер громкости музыки")]
-    [SerializeField] private Slider _sliderMusic;
+    [SerializeField] private Slider _desctopSliderMusic;
+    [SerializeField] private Slider _mobileSliderMusic;
 
     [Tooltip("Слайдер громкости интерфейса")]
-    [SerializeField] private Slider _sliderUi;
+    [SerializeField] private Slider _desctopSliderUi;
+    [SerializeField] private Slider _mobileSliderUi;
 
     [Tooltip("Слайдер громкости SFX")]
-    [SerializeField] private Slider _sliderSFX;
+    [SerializeField] private Slider _desctopSliderSFX;
+    [SerializeField] private Slider _mobileSliderSFX;
 
     [Tooltip("Audio Mixer с настройками громкости")]
     [SerializeField] private AudioMixer _audioMixer;
@@ -75,13 +78,19 @@ public class BaseMenuSound : MonoBehaviour
         ApplyVolume(SfxVolumeParam, sfxVol);
         ApplyVolume(UiVolumeParam, uiVol);
 
-        if (_sliderMusic) _sliderMusic.SetValueWithoutNotify(musicVol);
-        if (_sliderUi)    _sliderUi.SetValueWithoutNotify(uiVol);
-        if (_sliderSFX)   _sliderSFX.SetValueWithoutNotify(sfxVol);
+        if (_mobileSliderMusic) _mobileSliderMusic.SetValueWithoutNotify(musicVol);
+        if (_desctopSliderMusic) _desctopSliderMusic.SetValueWithoutNotify(musicVol);
+        if (_mobileSliderUi) _mobileSliderUi.SetValueWithoutNotify(musicVol);
+        if (_desctopSliderUi)    _desctopSliderUi.SetValueWithoutNotify(uiVol);
+        if (_mobileSliderSFX)   _mobileSliderSFX.SetValueWithoutNotify(sfxVol);
+        if (_desctopSliderSFX)   _desctopSliderSFX.SetValueWithoutNotify(sfxVol);
         
-        if (_sliderMusic) _sliderMusic.onValueChanged.AddListener(OnMusicVolumeChanged);
-        if (_sliderUi)    _sliderUi.onValueChanged.AddListener(OnUiVolumeChanged);
-        if (_sliderSFX)   _sliderSFX.onValueChanged.AddListener(OnSfxVolumeChanged);
+        if (_mobileSliderMusic) _mobileSliderMusic.onValueChanged.AddListener(OnMusicVolumeChanged);
+        if (_desctopSliderMusic) _desctopSliderMusic.onValueChanged.AddListener(OnMusicVolumeChanged);
+        if (_mobileSliderUi)    _mobileSliderUi.onValueChanged.AddListener(OnUiVolumeChanged);
+        if (_desctopSliderUi)    _desctopSliderUi.onValueChanged.AddListener(OnUiVolumeChanged);
+        if (_mobileSliderSFX)   _mobileSliderSFX.onValueChanged.AddListener(OnSfxVolumeChanged);
+        if (_desctopSliderSFX)   _desctopSliderSFX.onValueChanged.AddListener(OnSfxVolumeChanged);
     }
 
     private void ApplyVolume(string paramName, float value)

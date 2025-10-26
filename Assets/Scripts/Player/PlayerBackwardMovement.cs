@@ -7,7 +7,7 @@ public class PlayerBackwardMovement : MonoBehaviour
 
     private Transform _transform;
     private Vector3 _targetPosition;
-    private float _threshold = 0.01f;
+    private float _threshold = 0.001f;
 
     public float Speed => _speed;
     
@@ -20,7 +20,7 @@ public class PlayerBackwardMovement : MonoBehaviour
 
     public void MoveBackward()
     {
-        if ((_targetPosition - _transform.position).sqrMagnitude < _threshold * _threshold)
+        if ((_targetPosition - _transform.position).sqrMagnitude < _threshold)
         {
             OnPlayerFinish?.Invoke();
         }

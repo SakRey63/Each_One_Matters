@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class PoliceOfficer : MonoBehaviour
 {
-    
     [SerializeField] private float _delay = 1f;
     [SerializeField] private float _tiltAngle = 90f;
     [SerializeField] private float _duration = 1f;
@@ -32,12 +31,10 @@ public class PoliceOfficer : MonoBehaviour
     public int OfficerId => _officerId;
     public float SpeedOfficer => _officerMovement.Speed;
     public bool IsDead => _isDead;
-    public bool IsFoundBase => _isFoundBase;
 
     public event Action<PoliceOfficer> OnPoliceDeath;
     public event Action<PoliceOfficer> OnDeathAnimationFinished;
     public event Action<PoliceOfficer> OnPoliceReachedToGeneratePositionOnBase;
-    public event Action<PoliceOfficer, Base> OnPoliceReachedBase;
     
     private void Awake()
     {
@@ -158,6 +155,14 @@ public class PoliceOfficer : MonoBehaviour
     {
         _officerMovement.SetHorizontalAndBorder(isHorizontal, maxBorderPosition, minBorderPosition);
     }
+
+    public void SetFinishingTargets(Vector3 enteredPosition, Transform startPositionGeneration)
+    {
+        _isFoundBase = true;
+        _isReachedBaseEntry = true;
+        _officerMovement.SetTargetPosition(enteredPosition, true);
+        _startPositionGenerationSquad = startPositionGeneration;
+    }
     
     private void ToggleVisionOnZombieDetected(Zombie zombie)
     {
@@ -201,15 +206,6 @@ public class PoliceOfficer : MonoBehaviour
                 }
             }
         }
-    }
-
-    public void AssignPoliceDestination(Base basePolice)
-    {
-        _startPositionGenerationSquad = basePolice.StartPositionGeneration;
-        _isFoundBase = true;
-        _isReachedBaseEntry = true;
-        _officerMovement.SetTargetPosition(basePolice.BaseEntryTransform.localPosition, true); 
-        OnPoliceReachedBase?.Invoke(this, basePolice);
     }
     
     private IEnumerator TurnModelToCenter()

@@ -10,7 +10,6 @@ namespace YG
         private int _startPriceCallHelpButton = 150;
         private float _startBuffDuration = 5f;
         
-        public string PlayerName;
         public int Level;
         public int Score;
         public int CountPoliceOfficer;
@@ -30,9 +29,8 @@ namespace YG
         public float SpeedSideMovement = 18f;
         
 
-        public void SetNewPlayer(string name)
+        public void SetNewPlayer()
         {
-            PlayerName = name;
             HasSavedPlayer = true;
             IsCallHelpUpgradePurchased = false;
             Score = _startScore;

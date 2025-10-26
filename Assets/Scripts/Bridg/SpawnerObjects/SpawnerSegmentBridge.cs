@@ -1,6 +1,5 @@
 using System;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 public class SpawnerSegmentBridge : MonoBehaviour
 {
@@ -12,12 +11,9 @@ public class SpawnerSegmentBridge : MonoBehaviour
     [SerializeField] private float _bridgeConnectorOffset = 23f;
     [SerializeField] private float _baseOffset = 13f;
     [SerializeField] private float _rotationAngle = 180;
-
-    private Base _exitBridge;
-
-    public Transform EndPositionPlayer => _exitBridge.EndPositionPlayer;
     
     public event Action<BridgeConnector, Quaternion, Transform> OnBridgeConnectorSpawned;
+    public event Action<Base> OnBaseSpawned;
     
     public void CreateSegmentBridge(Vector3 positionSegment, BridgeObjectSelector objectSelector, bool isHorizontal, Quaternion targetRotation, Vector3 randomPositionSection, int numberPosition)
     {
@@ -55,8 +51,9 @@ public class SpawnerSegmentBridge : MonoBehaviour
         {
             nextSpawnPosition = positionGenerator.GetPositionToBaseOfConnector(nextSpawnPosition, _baseOffset);
 
-            _exitBridge = Instantiate(_base, nextSpawnPosition, targetRotation);
-            checkpointStore.AddCheckpointAtIndex(index, _exitBridge.BaseEntryTransform);
+            Base basePoliceOfficer = Instantiate(_base, nextSpawnPosition, targetRotation);
+            checkpointStore.AddCheckpointAtIndex(index, basePoliceOfficer.BaseEntryTransform);
+            OnBaseSpawned?.Invoke(basePoliceOfficer);
         }
     }
 

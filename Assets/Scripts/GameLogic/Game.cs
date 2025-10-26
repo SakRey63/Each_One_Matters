@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using YG;
@@ -55,6 +56,7 @@ public class Game : MonoBehaviour
         _bridgeGenerator.OnFireRateBoostedCreated += SubscribeToFireRateCreated;
         _bridgeGenerator.OnRecruitPoliceCreated += SubscribeToRecruitPoliced;
         _bridgeGenerator.OnBridgeConnectorCreated += SubscribeToBridgeConnectorCreation;
+        _bridgeGenerator.OnBasePoliceOfficerCreated += SubscribeToBasePoliceOfficer;
         _player.OnCheckpointReached += UpdatePlayerTargetPosition;
         _player.OnAllPoliceOfficersDead += HandleAllPoliceOfficerDead;
         _player.OnPlayerReachedBase += ActivateCallHelpButton;
@@ -73,6 +75,7 @@ public class Game : MonoBehaviour
         _bridgeGenerator.OnPointSpawnedTrigger -= SpawnedTrigger;
         _bridgeGenerator.OnFireRateBoostedCreated -= SubscribeToFireRateCreated;
         _bridgeGenerator.OnRecruitPoliceCreated -= SubscribeToRecruitPoliced;
+        _bridgeGenerator.OnBasePoliceOfficerCreated -= SubscribeToBasePoliceOfficer;
         _player.OnCheckpointReached -= UpdatePlayerTargetPosition;
         _player.OnAllPoliceOfficersDead -= HandleAllPoliceOfficerDead;
         _player.OnPlayerReachedBase -= ActivateCallHelpButton;
@@ -100,7 +103,7 @@ public class Game : MonoBehaviour
 
             if (YG2.saves.IsPlayGameGuide)
             {
-                _tutorialUI.PlayGameGuide();
+                StartCoroutine(WaitForFirstInput());
             }
             else
             {
@@ -118,6 +121,19 @@ public class Game : MonoBehaviour
     private void HandleUnitDead(int number)
     {
         _cameraController.OnUnitCountChanged(number);
+    }
+    
+    private IEnumerator WaitForFirstInput()
+    {
+        _tutorialUI.PlayGameGuide();
+        
+        yield return new WaitUntil(() => Input.anyKeyDown);
+        
+        _tutorialUI.CloseGameGuide();
+        _player.SpawnPoliceOfficer(YG2.saves.CountPoliceOfficer);
+        UpdatePlayerTargetPosition();
+        YG2.saves.IsPlayGameGuide = false;
+        YG2.SaveProgress();
     }
     
     private void RevealAndRemoveKillerObstacle()
@@ -171,6 +187,17 @@ public class Game : MonoBehaviour
         }
     }
     
+    private void SubscribeToBasePoliceOfficer(Base basePoliceOfficer)
+    {
+        basePoliceOfficer.OnPoliceOfficerDetected += HandlePoliceOfficerDetected;
+    }
+
+    private void HandlePoliceOfficerDetected(Base basePoliceOfficer)
+    {
+        basePoliceOfficer.OnPoliceOfficerDetected -= HandlePoliceOfficerDetected;
+        _player.HandlePoliceReachedBase(basePoliceOfficer);
+    }
+
     private void SetupRevivalWithAd()
     {
         _playerInput.DirectionChanged += OnDirectionChanged;
@@ -329,18 +356,7 @@ public class Game : MonoBehaviour
 
     private void OnDirectionChanged(float direction)
     {
-        if (YG2.saves.IsPlayGameGuide)
-        {
-            _tutorialUI.CloseGameGuide();
-            _player.SpawnPoliceOfficer(YG2.saves.CountPoliceOfficer);
-            UpdatePlayerTargetPosition();
-            YG2.saves.IsPlayGameGuide = false;
-            YG2.SaveProgress();
-        }
-        else
-        {
-            _player.MoveSideways(direction);
-        }
+        _player.MoveSideways(direction);
     }
     
     private void HandleAllPoliceOfficerDead()

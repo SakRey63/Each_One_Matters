@@ -19,17 +19,19 @@ public class BridgeGenerator : MonoBehaviour
     private BuffSpawner _buffSpawner;
     private SpawnerObstacles _spawnerObstacles;
     private int _indexZombieWaveTrigger;
+    private Transform _endPositionPlayer;
     private Vector3 _randomPositionSection;
     private Quaternion _targetRotation;
 
     public int BridgeSpanCount => _lengthCalculator.BridgePieceCount;
     public bool IsTurnRight => _positionGenerator.IsFirstTurnedRight;
-    public Transform EndPositionPlayer => _spawnerSegmentBridge.EndPositionPlayer;
+    public Transform EndPositionPlayer => _endPositionPlayer;
 
     public event Action<PointSpawnTrigger> OnPointSpawnedTrigger;
     public event Action<FireRateBooster> OnFireRateBoostedCreated;
     public event Action<RecruitPolice> OnRecruitPoliceCreated;
     public event Action<BridgeConnector> OnBridgeConnectorCreated;
+    public event Action<Base> OnBasePoliceOfficerCreated; 
 
     private void Awake()
     {
@@ -49,6 +51,7 @@ public class BridgeGenerator : MonoBehaviour
         _buffSpawner.OnPoliceRecruitSpawned += HandlePoliceRecruitSpawned;
         _buffSpawner.OnFireRateBoostSpawned += HandleFireRateBoostSpawned;
         _spawnerSegmentBridge.OnBridgeConnectorSpawned += HandleBridgeConnectorSpawned;
+        _spawnerSegmentBridge.OnBaseSpawned += HandleBaseSpawned;
     }
 
     private void OnDisable()
@@ -56,9 +59,9 @@ public class BridgeGenerator : MonoBehaviour
         _buffSpawner.OnPoliceRecruitSpawned -= HandlePoliceRecruitSpawned;
         _buffSpawner.OnFireRateBoostSpawned -= HandleFireRateBoostSpawned;
         _spawnerSegmentBridge.OnBridgeConnectorSpawned -= HandleBridgeConnectorSpawned;
-        
+        _spawnerSegmentBridge.OnBaseSpawned -= HandleBaseSpawned;
     }
-    
+
     public void SpawnNormalSegment(Transform transform, int number)
     {
         _spawnerSegmentBridge.CreateNormalSegment(transform, number);
@@ -108,6 +111,12 @@ public class BridgeGenerator : MonoBehaviour
     public Transform GetTargetPoint(int index)
     {
         return _checkpointStore.GetCheckpointAtIndex(index);
+    }
+    
+    private void HandleBaseSpawned(Base basePoliceOfficer)
+    {
+        _endPositionPlayer = basePoliceOfficer.EndPositionPlayer;
+        OnBasePoliceOfficerCreated?.Invoke(basePoliceOfficer);
     }
     
     private void HandleBridgeConnectorSpawned(BridgeConnector connector, Quaternion targetRotation, Transform startPositionBridgeSegments)

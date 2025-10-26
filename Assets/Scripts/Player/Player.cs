@@ -177,7 +177,7 @@ public class Player : MonoBehaviour
             }
             else
             {
-                _base.SetPolicemanTarget(policeOfficer);
+                _base.SetTargetPoliceHelps(policeOfficer);
             }
             
             policeOfficer.SetNumberOfficer(_numberOfficer);
@@ -186,7 +186,7 @@ public class Player : MonoBehaviour
             policeOfficer.SetSpeed(_backwardMovement.Speed);
             policeOfficer.SetHealthPoint(_healthPoliceOfficer);
             policeOfficer.OnPoliceDeath += HandlePoliceDeath;
-            policeOfficer.OnPoliceReachedBase += HandlePoliceReachedBase;
+            
 
             if (_isStoppedWar == false)
             {
@@ -209,15 +209,30 @@ public class Player : MonoBehaviour
     {
         _isMoving = true;
     }
-
-    private void HandlePoliceReachedBase(PoliceOfficer policeOfficer, Base basePolice)
+    
+    public void ResetPositionUiElements()
     {
-        policeOfficer.OnPoliceReachedBase -= HandlePoliceReachedBase;
+        _playerSideMovement.ResetPositionSquad();
+    }
 
+    public void HandlePoliceReachedBase(Base basePolice)
+    {
         if (_isPoliceOfficerOnBase == false)
         {
             _base = basePolice;
             _isPoliceOfficerOnBase = true;
+
+            if (_coroutineReorganize != null)
+            {
+                StopCoroutine(_coroutineReorganize);
+            }
+
+            foreach (PoliceOfficer policeOfficer in _policeOfficers.Values)
+            {
+                _base.SetTargetPoliceOfficers(policeOfficer);
+                policeOfficer.SetFinishingTargets(_base.BaseEntryTransform.localPosition, _base.StartPositionGeneration);
+            }
+            
             OnPlayerReachedBase?.Invoke();
         }
     }
@@ -286,11 +301,7 @@ public class Player : MonoBehaviour
         _policeOfficers.Remove(officer.OfficerId);
         _policeCount = _policeOfficers.Count;
         _playerView.ShowPoliceCount(_policeCount);
-        
-        if(_coroutineReorganize == null && officer.IsFoundBase == false && _policeCount > 0)
-        {
-            _coroutineReorganize = StartCoroutine(ReorganizeSquadAfterDeath());
-        }
+        OnUnitDeath?.Invoke(_policeCount);
         
         if (_policeCount == 0)
         {
@@ -304,11 +315,14 @@ public class Player : MonoBehaviour
             OnAllPoliceOfficersDead?.Invoke();
         }
         
-        OnUnitDeath?.Invoke(_policeCount);
-    }
-
-    public void ResetPositionUiElements()
-    {
-        _playerSideMovement.ResetPositionSquad();
+        if(_isPoliceOfficerOnBase == false && _policeCount > 0)
+        {
+            if (_coroutineReorganize != null)
+            {
+                StopCoroutine(_coroutineReorganize);
+            }
+            
+            _coroutineReorganize = StartCoroutine(ReorganizeSquadAfterDeath());
+        }
     }
 }

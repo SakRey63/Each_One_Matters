@@ -1,4 +1,6 @@
+using System;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class Base : MonoBehaviour
 {
@@ -11,6 +13,8 @@ public class Base : MonoBehaviour
 
     private PositionGenerationBase _positionGenerationBase;
 
+    public event Action<Base> OnPoliceOfficerDetected;
+
     private void Awake()
     {
         _positionGenerationBase = GetComponent<PositionGenerationBase>();
@@ -22,15 +26,19 @@ public class Base : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.TryGetComponent(out PoliceOfficer policeOfficer))
+        if (other.TryGetComponent<PoliceOfficer>(out _))
         {
-            policeOfficer.transform.parent = _parentToSquad;
-            policeOfficer.AssignPoliceDestination(this);
-            policeOfficer.OnPoliceReachedToGeneratePositionOnBase += AssignNewPositionOnBase;
+            OnPoliceOfficerDetected?.Invoke(this);
         }
     }
+
+    public void SetTargetPoliceOfficers(PoliceOfficer policeOfficer)
+    {
+        policeOfficer.OnPoliceReachedToGeneratePositionOnBase += AssignNewPositionOnBase;
+        policeOfficer.transform.parent = _parentToSquad;
+    }
     
-    public void SetPolicemanTarget(PoliceOfficer policeOfficer)
+    public void SetTargetPoliceHelps(PoliceOfficer policeOfficer)
     {
         policeOfficer.transform.parent = _parentToSquad;
         policeOfficer.transform.localPosition = GetRandomPositionToBase();
