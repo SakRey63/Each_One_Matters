@@ -54,7 +54,7 @@ public class PlayerInput : MonoBehaviour
             if (_isTouchActive)
             {
                 _isTouchActive = false;
-                DirectionChanged?.Invoke(0f); // остановка
+                DirectionChanged?.Invoke(0f);
             }
             return;
         }
@@ -76,7 +76,6 @@ public class PlayerInput : MonoBehaviour
 
                     if (Mathf.Abs(delta.x) > _minSwipeDelta && Mathf.Abs(delta.y) < 30f)
                     {
-                        // Чем быстрее свайп — тем сильнее сигнал
                         float direction = delta.x * _sensitivity / Screen.width;
                         direction = Mathf.Clamp(direction * 10f, -_maxOutput, _maxOutput);
 
@@ -88,12 +87,15 @@ public class PlayerInput : MonoBehaviour
                 break;
 
             case TouchPhase.Ended:
+                
             case TouchPhase.Canceled:
+                
                 if (_isTouchActive)
                 {
                     _isTouchActive = false;
                     DirectionChanged?.Invoke(0f);
                 }
+                
                 break;
         }
     }

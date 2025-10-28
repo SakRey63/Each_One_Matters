@@ -54,6 +54,7 @@ public class MainMenuController : MonoBehaviour
     {
         if (YG2.saves.IsLoadedMainMenu)
         {
+            Cursor.lockState = CursorLockMode.None;
             _tapToStartPrompt?.SetActive(true);
             StartCoroutine(WaitForFirstInput());
         }

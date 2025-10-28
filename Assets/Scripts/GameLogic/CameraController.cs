@@ -8,10 +8,10 @@ public class CameraController : MonoBehaviour
     [SerializeField] private Transform _cameraPositionToLevel;
     [SerializeField] private float _xAngleOffsetMobile = 50;
     [SerializeField] private float _yAngleOffsetMobile = 180;
-    [SerializeField] private float _fieldOfViewMobile = 110;
     [SerializeField] private float _fieldOfViewDesktop = 70;
     [SerializeField] private float _zoomStep = 0.5f; 
     [SerializeField] private float _speed = 5;
+    [SerializeField] private float _yOffset = 0.7f;
     [SerializeField] private int _unitsPerZoomLevel = 10;
     
     private int _lastZoomLevel;
@@ -31,7 +31,8 @@ public class CameraController : MonoBehaviour
 
             _cameraPositionToLevel.localRotation = angle;
             
-            _camera.fieldOfView = _fieldOfViewMobile;
+            AdjustCameraForMobile();
+            _cameraPositionToLevel.localPosition = _baseOffset;
         }
         else
         {
@@ -79,6 +80,17 @@ public class CameraController : MonoBehaviour
             
             _coroutine = StartCoroutine(UpdateCameraPosition());
         }
+    }
+    
+    private void AdjustCameraForMobile()
+    {
+        float halfBridgeWidth = 15f; 
+        float fov = 80f;   
+        
+        float distance = halfBridgeWidth / Mathf.Tan(fov * 0.5f * Mathf.Deg2Rad);
+        _baseOffset = new Vector3(0, distance * _yOffset, _baseOffset.z); 
+        _camera.fieldOfView = fov;
+        _camera.transform.localPosition = _baseOffset;
     }
     
     private IEnumerator UpdateCameraPosition()

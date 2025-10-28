@@ -9,9 +9,10 @@ public class ZombieMovement : MonoBehaviour
 
     private float _movementSpeed;
     private Transform _transform;
-    private float _threshold = 0.001f;
+    private float _threshold = 0.01f;
 
     public event Action OnTargetReached;
+    
     private void Awake()
     {
         _transform = transform;

@@ -39,7 +39,7 @@ public class LevelMenuHandler : MonoBehaviour
 
     public event Action OnLevelUp;
     public event Action OnCallHelpPoliceOfficer; 
-    public event Action OnRewardedAdWatched;
+    public event Action<bool> OnRewardedAdWatched;
     public event Action OnRewardedAdClicked;
 
     private void OnEnable()
@@ -78,20 +78,30 @@ public class LevelMenuHandler : MonoBehaviour
     {
         if (_isEnableGameMenu == false && _isEnableUpgradeMenu == false)
         {
-            Cursor.visible = true;
+            if (YG2.envir.isDesktop)
+            {
+                Cursor.lockState = CursorLockMode.Confined;
+                Cursor.visible = true; 
+            }
+            
             _elementToggler.gameObject.SetActive(false);
             _isEnableGameMenu = true;
             _gameMenu.gameObject.SetActive(true);
-            Time.timeScale = 0f;
             _pauseText.gameObject.SetActive(true);
             _continueGame.gameObject.SetActive(true);
             _levelSounds.PlayPauseMusic();
+            Time.timeScale = 0f;
         }
     }
 
     public void ResumeGame()
     {
-        Cursor.visible = false;
+        if (YG2.envir.isDesktop)
+        {
+             Cursor.lockState = CursorLockMode.Locked;
+             Cursor.visible = false;
+        }
+        
         _levelSounds.PlayBackgroundMusic();
         _elementToggler.gameObject.SetActive(true);
         _isEnableGameMenu = false;
@@ -136,7 +146,12 @@ public class LevelMenuHandler : MonoBehaviour
 
     public void ShowGameOverMenu(bool isPoliceOnBase)
     {
-        Cursor.visible = true;
+        if (YG2.envir.isDesktop)
+        {
+            Cursor.lockState = CursorLockMode.Confined;
+            Cursor.visible = true; 
+        }
+        
         _elementToggler.gameObject.SetActive(false);
         _isEnableGameMenu = true;
         _gameMenu.gameObject.SetActive(true);
@@ -152,7 +167,12 @@ public class LevelMenuHandler : MonoBehaviour
 
     public void ShowWinGameMenu()
     {
-        Cursor.visible = true;
+        if (YG2.envir.isDesktop)
+        {
+            Cursor.lockState = CursorLockMode.Confined;
+            Cursor.visible = true; 
+        }
+        
         _elementToggler.gameObject.SetActive(false);
         _isEnableGameMenu = true;
         _gameMenu.gameObject.SetActive(true);
@@ -214,7 +234,6 @@ public class LevelMenuHandler : MonoBehaviour
     
     public void ShowReviveWithAd()
     {
-        Cursor.visible = false;
         YG2.RewardedAdvShow(RewardID);
         _reviveWithAd.gameObject.SetActive(false);
         _levelSounds.PlayBackgroundMusic();
@@ -223,17 +242,61 @@ public class LevelMenuHandler : MonoBehaviour
     
     private void OnReward(string id)
     {
-        if (id == RewardID)
+        bool isRewarded = (id == RewardID);
+        
+        _isEnableGameMenu = false;
+        _gameMenu.gameObject.SetActive(false);
+        _gameOverText.gameObject.SetActive(false);
+        
+        StartCoroutine(RestoreGameStateAfterAd(isRewarded));
+        
+        // if (isRewarded)
+        // {
+        //     _elementToggler.gameObject.SetActive(true);
+        //         
+        //     if (YG2.envir.isDesktop)
+        //     {
+        //         Cursor.lockState = CursorLockMode.Locked;
+        //         Cursor.visible = false;
+        //     }   
+        // }
+        // else
+        // {
+        //     if (YG2.envir.isDesktop)
+        //     {
+        //         Cursor.lockState = CursorLockMode.Confined;
+        //         Cursor.visible = true; 
+        //     }
+        // }
+        //
+        // OnRewardedAdWatched?.Invoke(isRewarded);
+    }
+    
+    private IEnumerator RestoreGameStateAfterAd(bool isRewarded)
+    {
+        yield return null;
+
+        if (isRewarded)
         {
             _elementToggler.gameObject.SetActive(true);
-            _isEnableGameMenu = false;
-            _gameMenu.gameObject.SetActive(false);
-            _gameOverText.gameObject.SetActive(false);
-            OnRewardedAdWatched?.Invoke();
+        
+            if (YG2.envir.isDesktop)
+            {
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+            }
+        
+            OnRewardedAdWatched?.Invoke(true);
         }
         else
         {
-            Cursor.visible = true;
+            if (YG2.envir.isDesktop)
+            {
+                Cursor.lockState = CursorLockMode.Confined;
+                Cursor.visible = true;
+            }
+        
+            OnRewardedAdWatched?.Invoke(false);
         }
     }
 

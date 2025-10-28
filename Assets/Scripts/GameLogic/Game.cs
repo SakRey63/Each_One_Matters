@@ -14,6 +14,7 @@ public class Game : MonoBehaviour
     [SerializeField] private float _xOffsetOcean = 59f;
     [SerializeField] private float _searchRadius = 5f;
     [SerializeField] private int _countAdRevival = 5;
+    [SerializeField] private int _damageZombie = 100;
     [SerializeField] private LevelMenuHandler _levelMenuHandler;
     [SerializeField] private ScoreHandler _scoreHandler;
     [SerializeField] private Ocean _ocean;
@@ -93,7 +94,13 @@ public class Game : MonoBehaviour
         {
             _cameraController.ConfigureCameraForPlatform();
             _cameraController.OnUnitCountChanged(YG2.saves.CountPoliceOfficer);
-            Cursor.visible = false;
+            
+            if (YG2.envir.isDesktop)
+            {
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+            }
+            
             _playerInput.OnEscapePressed += HandleEscapePressed;
             _playerInput.DirectionChanged += OnDirectionChanged;
             _levelPlayer = YG2.saves.Level;
@@ -182,7 +189,7 @@ public class Game : MonoBehaviour
             }
             else if (collider.TryGetComponent(out Zombie zombie))
             {
-                _spawnerZombie.ReturnDemoEnemies(zombie);
+                zombie.TakeDamage(_damageZombie);
             }
         }
     }
@@ -198,12 +205,28 @@ public class Game : MonoBehaviour
         _player.HandlePoliceReachedBase(basePoliceOfficer);
     }
 
-    private void SetupRevivalWithAd()
+    private void SetupRevivalWithAd(bool isRewarded)
     {
-        _playerInput.DirectionChanged += OnDirectionChanged;
-        _player.SpawnPoliceOfficer(_countAdRevival);
-        _player.KeepMoving();
-        _enemyGroup.ResumeAllZombies();
+        if (isRewarded)
+        {
+            if (YG2.envir.isDesktop)
+            {
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false; 
+            }
+            
+            _playerInput.DirectionChanged += OnDirectionChanged;
+            _player.SpawnPoliceOfficer(_countAdRevival);
+            _player.KeepMoving();
+            _enemyGroup.ResumeAllZombies();
+        }
+        else
+        {
+            if (YG2.envir.isDesktop)
+            {
+                _levelMenuHandler.ShowGameOverMenu(true);
+            }
+        }
     }
 
     private void HandleCallHelpPolice()
@@ -224,8 +247,12 @@ public class Game : MonoBehaviour
     {
         _playerInput.DirectionChanged -= OnDirectionChanged;
         _player.ResetPositionUiElements();
-        
-        Cursor.visible = true;
+
+        if (YG2.envir.isDesktop)
+        {
+            Cursor.lockState = CursorLockMode.Confined;
+            Cursor.visible = true; 
+        }
         
         if (YG2.saves.IsCallHelpUpgradePurchased)
         {
