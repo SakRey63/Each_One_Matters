@@ -249,27 +249,6 @@ public class LevelMenuHandler : MonoBehaviour
         _gameOverText.gameObject.SetActive(false);
         
         StartCoroutine(RestoreGameStateAfterAd(isRewarded));
-        
-        // if (isRewarded)
-        // {
-        //     _elementToggler.gameObject.SetActive(true);
-        //         
-        //     if (YG2.envir.isDesktop)
-        //     {
-        //         Cursor.lockState = CursorLockMode.Locked;
-        //         Cursor.visible = false;
-        //     }   
-        // }
-        // else
-        // {
-        //     if (YG2.envir.isDesktop)
-        //     {
-        //         Cursor.lockState = CursorLockMode.Confined;
-        //         Cursor.visible = true; 
-        //     }
-        // }
-        //
-        // OnRewardedAdWatched?.Invoke(isRewarded);
     }
     
     private IEnumerator RestoreGameStateAfterAd(bool isRewarded)

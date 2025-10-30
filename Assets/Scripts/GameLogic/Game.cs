@@ -189,7 +189,7 @@ public class Game : MonoBehaviour
             }
             else if (collider.TryGetComponent(out Zombie zombie))
             {
-                zombie.TakeDamage(_damageZombie);
+                zombie.TakeDamage(_damageZombie, false);
             }
         }
     }

@@ -22,7 +22,7 @@ public class Bullet : MonoBehaviour
     {
         if (other.TryGetComponent(out Zombie zombie))
         {
-            zombie.TakeDamage(_damage);
+            zombie.TakeDamage(_damage, true);
             StopCoroutine(_coroutineShot);
             OnHit?.Invoke(this);
         }

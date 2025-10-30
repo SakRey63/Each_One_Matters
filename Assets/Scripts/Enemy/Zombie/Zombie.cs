@@ -96,13 +96,13 @@ public class Zombie : MonoBehaviour
         _id = zombieId;
     }
 
-    public void TakeDamage(int damage)
+    public void TakeDamage(int damage, bool isKilledByBullet)
     {
         _health.TakeDamage(damage);
         
         if (_health.HealthPoint <= 0)
         {
-            _isKilledByBullet = true;
+            _isKilledByBullet = isKilledByBullet;
             _zombieVision.ScanOff();
             OnZombieDeath?.Invoke(this);
         }

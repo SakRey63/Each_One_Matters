@@ -7,11 +7,11 @@
     false,
     false
   ],
-  "idSave": 5178,
+  "idSave": 5339,
   "Level": 7,
-  "Score": 10540,
-  "CountPoliceOfficer": 5,
-  "IncreaseSquadPrices": 1000,
+  "Score": 9599,
+  "CountPoliceOfficer": 20,
+  "IncreaseSquadPrices": 15428,
   "ExtendFireRateDurationPrices": 1000,
   "CallHelpOnBasePrices": 1000,
   "CountHelpPoliceOfficer": 3,
@@ -24,5 +24,5 @@
   "VolumeMusic": -25.9166145,
   "VolumeUi": -21.6671982,
   "VolumeSFX": -5.159869,
-  "SpeedSideMovement": 92.45714
+  "SpeedSideMovement": 39.58396
 }
