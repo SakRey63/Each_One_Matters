@@ -17,7 +17,7 @@ public class ScoreHandler : MonoBehaviour
     {
         _currentScore = score;
         _score.text = Convert.ToString(_currentScore);
-        _level.text = Convert.ToString(YG2.saves.Level);
+        _level.text = Convert.ToString(YG2.saves.gameplay.Level);
     }
 
     public void AddPointsForZombie()

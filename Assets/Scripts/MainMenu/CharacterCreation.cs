@@ -1,8 +1,8 @@
+using EachOneMatters.Saving;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using YG;
 
 public class CharacterCreation : MonoBehaviour
 {
@@ -13,9 +13,7 @@ public class CharacterCreation : MonoBehaviour
 
     public void TryCreatePlayer()
     {
-        YG2.saves.SetNewPlayer();
-        YG2.saves.IsLoadedMainMenu = false;
-        YG2.SaveProgress();
+        PlayerSaveInitializer.SetNewPlayer();
         SceneManager.LoadScene(LevelScene);
     }
 

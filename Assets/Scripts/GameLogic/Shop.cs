@@ -9,9 +9,9 @@ public class Shop
     public int ProcessTransaction(int price)
     {
         float newPrice = price;
-        int score = YG2.saves.Score;
+        int score = YG2.saves.gameplay.Score;
         score -= price;
-        YG2.saves.Score = score;
+        YG2.saves.gameplay.Score = score;
         price = GetUpdatePrice(newPrice);
 
         return price;

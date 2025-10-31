@@ -19,7 +19,7 @@ public class BuffSpawner : MonoBehaviour
     {
         basePosition = new Vector3(randomPositionSection.x, _verticalPositionFireRateBoosted, randomPositionSection.z);
         FireRateBooster fireRateBooster = Instantiate(_fireRateBooster, basePosition, targetRotation);
-        fireRateBooster.SetDurationTimeImprovedRange(YG2.saves.BuffDuration);
+        fireRateBooster.SetDurationTimeImprovedRange(YG2.saves.upgrades.BuffDuration);
         OnFireRateBoostSpawned?.Invoke(fireRateBooster);
     }
 

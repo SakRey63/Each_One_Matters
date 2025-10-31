@@ -67,19 +67,19 @@ public class SettingsUI : MonoBehaviour
             yield return null;
         }
         
-        _tutorialToggle.SetIsOnWithoutNotify(YG2.saves.IsPlayGameGuide);
-        _mouseSensitivity.SetValueWithoutNotify(YG2.saves.SpeedSideMovement);
+        _tutorialToggle.SetIsOnWithoutNotify(YG2.saves.gameplay.IsFirstLaunch);
+        _mouseSensitivity.SetValueWithoutNotify(YG2.saves.audio.SpeedSideMovement);
     }
     
     private void ChangedMouseSensitivity(float speed)
     {
-        YG2.saves.SpeedSideMovement = speed;
+        YG2.saves.audio.SpeedSideMovement = speed;
         YG2.SaveProgress();
     }
     
     private void OnTutorialChanged(bool isPlayGameGuide)
     {
-        YG2.saves.IsPlayGameGuide = isPlayGameGuide;
+        YG2.saves.gameplay.IsFirstLaunch = isPlayGameGuide;
         YG2.SaveProgress();
     }
 

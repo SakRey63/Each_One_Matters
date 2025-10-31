@@ -13,7 +13,7 @@ public class PlayerSideMovement : MonoBehaviour
 
     private void Start()
     {
-        _speed = YG2.saves.SpeedSideMovement;
+        _speed = YG2.saves.audio.SpeedSideMovement;
     }
 
     public void Move(float direction)

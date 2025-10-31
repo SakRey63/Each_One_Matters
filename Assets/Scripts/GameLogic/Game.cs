@@ -48,7 +48,7 @@ public class Game : MonoBehaviour
 
     private void OnEnable()
     {
-        _player.OnUnitDeath += HandleUnitDead;
+        _player.OnUnitDied += HandleUnitDead;
         _levelMenuHandler.OnLevelUp += HandleOnLevelUp;
         _levelMenuHandler.OnRewardedAdClicked += RevealAndRemoveKillerObstacle;
         _levelMenuHandler.OnCallHelpPoliceOfficer += HandleCallHelpPolice;
@@ -59,14 +59,14 @@ public class Game : MonoBehaviour
         _bridgeGenerator.OnBridgeConnectorCreated += SubscribeToBridgeConnectorCreation;
         _bridgeGenerator.OnBasePoliceOfficerCreated += SubscribeToBasePoliceOfficer;
         _player.OnCheckpointReached += UpdatePlayerTargetPosition;
-        _player.OnAllPoliceOfficersDead += HandleAllPoliceOfficerDead;
+        _player.OnAllPoliceOfficersDied += HandleAllPoliceOfficerDied;
         _player.OnPlayerReachedBase += ActivateCallHelpButton;
         _enemyGroup.OnZombieKilled += HandleZombieKilled;
     }
 
     private void OnDisable()
     {
-        _player.OnUnitDeath += HandleUnitDead;
+        _player.OnUnitDied += HandleUnitDead;
         _playerInput.OnEscapePressed -= HandleEscapePressed;
         _levelMenuHandler.OnRewardedAdWatched -= SetupRevivalWithAd;
         _levelMenuHandler.OnRewardedAdClicked -= RevealAndRemoveKillerObstacle;
@@ -78,7 +78,7 @@ public class Game : MonoBehaviour
         _bridgeGenerator.OnRecruitPoliceCreated -= SubscribeToRecruitPoliced;
         _bridgeGenerator.OnBasePoliceOfficerCreated -= SubscribeToBasePoliceOfficer;
         _player.OnCheckpointReached -= UpdatePlayerTargetPosition;
-        _player.OnAllPoliceOfficersDead -= HandleAllPoliceOfficerDead;
+        _player.OnAllPoliceOfficersDied -= HandleAllPoliceOfficerDied;
         _player.OnPlayerReachedBase -= ActivateCallHelpButton;
         _enemyGroup.OnZombieKilled -= HandleZombieKilled;
         
@@ -88,35 +88,33 @@ public class Game : MonoBehaviour
         }
     }
 
-    private void Start()
+    public void StartNewLevel()
     {
-        if (YG2.saves.IsLoadedMainMenu == false)
+        _cameraController.ConfigureCameraForPlatform();
+        _cameraController.OnUnitCountChanged(YG2.saves.player.CountPoliceOfficer);
+            
+        if (YG2.envir.isDesktop)
         {
-            _cameraController.ConfigureCameraForPlatform();
-            _cameraController.OnUnitCountChanged(YG2.saves.CountPoliceOfficer);
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
             
-            if (YG2.envir.isDesktop)
-            {
-                Cursor.lockState = CursorLockMode.Locked;
-                Cursor.visible = false;
-            }
+        _playerInput.OnEscapePressed += HandleEscapePressed;
+        _playerInput.DirectionChanged += OnDirectionChanged;
+        _levelPlayer = YG2.saves.gameplay.Level;
+        _scoreHandler.SetInitialScore(_currentScore);
+        _bridgeGenerator.Generate(_levelPlayer);
+        _player.SetupObjectsPool(_bulletPool, _chunkPool);
             
-            _playerInput.OnEscapePressed += HandleEscapePressed;
-            _playerInput.DirectionChanged += OnDirectionChanged;
-            _levelPlayer = YG2.saves.Level;
-            _scoreHandler.SetInitialScore(_currentScore);
-            _bridgeGenerator.Generate(_levelPlayer);
-            _player.SetupObjectsPool(_bulletPool, _chunkPool);
-
-            if (YG2.saves.IsPlayGameGuide)
-            {
-                StartCoroutine(WaitForFirstInput());
-            }
-            else
-            {
-                _player.SpawnPoliceOfficer(YG2.saves.CountPoliceOfficer);
-                UpdatePlayerTargetPosition();
-            }
+        if (YG2.saves.gameplay.IsFirstLaunch)
+        {
+            StartCoroutine(WaitForFirstInput());
+        }
+        else
+        {
+            _levelMenuHandler.InitializeLevelMenu();
+            _player.SpawnPoliceOfficer(YG2.saves.player.CountPoliceOfficer);
+            UpdatePlayerTargetPosition();
         }
     }
 
@@ -137,9 +135,10 @@ public class Game : MonoBehaviour
         yield return new WaitUntil(() => Input.anyKeyDown);
         
         _tutorialUI.CloseGameGuide();
-        _player.SpawnPoliceOfficer(YG2.saves.CountPoliceOfficer);
+        _levelMenuHandler.InitializeLevelMenu();
+        _player.SpawnPoliceOfficer(YG2.saves.player.CountPoliceOfficer);
         UpdatePlayerTargetPosition();
-        YG2.saves.IsPlayGameGuide = false;
+        YG2.saves.gameplay.IsFirstLaunch = false;
         YG2.SaveProgress();
     }
     
@@ -231,11 +230,11 @@ public class Game : MonoBehaviour
 
     private void HandleCallHelpPolice()
     {
-        if (_scoreHandler.CurrentScore >= YG2.saves.CallHelpButtonPrice)
+        if (_scoreHandler.CurrentScore >= YG2.saves.gameplay.CallHelpButtonPrice)
         {
-            _scoreHandler.DeductPointsForHelp(YG2.saves.CallHelpButtonPrice);
+            _scoreHandler.DeductPointsForHelp(YG2.saves.gameplay.CallHelpButtonPrice);
             _levelMenuHandler.LockButtonDuringCooldown();
-            _player.SpawnPoliceOfficer(YG2.saves.CountHelpPoliceOfficer);
+            _player.SpawnPoliceOfficer(YG2.saves.gameplay.CountHelpPoliceOfficer);
         }
         else
         {
@@ -254,7 +253,7 @@ public class Game : MonoBehaviour
             Cursor.visible = true; 
         }
         
-        if (YG2.saves.IsCallHelpUpgradePurchased)
+        if (YG2.saves.gameplay.IsCallHelpUpgradePurchased)
         {
             _levelMenuHandler.ActivateCallHelp();
         }
@@ -265,7 +264,7 @@ public class Game : MonoBehaviour
     private void HandleOnLevelUp()
     {
         _levelPlayer++;
-        YG2.saves.Level = _levelPlayer;
+        YG2.saves.gameplay.Level = _levelPlayer;
         YG2.SaveProgress();
     } 
     
@@ -386,7 +385,7 @@ public class Game : MonoBehaviour
         _player.MoveSideways(direction);
     }
     
-    private void HandleAllPoliceOfficerDead()
+    private void HandleAllPoliceOfficerDied()
     {
         _playerInput.DirectionChanged -= OnDirectionChanged;
         _player.StopMoving();
@@ -409,9 +408,9 @@ public class Game : MonoBehaviour
     {
         if (_enemyGroup.CountAllZombies == 0 && _player.IsPoliceOfficerOnBase && _player.PoliceCount > 0)
         {
-            int score = YG2.saves.Score;
+            int score = YG2.saves.gameplay.Score;
             score += _scoreHandler.CurrentScore;
-            YG2.saves.Score = score;
+            YG2.saves.gameplay.Score = score;
             YG2.SetLeaderboard(LeaderboardId, score);
             YG2.SaveProgress();
             _levelMenuHandler.ShowWinGameMenu();

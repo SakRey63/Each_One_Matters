@@ -5,9 +5,9 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    [SerializeField] private float _border = 5.7f;
+    [SerializeField] private float _borderOffset = 5.7f;
     [SerializeField] private Transform _positionSpawnPoliceOfficer;
-    [SerializeField] private float _delay = 0.7f;
+    [SerializeField] private float _reorganizationDelay = 0.7f;
     [SerializeField] private int _healthPoliceOfficer = 75;
     [SerializeField] private ParticleSystem _effectPlexus;
     [SerializeField] private UnityEngine.UI.Image _buffTimerBar;
@@ -44,9 +44,9 @@ public class Player : MonoBehaviour
     public PoleceOfficerSpawner PoliceOfficerSpawner => _officerSpawner;
 
     public event Action OnCheckpointReached;
-    public event Action OnAllPoliceOfficersDead;
+    public event Action OnAllPoliceOfficersDied;
     public event Action OnPlayerReachedBase;
-    public event Action<int> OnUnitDeath;
+    public event Action<int> OnUnitDied;
 
     private void OnEnable()
     {
@@ -123,13 +123,13 @@ public class Player : MonoBehaviour
     {
         if (_isHorizontal)
         {
-            _maxBorderPosition =_moveTarget.position.z + _border;
-            _minBorderPosition =_moveTarget.position.z - _border;
+            _maxBorderPosition =_moveTarget.position.z + _borderOffset;
+            _minBorderPosition =_moveTarget.position.z - _borderOffset;
         }
         else
         {
-            _maxBorderPosition =_moveTarget.position.x + _border;
-            _minBorderPosition =_moveTarget.position.x - _border;
+            _maxBorderPosition =_moveTarget.position.x + _borderOffset;
+            _minBorderPosition =_moveTarget.position.x - _borderOffset;
         }
         
         foreach (PoliceOfficer policeOfficer in _policeOfficers.Values)
@@ -279,7 +279,7 @@ public class Player : MonoBehaviour
 
     private IEnumerator ReorganizeSquadAfterDeath()
     {
-        WaitForSeconds delay = new WaitForSeconds(_delay);
+        WaitForSeconds delay = new WaitForSeconds(_reorganizationDelay);
         
         _positionGeneratorSquad.ResetAllPositions();
 
@@ -301,7 +301,7 @@ public class Player : MonoBehaviour
         _policeOfficers.Remove(officer.OfficerId);
         _policeCount = _policeOfficers.Count;
         _playerView.ShowPoliceCount(_policeCount);
-        OnUnitDeath?.Invoke(_policeCount);
+        OnUnitDied?.Invoke(_policeCount);
         
         if (_policeCount == 0)
         {
@@ -312,7 +312,7 @@ public class Player : MonoBehaviour
             }
             
             _positionGeneratorSquad.ResetAllPositions();
-            OnAllPoliceOfficersDead?.Invoke();
+            OnAllPoliceOfficersDied?.Invoke();
         }
         
         if(_isPoliceOfficerOnBase == false && _policeCount > 0)

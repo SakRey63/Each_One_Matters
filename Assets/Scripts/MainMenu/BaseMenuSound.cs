@@ -70,9 +70,9 @@ public class BaseMenuSound : MonoBehaviour
             return;
         }
         
-        float musicVol = YG2.saves.VolumeMusic;
-        float sfxVol   = YG2.saves.VolumeSFX;
-        float uiVol    = YG2.saves.VolumeUi;
+        float musicVol = YG2.saves.audio.VolumeMusic;
+        float sfxVol   = YG2.saves.audio.VolumeSFX;
+        float uiVol    = YG2.saves.audio.VolumeUi;
         
         ApplyVolume(MusicVolumeParam, musicVol);
         ApplyVolume(SfxVolumeParam, sfxVol);
@@ -108,21 +108,21 @@ public class BaseMenuSound : MonoBehaviour
     private void OnMusicVolumeChanged(float value)
     {
         ApplyVolume(MusicVolumeParam, value);
-        YG2.saves.VolumeMusic = value;
+        YG2.saves.audio.VolumeMusic = value;
         YG2.SaveProgress();
     }
 
     private void OnUiVolumeChanged(float value)
     {
         ApplyVolume(UiVolumeParam, value);
-        YG2.saves.VolumeUi = value;
+        YG2.saves.audio.VolumeUi = value;
         YG2.SaveProgress();
     }
 
     private void OnSfxVolumeChanged(float value)
     {
         ApplyVolume(SfxVolumeParam, value);
-        YG2.saves.VolumeSFX = value;
+        YG2.saves.audio.VolumeSFX = value;
         YG2.SaveProgress();
     }
 }

@@ -2,6 +2,7 @@ using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 using YG;
 
@@ -29,8 +30,9 @@ public class MainMenuController : MonoBehaviour
     [SerializeField] private Image _desctopContinueMenuPanel;
     [SerializeField] private Image _mobileContinueMenuPanel;
     
+    [FormerlySerializedAs("_demoGame")]
     [Header("Demo & Audio")]
-    [SerializeField] private Game _demoGame; 
+    [SerializeField] private Game _game; 
     [SerializeField] private GameObject _tapToStartPrompt; 
 
     private BaseMenu _baseMenu;
@@ -52,11 +54,15 @@ public class MainMenuController : MonoBehaviour
 
     private void Start()
     {
-        if (YG2.saves.IsLoadedMainMenu)
+        if (YG2.saves.gameplay.IsLoadedMainMenu)
         {
             Cursor.lockState = CursorLockMode.None;
             _tapToStartPrompt?.SetActive(true);
             StartCoroutine(WaitForFirstInput());
+        }
+        else
+        {
+            _game.StartNewLevel();
         }
     }
     
@@ -77,7 +83,7 @@ public class MainMenuController : MonoBehaviour
 
     public void ContinueGame()
     {
-        YG2.saves.IsLoadedMainMenu = false;
+        YG2.saves.gameplay.IsLoadedMainMenu = false;
         YG2.SaveProgress();
         SceneManager.LoadScene(LevelScene);
     }
@@ -113,12 +119,12 @@ public class MainMenuController : MonoBehaviour
         _nameGameText.gameObject.SetActive(true);
         UpdateGreetingText();
         _menuSound.CreateMainMenuMusic();
-        _demoGame.StartDemoScene();
+        _game.StartDemoScene();
     }
     
     private void UpdateGreetingText()
     {
-        _hasSavedPlayer = YG2.saves.HasSavedPlayer;
+        _hasSavedPlayer = YG2.saves.player.HasSavedPlayer;
         _settingsUI.CreateLanguageToSetting(YG2.lang);
         _welcomeText.gameObject.SetActive(!_hasSavedPlayer);
         _continueText.gameObject.SetActive(_hasSavedPlayer);

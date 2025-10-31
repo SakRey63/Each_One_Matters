@@ -32,75 +32,75 @@ public class Upgrade : MonoBehaviour
     private void Start()
     {
         _shop = new Shop();
-        _increaseSquadPrices.text = Convert.ToString(YG2.saves.IncreaseSquadPrices);
-        _extendFireRateDurationPrices.text = Convert.ToString(YG2.saves.ExtendFireRateDurationPrices);
-        _callHelpOnBasePrices.text = Convert.ToString(YG2.saves.CallHelpOnBasePrices);
+        _increaseSquadPrices.text = Convert.ToString(YG2.saves.upgrades.IncreaseSquadPrices);
+        _extendFireRateDurationPrices.text = Convert.ToString(YG2.saves.upgrades.ExtendFireRateDurationPrices);
+        _callHelpOnBasePrices.text = Convert.ToString(YG2.saves.upgrades.CallHelpOnBasePrices);
     }
 
     public void AddPoliceToSquad()
     {
         _canIncreaseSquad = true;
-        TryApplyUpgrade(YG2.saves.IncreaseSquadPrices);
+        TryApplyUpgrade(YG2.saves.upgrades.IncreaseSquadPrices);
     }
 
     public void ExtendFireRateDuration()
     {
         _canExtendFireRate = true;
-        TryApplyUpgrade(YG2.saves.ExtendFireRateDurationPrices);
+        TryApplyUpgrade(YG2.saves.upgrades.ExtendFireRateDurationPrices);
     }
 
     public void CallReinforcements()
     {
         _canCallHelpOnBase = true;
-        TryApplyUpgrade(YG2.saves.CallHelpOnBasePrices);
+        TryApplyUpgrade(YG2.saves.upgrades.CallHelpOnBasePrices);
     }
     
     private void UpdatePriceText()
     {
-        _allScore.text = Convert.ToString(YG2.saves.Score);
+        _allScore.text = Convert.ToString(YG2.saves.gameplay.Score);
     }
 
     private void TryApplyUpgrade(int price)
     {
-        if (YG2.saves.Score >= price)
+        if (YG2.saves.gameplay.Score >= price)
         {
             int newPrice = _shop.ProcessTransaction(price);
             
             if (_canIncreaseSquad)
             {
-                int countPolice = YG2.saves.CountPoliceOfficer;
+                int countPolice = YG2.saves.player.CountPoliceOfficer;
                 countPolice++;
-                YG2.saves.CountPoliceOfficer = countPolice;
-                YG2.saves.IncreaseSquadPrices = newPrice;
+                YG2.saves.player.CountPoliceOfficer = countPolice;
+                YG2.saves.upgrades.IncreaseSquadPrices = newPrice;
                 _increaseSquadPrices.text = Convert.ToString(newPrice);
                 _canIncreaseSquad = false;
             }
             else if (_canExtendFireRate)
             {
-                float buffDuration = YG2.saves.BuffDuration;
+                float buffDuration = YG2.saves.upgrades.BuffDuration;
                 buffDuration++;
-                YG2.saves.BuffDuration = buffDuration;
-                YG2.saves.ExtendFireRateDurationPrices = newPrice;
+                YG2.saves.upgrades.BuffDuration = buffDuration;
+                YG2.saves.upgrades.ExtendFireRateDurationPrices = newPrice;
                 _extendFireRateDurationPrices.text = Convert.ToString(newPrice);
                 _canExtendFireRate = false;
             }
             else if (_canCallHelpOnBase)
             {
-                if (YG2.saves.IsCallHelpUpgradePurchased)
+                if (YG2.saves.gameplay.IsCallHelpUpgradePurchased)
                 {
-                    int countHelpPoliceOfficer = YG2.saves.CountHelpPoliceOfficer;
+                    int countHelpPoliceOfficer = YG2.saves.gameplay.CountHelpPoliceOfficer;
                     countHelpPoliceOfficer++;
-                    YG2.saves.CountHelpPoliceOfficer = countHelpPoliceOfficer;
-                    int priceButton = YG2.saves.CallHelpButtonPrice;
+                    YG2.saves.gameplay.CountHelpPoliceOfficer = countHelpPoliceOfficer;
+                    int priceButton = YG2.saves.gameplay.CallHelpButtonPrice;
                     priceButton += _callHelpUpgradeButtonPrice;
-                    YG2.saves.CallHelpButtonPrice = priceButton;
+                    YG2.saves.gameplay.CallHelpButtonPrice = priceButton;
                 }
                 else
                 {
-                    YG2.saves.IsCallHelpUpgradePurchased = true;
+                    YG2.saves.gameplay.IsCallHelpUpgradePurchased = true;
                 }
                 
-                YG2.saves.CallHelpOnBasePrices = newPrice;
+                YG2.saves.upgrades.CallHelpOnBasePrices = newPrice;
                 _callHelpOnBasePrices.text = Convert.ToString(newPrice);
                 _canCallHelpOnBase = false;
             }
@@ -124,7 +124,7 @@ public class Upgrade : MonoBehaviour
     {
         UpdatePriceText();
 
-        if (YG2.saves.IsCallHelpUpgradePurchased)
+        if (YG2.saves.gameplay.IsCallHelpUpgradePurchased)
         {
             _uguipgradeCallHelpOnBaseText.gameObject.SetActive(true);
             _callHelpOnBaseText.gameObject.SetActive(false);

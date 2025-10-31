@@ -57,21 +57,18 @@ public class LevelMenuHandler : MonoBehaviour
         _levelSounds = GetComponent<LevelSounds>();
     }
 
-    private void Start()
+    public void InitializeLevelMenu()
     {
-        if (YG2.saves.IsLoadedMainMenu == false)
+        _levelSounds.PlayBackgroundMusic();
+        _elementToggler.gameObject.SetActive(true);
+            
+        if (YG2.envir.isMobile)
         {
-            _levelSounds.PlayBackgroundMusic();
-            _elementToggler.gameObject.SetActive(true);
-            
-            if (YG2.envir.isMobile)
-            {
-                _menuButton.gameObject.SetActive(true);
-            }
-            
-            YG2.saves.IsLoadedMainMenu = true;
-            YG2.SaveProgress();
+            _menuButton.gameObject.SetActive(true);
         }
+            
+        YG2.saves.gameplay.IsLoadedMainMenu = true;
+        YG2.SaveProgress();
     }
 
     public void ShowPauseGameMenu()
@@ -114,7 +111,7 @@ public class LevelMenuHandler : MonoBehaviour
     public void ReloadLevel()
     {
         _isEnableGameMenu = false;
-        YG2.saves.IsLoadedMainMenu = false;
+        YG2.saves.gameplay.IsLoadedMainMenu = false;
         YG2.SaveProgress();
         YG2.InterstitialAdvShow();
         Time.timeScale = 1f;
@@ -123,7 +120,7 @@ public class LevelMenuHandler : MonoBehaviour
 
     public void LoadMainMenu()
     {
-        YG2.saves.IsLoadedMainMenu = true;
+        YG2.saves.gameplay.IsLoadedMainMenu = true;
         YG2.SaveProgress();
         _isEnableGameMenu = false;
         Time.timeScale = 1f;
@@ -138,7 +135,7 @@ public class LevelMenuHandler : MonoBehaviour
         _winText.gameObject.SetActive(false);
         _nextLevel.gameObject.SetActive(false);
         _upgradeButton.gameObject.SetActive(false);
-        YG2.saves.IsLoadedMainMenu = false;
+        YG2.saves.gameplay.IsLoadedMainMenu = false;
         YG2.SaveProgress();
         YG2.InterstitialAdvShow();
         SceneManager.LoadScene(LevelScene);
@@ -201,7 +198,7 @@ public class LevelMenuHandler : MonoBehaviour
     public void ActivateCallHelp()
     {
         _callHelpPoliceOfficer.gameObject.SetActive(true);
-        _callHelpPoliceOfficerPrice.text = YG2.saves.CallHelpButtonPrice.ToString();
+        _callHelpPoliceOfficerPrice.text = YG2.saves.gameplay.CallHelpButtonPrice.ToString();
     }
 
     public void CallHelpPoliceOfficer()
@@ -306,7 +303,7 @@ public class LevelMenuHandler : MonoBehaviour
             yield return wait; 
         }
 
-        _callHelpPoliceOfficerPrice.text = YG2.saves.CallHelpButtonPrice.ToString();
+        _callHelpPoliceOfficerPrice.text = YG2.saves.gameplay.CallHelpButtonPrice.ToString();
         _callHelpPoliceOfficerText.gameObject.SetActive(true);
         _callHelpPauseText.gameObject.SetActive(false);
         _callHelpPoliceOfficer.interactable = true;
