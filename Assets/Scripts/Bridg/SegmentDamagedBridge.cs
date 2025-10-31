@@ -1,11 +1,12 @@
 using UnityEngine;
 
-public class SegmentDamagedBridge : MonoBehaviour
+public class SegmentDamagedBridge : MonoBehaviour, IBridgeObject
 {
     [SerializeField] private Transform _centrPoint;
 
     private int _number;
 
+    public BridgeObjectType Type => BridgeObjectType.DamagedSegment;
     public int NumberPosition => _number;
 
     private void OnTriggerEnter(Collider other)

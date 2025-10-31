@@ -3,7 +3,7 @@ using System;
 namespace YG
 {
     [Serializable]
-    public class AudioData
+    public class SettingsData
     {
         public float VolumeMusic = 1f;
         public float VolumeSFX = 1f;
@@ -13,6 +13,6 @@ namespace YG
 
     public partial class SavesYG
     {
-        public AudioData audio = new AudioData();
+        public SettingsData settings = new SettingsData();
     }
 }

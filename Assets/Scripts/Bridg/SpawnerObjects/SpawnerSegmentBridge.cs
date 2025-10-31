@@ -15,18 +15,10 @@ public class SpawnerSegmentBridge : MonoBehaviour
     public event Action<BridgeConnector, Quaternion, Transform> OnBridgeConnectorSpawned;
     public event Action<Base> OnBaseSpawned;
     
-    public void CreateSegmentBridge(Vector3 positionSegment, BridgeObjectSelector objectSelector, bool isHorizontal, Quaternion targetRotation, Vector3 randomPositionSection, int numberPosition)
+    public void CreateDemagSegmentBridge(Vector3 positionSegment, Quaternion targetRotation, int numberPosition)
     {
-        if (objectSelector.IsDamagedSegment && isHorizontal == false && randomPositionSection.x == positionSegment.x || objectSelector.IsDamagedSegment && isHorizontal && randomPositionSection.z == positionSegment.z)
-        {
-            SegmentDamagedBridge damagedBridge = Instantiate(_damagedBridge, positionSegment, targetRotation);
-            damagedBridge.SetStatus(numberPosition);
-            objectSelector.ResetAllStats();
-        }
-        else
-        {
-            CreatedNormalSegmentBridge(positionSegment, targetRotation, numberPosition);
-        }
+        SegmentDamagedBridge damagedBridge = Instantiate(_damagedBridge, positionSegment, targetRotation);
+        damagedBridge.SetStatus(numberPosition);
     }
 
     public void SetBridgeConnectorOrFinish(int index, Vector3 nextSpawnPosition, SegmentPositionGenerator positionGenerator, Quaternion targetRotation, BridgeCheckpointStore checkpointStore, int spanCount)
@@ -57,9 +49,9 @@ public class SpawnerSegmentBridge : MonoBehaviour
         }
     }
 
-    public void CreateNormalSegment(Transform transform, int number)
+    public void CreateNormalSegment(Vector3 position, Quaternion rotation, int number)
     {
-        CreatedNormalSegmentBridge(transform.position, transform.rotation, number);
+        CreatedNormalSegmentBridge(position, rotation, number);
     }
     
     private void CreatedNormalSegmentBridge(Vector3 positionSegment, Quaternion targetRotation, int numberPosition)

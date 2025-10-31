@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-public class PoliceOficcerVision : MonoBehaviour
+public class PoliceOfficerVision : MonoBehaviour
 {
     [SerializeField] private float _scanRadius = 12f;
     [SerializeField] private float _delay = 0.5f;

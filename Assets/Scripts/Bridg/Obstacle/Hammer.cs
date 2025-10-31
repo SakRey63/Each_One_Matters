@@ -1,4 +1,6 @@
 using UnityEngine;
 
-public class Hammer : MonoBehaviour
-{ }
+public class Hammer : MonoBehaviour, IBridgeObject
+{
+    public BridgeObjectType Type => BridgeObjectType.Hammer;
+}

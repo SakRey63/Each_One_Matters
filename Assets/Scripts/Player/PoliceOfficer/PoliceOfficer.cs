@@ -14,7 +14,7 @@ public class PoliceOfficer : MonoBehaviour
     private Quaternion _rotationPositionToDamageBridge;
     private PoliceOfficerMovement _officerMovement;
     private PoliceOfficerRotation _officerRotation;
-    private PoliceOficcerVision _officerVision;
+    private PoliceOfficerVision _officerVision;
     private PoliceOfficerSound _policeOfficerSound;
     private Health _health = new Health();
     private Weapon _weapon;
@@ -38,7 +38,7 @@ public class PoliceOfficer : MonoBehaviour
     
     private void Awake()
     {
-        _officerVision = GetComponent<PoliceOficcerVision>();
+        _officerVision = GetComponent<PoliceOfficerVision>();
         _officerRotation = GetComponent<PoliceOfficerRotation>();
         _policeOfficerSound = GetComponent<PoliceOfficerSound>();
         _officerMovement = GetComponent<PoliceOfficerMovement>();

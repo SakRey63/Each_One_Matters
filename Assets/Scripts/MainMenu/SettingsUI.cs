@@ -68,12 +68,12 @@ public class SettingsUI : MonoBehaviour
         }
         
         _tutorialToggle.SetIsOnWithoutNotify(YG2.saves.gameplay.IsFirstLaunch);
-        _mouseSensitivity.SetValueWithoutNotify(YG2.saves.audio.SpeedSideMovement);
+        _mouseSensitivity.SetValueWithoutNotify(YG2.saves.settings.SpeedSideMovement);
     }
     
     private void ChangedMouseSensitivity(float speed)
     {
-        YG2.saves.audio.SpeedSideMovement = speed;
+        YG2.saves.settings.SpeedSideMovement = speed;
         YG2.SaveProgress();
     }
     

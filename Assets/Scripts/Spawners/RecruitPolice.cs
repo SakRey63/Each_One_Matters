@@ -4,7 +4,7 @@ using TMPro;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-public class RecruitPolice : MonoBehaviour
+public class RecruitPolice : MonoBehaviour, IBridgeObject
 {
     [SerializeField] private int _minNumber = 1;
     [SerializeField] private int _maxCumulativeIncrease = 6;
@@ -23,6 +23,8 @@ public class RecruitPolice : MonoBehaviour
     private int _populationMultiplier;
     private bool _isMultiplication;
 
+    public BridgeObjectType Type => BridgeObjectType.RecruitPolice;
+    
     public event Action<RecruitPolice> OnRecruitPoliceTriggered;
     
     private void OnTriggerEnter(Collider other)

@@ -217,24 +217,23 @@ public class Player : MonoBehaviour
 
     public void HandlePoliceReachedBase(Base basePolice)
     {
-        if (_isPoliceOfficerOnBase == false)
+        if (_isPoliceOfficerOnBase || basePolice == null) return;
+
+        _base = basePolice;
+        _isPoliceOfficerOnBase = true;
+        
+        if (_coroutineReorganize != null)
         {
-            _base = basePolice;
-            _isPoliceOfficerOnBase = true;
-
-            if (_coroutineReorganize != null)
-            {
-                StopCoroutine(_coroutineReorganize);
-            }
-
-            foreach (PoliceOfficer policeOfficer in _policeOfficers.Values)
-            {
-                _base.SetTargetPoliceOfficers(policeOfficer);
-                policeOfficer.SetFinishingTargets(_base.BaseEntryTransform.localPosition, _base.StartPositionGeneration);
-            }
-            
-            OnPlayerReachedBase?.Invoke();
+            StopCoroutine(_coroutineReorganize);
         }
+        
+        foreach (PoliceOfficer policeOfficer in _policeOfficers.Values)
+        {
+            _base.SetTargetPoliceOfficers(policeOfficer);
+            policeOfficer.SetFinishingTargets(_base.BaseEntryTransform.localPosition, _base.StartPositionGeneration);
+        }
+            
+        OnPlayerReachedBase?.Invoke();
     }
 
     private void HandlePlayerFinish()

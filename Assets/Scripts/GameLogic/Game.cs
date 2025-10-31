@@ -34,7 +34,6 @@ public class Game : MonoBehaviour
     private List<BridgeConnector> _connectors;
     private Coroutine _buffCoroutine;
     
-
     private void Awake()
     {
         _bulletPool = GetComponent<BulletPool>();
@@ -181,10 +180,11 @@ public class Game : MonoBehaviour
                         policeOfficer.OnDeathAnimationComplete();
                     }
                 }
+                
                 Transform transform = damagedBridge.transform;
                 int number = damagedBridge.NumberPosition;
                 Destroy(collider.gameObject);
-                _bridgeGenerator.SpawnNormalSegment(transform, number);
+                _bridgeGenerator.SpawnNormalSegment(transform.position, transform.rotation, number);
             }
             else if (collider.TryGetComponent(out Zombie zombie))
             {

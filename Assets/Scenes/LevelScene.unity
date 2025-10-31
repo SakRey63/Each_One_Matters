@@ -17851,7 +17851,7 @@ MonoBehaviour:
   _mobileStartMenuPanel: {fileID: 489419630}
   _desctopContinueMenuPanel: {fileID: 598745344}
   _mobileContinueMenuPanel: {fileID: 295028311}
-  _demoGame: {fileID: 949993451}
+  _game: {fileID: 949993451}
   _tapToStartPrompt: {fileID: 1058164949}
 --- !u!114 &919290257
 MonoBehaviour:
@@ -23492,9 +23492,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4cb4b0734afa0fe47bb2f6dabcb83093, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _border: 5.7
+  _borderOffset: 5.7
   _positionSpawnPoliceOfficer: {fileID: 620691865}
-  _delay: 0.7
+  _reorganizationDelay: 0.7
   _healthPoliceOfficer: 75
   _effectPlexus: {fileID: 2022519220}
   _buffTimerBar: {fileID: 2081826493}

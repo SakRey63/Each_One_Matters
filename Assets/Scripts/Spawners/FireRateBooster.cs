@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-public class FireRateBooster : MonoBehaviour
+public class FireRateBooster : MonoBehaviour, IBridgeObject
 {
     [SerializeField] private ParticleSystem _buffEffect;
     [SerializeField] private ParticleSystem _constEffect;
@@ -14,6 +14,7 @@ public class FireRateBooster : MonoBehaviour
     private float _buffDuration;
     private Coroutine _handleBuffEffect;
 
+    public BridgeObjectType Type => BridgeObjectType.FireRateBooster;
     public float BuffDuration => _buffDuration;
     public float IncreasedRateOfFire => _increasedRateOfFire;
     

@@ -11,7 +11,5 @@ public class AudioInitializer : MonoBehaviour
         
         AudioListener.volume = 1f;
         _audioInitialized = true;
-
-        Debug.Log("AudioInitializer: Аудио активировано. Звук теперь работает.");
     }
 }

@@ -22,6 +22,7 @@ public class BridgeGenerator : MonoBehaviour
     private Transform _endPositionPlayer;
     private Vector3 _randomPositionSection;
     private Quaternion _targetRotation;
+    private GameObject _selectedObject;
 
     public int BridgeSpanCount => _lengthCalculator.BridgePieceCount;
     public bool IsTurnRight => _positionGenerator.IsFirstTurnedRight;
@@ -62,9 +63,9 @@ public class BridgeGenerator : MonoBehaviour
         _spawnerSegmentBridge.OnBaseSpawned -= HandleBaseSpawned;
     }
 
-    public void SpawnNormalSegment(Transform transform, int number)
+    public void SpawnNormalSegment(Vector3 position, Quaternion rotation, int number)
     {
-        _spawnerSegmentBridge.CreateNormalSegment(transform, number);
+        _spawnerSegmentBridge.CreateNormalSegment(position, rotation, number);
     }
 
     public void Generate(int level)
@@ -88,7 +89,7 @@ public class BridgeGenerator : MonoBehaviour
                 if (indexLevel == _indexLevelSpawnObject)
                 {
                     indexLevel = 0;
-                    _objectSelector.ChoseObjectToBridge();
+                    _selectedObject = _objectSelector.GetObjectToBridge();
                     _randomPositionSection = _positionGenerator.GetRandomPositionToLevel(nextSpawnPosition);
                 }
 
@@ -100,7 +101,7 @@ public class BridgeGenerator : MonoBehaviour
                 CreateLevel(nextSpawnPosition);
             
                 nextSpawnPosition = _positionGenerator.GetNextPositionAlongLength(nextSpawnPosition);
-            
+                
                 _indexZombieWaveTrigger++;
             }
 
@@ -137,35 +138,6 @@ public class BridgeGenerator : MonoBehaviour
         OnPointSpawnedTrigger?.Invoke(waveTrigger);
     }
 
-    private void CreateLevel(Vector3 position)
-    {
-        for (int j = 0; j < _laneCount; j++)
-        {
-            _spawnerSegmentBridge.CreateSegmentBridge(position, _objectSelector, _positionGenerator.IsHorizontal, _targetRotation, _randomPositionSection, j);
-            SpawnPowerUp(position);
-            SpawnObstacles(position);
-            
-            position = _positionGenerator.GetNextPositionAlongWidth(position);
-
-            if (_objectSelector.IsPlaced && _objectSelector.IsDamagedSegment == false)
-            {
-                _objectSelector.ResetAllStats();
-            }
-        }
-    }
-    
-    private void SpawnPowerUp(Vector3 basePosition)
-    {
-        if (_objectSelector.IsRecruitedPolice)
-        {
-            _buffSpawner.CreateRecruitPolice(_positionGenerator, basePosition, _targetRotation);
-        }
-        else if (_objectSelector.IsFireRateBoosted)
-        {
-            _buffSpawner.CreateFireRateBooster(basePosition, _targetRotation, _randomPositionSection);
-        }
-    }
-
     private void HandleFireRateBoostSpawned(FireRateBooster fireRateBooster)
     {
         OnFireRateBoostedCreated?.Invoke(fireRateBooster);
@@ -175,32 +147,104 @@ public class BridgeGenerator : MonoBehaviour
     {
         OnRecruitPoliceCreated?.Invoke(recruitPolice);
     }
-
-    private void SpawnObstacles(Vector3 positionObstacle)
+    
+    private void CreateLevel(Vector3 position)
     {
-        if (_objectSelector.IsHammerActive)
+        for (int j = 0; j < _laneCount; j++)
         {
-            _spawnerObstacles.CreateHummer(positionObstacle, _positionGenerator, _targetRotation);
+            SpawnSegmentBridge(position, _selectedObject, j);
+            SpawnPowerUp(position, _selectedObject);
+            SpawnObstacles(position, _selectedObject);
+            
+            position = _positionGenerator.GetNextPositionAlongWidth(position);
         }
-        else if (_objectSelector.IsRotatingBlade)
+    }
+
+    private void SpawnSegmentBridge(Vector3 basePosition, GameObject segmentObject, int index)
+    {
+        if (segmentObject != null &&
+            segmentObject.TryGetComponent<IBridgeObject>(out var bridgeObject) &&
+            bridgeObject != null &&
+            bridgeObject.Type == BridgeObjectType.DamagedSegment)
         {
-            _spawnerObstacles.CreateRotatingBlade(positionObstacle, _positionGenerator, _targetRotation);
+            if (ShouldPlaceDamagedSegment(basePosition))
+            {
+                _spawnerSegmentBridge.CreateDemagSegmentBridge(basePosition, _targetRotation, index);
+                _selectedObject = null;
+                return; 
+            }
         }
-        else if (_objectSelector.IsSawBlade)
+        
+        _spawnerSegmentBridge.CreateNormalSegment(basePosition, _targetRotation, index);
+    }
+    
+    private bool ShouldPlaceDamagedSegment(Vector3 position)
+    {
+        return (_positionGenerator.IsHorizontal && Mathf.Approximately(_randomPositionSection.z, position.z)) ||
+               (!_positionGenerator.IsHorizontal && Mathf.Approximately(_randomPositionSection.x, position.x));
+    }
+    
+    private void SpawnPowerUp(Vector3 basePosition, GameObject segmentObject)
+    {
+        if (segmentObject == null)
+            return;
+        
+        if (segmentObject.TryGetComponent<IBridgeObject>(out var bridgeObject) && bridgeObject != null)
         {
-            _spawnerObstacles.CreateSawBlade(positionObstacle, _positionGenerator, _targetRotation);
+            switch (bridgeObject.Type)
+            {
+                case BridgeObjectType.RecruitPolice:
+                    _buffSpawner.CreateRecruitPolice(_positionGenerator, basePosition, _targetRotation);
+                    _selectedObject = null;
+                    break;
+
+                case BridgeObjectType.FireRateBooster:
+                    _buffSpawner.CreateFireRateBooster(basePosition, _targetRotation, _randomPositionSection);
+                    _selectedObject = null;
+                    break;
+            }
         }
-        else if (_objectSelector.IsSpikedCylinder)
+    }
+
+    private void SpawnObstacles(Vector3 positionObstacle, GameObject segmentObject)
+    {
+        if (segmentObject == null)
+            return;
+        
+        if (segmentObject.TryGetComponent<IBridgeObject>(out var bridgeObject)  && bridgeObject != null)
         {
-            _spawnerObstacles.CreateSpikedCylinder(positionObstacle, _positionGenerator, _targetRotation);
-        }
-        else if (_objectSelector.IsSpikePress)
-        {
-            _spawnerObstacles.CreateSpikePress(positionObstacle, _positionGenerator, _targetRotation);
-        }
-        else if (_objectSelector.IsSpikes)
-        {
-            _spawnerObstacles.CreateSpikes(positionObstacle, _positionGenerator, _targetRotation);
+            switch (bridgeObject.Type)
+            {
+                case BridgeObjectType.Hammer:
+                    _spawnerObstacles.CreateHummer(positionObstacle, _positionGenerator, _targetRotation);
+                    _selectedObject = null;
+                    break;
+
+                case BridgeObjectType.RotatingBlade:
+                    _spawnerObstacles.CreateRotatingBlade(positionObstacle, _positionGenerator, _targetRotation);
+                    _selectedObject = null;
+                    break;
+
+                case BridgeObjectType.SawBlade:
+                    _spawnerObstacles.CreateSawBlade(positionObstacle, _positionGenerator, _targetRotation);
+                    _selectedObject = null;
+                    break;
+
+                case BridgeObjectType.SpikedCylinder:
+                    _spawnerObstacles.CreateSpikedCylinder(positionObstacle, _positionGenerator, _targetRotation);
+                    _selectedObject = null;
+                    break;
+
+                case BridgeObjectType.SpikePress:
+                    _spawnerObstacles.CreateSpikePress(positionObstacle, _positionGenerator, _targetRotation);
+                    _selectedObject = null;
+                    break;
+
+                case BridgeObjectType.Spikes:
+                    _spawnerObstacles.CreateSpikes(positionObstacle, _positionGenerator, _targetRotation);
+                    _selectedObject = null;
+                    break;
+            }
         }
     }
 }
