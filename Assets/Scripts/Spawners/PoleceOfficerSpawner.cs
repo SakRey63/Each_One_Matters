@@ -1,6 +1,3 @@
-using Unity.Mathematics;
-using UnityEngine;
-
 public class PoleceOfficerSpawner : ObjectPool<PoliceOfficer>
 {
     public PoliceOfficer CreatePoliceUnits()

@@ -27,7 +27,7 @@ public class BridgeGenerator : MonoBehaviour
     private Quaternion _targetRotation;
 
     public int BridgeSpanCount => _lengthCalculator.BridgePieceCount;
-    public bool IsTurnRight => _positionGenerator.IsFirstTurnedRight;
+    public BridgeDirection FirstTurn => _positionGenerator.FirstTurnDirection;
     public Transform EndPositionPlayer => _endPositionPlayer;
 
     public event Action<PointSpawnTrigger> OnPointSpawnedTrigger;
@@ -110,7 +110,7 @@ public class BridgeGenerator : MonoBehaviour
             Vector3 position = _positionGenerator.GetPositionToBaseOfConnector(nextSpawnPosition, _bridgeConnectorOffset);
             BridgeConnector connector = _spawnerSegmentBridge.GetBridgeConnector(position, _targetRotation);
             _checkpointStore.AddCheckpointAtIndex(index, connector.RotationTarget);
-            bool isTurnedRight = _positionGenerator.ToggleMovementDirection();
+            BridgeDirection isTurnedRight = _positionGenerator.ToggleMovementDirection();
             connector.SetIndex(number, isTurnedRight);
             float  currentYAngle = _positionGenerator.GetAngelAndCreateNextStartPositionBridgeSegment(_targetRotation.eulerAngles.y, connector.BridgeStartPointRight, connector.BridgeStartPointLeft);
             _startPositionBridgeSegments = _positionGenerator.StartPositionBridgeSegments;
@@ -191,7 +191,7 @@ public class BridgeGenerator : MonoBehaviour
         {
             case BridgeObjectType.Hammer:
                 _positionGenerator.CreateRandomSide();
-                _spawnerObstacles.CreateHummer(_positionGenerator.GetObstaclePosition(positionObstacle), _positionGenerator.IsMonsterPositionRight, _targetRotation);
+                _spawnerObstacles.CreateHummer(_positionGenerator.GetObstaclePosition(positionObstacle), _positionGenerator.Side, _targetRotation);
                 break;
 
             case BridgeObjectType.RotatingBlade:
@@ -208,7 +208,7 @@ public class BridgeGenerator : MonoBehaviour
 
             case BridgeObjectType.SpikePress:
                 _positionGenerator.CreateRandomSide();
-                _spawnerObstacles.CreateSpikePress(_positionGenerator.GetNextPositionAlongWidth(positionObstacle), _positionGenerator.IsMonsterPositionRight, _targetRotation);
+                _spawnerObstacles.CreateSpikePress(_positionGenerator.GetNextPositionAlongWidth(positionObstacle), _positionGenerator.Side, _targetRotation);
                 break;
 
             case BridgeObjectType.Spikes:

@@ -9,178 +9,168 @@ public class SegmentPositionGenerator : MonoBehaviour
     [SerializeField] private Transform _startPositionAllTriggers;
 
     private Transform _startPositionBridgeSegments;
-    private bool _isTurnedRight;
-    private bool _isHorizontal;
+    private bool _isFirstTurn;
     private bool _isMonsterPositionRight;
-    private bool _isFirstTurnedRight;
     private int _maxIndexExclusive = 3;
     private int _maxRandomValue = 2;
     private int _rotationCount;
-    private BridgeDirection _currentDirection;
+    private BridgeDirection _currentDirection = BridgeDirection.VerticalUp;
+    private BridgeDirection _firstTurnDirection;
+    private BridgeDirection _lastHorizontalDirection;
+    private BridgeDirection _lastHorizontalRotation;
+    private ObstacleSide _obstacleSide;
 
     public Transform StartPositionBridgeSegments => _startPositionBridgeSegments;
-    public bool IsMonsterPositionRight => _isMonsterPositionRight;
-    public bool IsFirstTurnedRight => _isFirstTurnedRight;
+    public ObstacleSide Side => _obstacleSide;
+    public BridgeDirection FirstTurnDirection => _firstTurnDirection;
 
-    public bool ToggleMovementDirection()
+    public BridgeDirection ToggleMovementDirection()
     {
-        _isHorizontal = !_isHorizontal;
-
-        if (_rotationCount == 0)
+        if (_isFirstTurn == false)
         {
             int randomNumber = GetRandomIndex(0, _maxRandomValue);
             
-                
-            if (randomNumber > 0)
-            {
-                _isTurnedRight = true;
-            }
-            else
-            {
-                _isTurnedRight = false;
-            }
-
-            _isFirstTurnedRight = _isTurnedRight;
-            _rotationCount++;
+            _currentDirection = randomNumber > 0 ? BridgeDirection.HorizontalRight : BridgeDirection.HorizontalLeft;
+            _firstTurnDirection = _currentDirection;
+            _lastHorizontalDirection = _currentDirection;
+            _lastHorizontalRotation = _currentDirection;
+            _isFirstTurn = true;
         }
         else
         {
-            _isTurnedRight = !_isTurnedRight;
+            _currentDirection = _currentDirection == BridgeDirection.VerticalUp 
+                ? GetDirection()
+                : BridgeDirection.VerticalUp;
         }
 
-        return _isTurnedRight;
+        return _lastHorizontalRotation;
     }
     
-    public Vector3 GetNextPositionAlongLength(Vector3 nextPosition)
+    private BridgeDirection GetDirection()
     {
-        if (_isHorizontal)
-        {
-            if (_isTurnedRight)
-            {
-                nextPosition = new Vector3(nextPosition.x + _sectionOffset, nextPosition.y, nextPosition.z );
-            }
-            else
-            {
-                nextPosition = new Vector3(nextPosition.x - _sectionOffset , nextPosition.y, nextPosition.z);
-            }
-        }
-        else
-        {
-            nextPosition = new Vector3(nextPosition.x, nextPosition.y, nextPosition.z + _sectionOffset);
-        }
+        BridgeDirection tempDirection = _lastHorizontalDirection == BridgeDirection.HorizontalLeft ? BridgeDirection.HorizontalRight : BridgeDirection.HorizontalLeft;
+        
+        _lastHorizontalDirection = tempDirection;
 
-        return nextPosition;
+        return tempDirection;
+    }
+    
+    public Vector3 GetNextPositionAlongLength(Vector3 currentPosition)
+    {
+        return _currentDirection switch
+        {
+            BridgeDirection.HorizontalRight => new Vector3(currentPosition.x + _sectionOffset, currentPosition.y, currentPosition.z),
+            BridgeDirection.HorizontalLeft   => new Vector3(currentPosition.x - _sectionOffset, currentPosition.y, currentPosition.z),
+            BridgeDirection.VerticalUp       => new Vector3(currentPosition.x, currentPosition.y, currentPosition.z + _sectionOffset),
+            _ => currentPosition
+        };
     }
     
     public float GetAngelAndCreateNextStartPositionBridgeSegment(float currentYAngle, Transform targetRight, Transform targetLeft)
     {
-        if (_isTurnedRight)
+        _startPositionBridgeSegments = _lastHorizontalRotation == BridgeDirection.HorizontalRight ? targetRight : targetLeft;
+
+        if (_lastHorizontalRotation == BridgeDirection.HorizontalRight)
         {
-            _startPositionBridgeSegments = targetRight;
             currentYAngle += _angleRotate;
         }
         else
         {
-            _startPositionBridgeSegments = targetLeft;
             currentYAngle -= _angleRotate;
         }
+
+        UpdateRotationForNextSegment();
 
         return currentYAngle;
     }
     
-    public Vector3 GetNextPositionAlongWidth(Vector3 position)
+    public Vector3 GetNextPositionAlongWidth(Vector3 currentPosition)
     {
-        if (_isHorizontal)
+        return _currentDirection switch
         {
-            if (_isTurnedRight)
-            {
-                position = new Vector3(position.x, position.y, position.z - _sectionOffset);
-            }
-            else
-            {
-                position = new Vector3(position.x, position.y, position.z + _sectionOffset);
-            }
-        }
-        else
-        {
-            position = new Vector3(position.x + _sectionOffset, position.y, position.z);
-        }
-
-        return position;
+            BridgeDirection.HorizontalRight => new Vector3(currentPosition.x, currentPosition.y, currentPosition.z - _sectionOffset),
+            BridgeDirection.HorizontalLeft  => new Vector3(currentPosition.x, currentPosition.y, currentPosition.z + _sectionOffset),
+            BridgeDirection.VerticalUp      => new Vector3(currentPosition.x + _sectionOffset, currentPosition.y, currentPosition.z),
+            _ => currentPosition
+        };
     }
 
     public Vector3 GetPositionToBaseOfConnector(Vector3 nextPosition, float offset)
     {
-        if (_isHorizontal)
+        return _currentDirection switch
         {
-            if (_isTurnedRight)
-            {
-                nextPosition = new Vector3(nextPosition.x + offset, _startPositionAllTriggers.position.y,
-                    nextPosition.z - _sectionOffset);
-            }
-            else
-            {
-                nextPosition = new Vector3(nextPosition.x - offset, _startPositionAllTriggers.position.y,
-                    nextPosition.z + _sectionOffset);
-            }
-        }
-        else
-        {
-            nextPosition = new Vector3(nextPosition.x + _sectionOffset, _startPositionAllTriggers.position.y, nextPosition.z + offset);
-        }
+            BridgeDirection.HorizontalRight => new Vector3(
+                nextPosition.x + offset, 
+                _startPositionAllTriggers.position.y, 
+                nextPosition.z - _sectionOffset),
 
-        return nextPosition;
+            BridgeDirection.HorizontalLeft => new Vector3(
+                nextPosition.x - offset, 
+                _startPositionAllTriggers.position.y, 
+                nextPosition.z + _sectionOffset),
+
+            BridgeDirection.VerticalUp => new Vector3(
+                nextPosition.x + _sectionOffset, 
+                _startPositionAllTriggers.position.y, 
+                nextPosition.z + offset),
+
+            _ => nextPosition
+        };
     }
 
     public Vector3 GetRandomPositionToLevel(Vector3 position)
     {
-        float randomSectionOffset = _sectionOffset * GetRandomIndex(0, _maxIndexExclusive);
+        float randomSectionOffset = _sectionOffset * Random.Range(0, _maxIndexExclusive);
 
-        if (_isHorizontal)
+        return _currentDirection switch
         {
-            if (_isTurnedRight)
-            {
-                position = new Vector3(position.x , position.y, position.z - randomSectionOffset);
-            }
-            else
-            {
-                position = new Vector3(position.x , position.y, position.z + randomSectionOffset);
-            }
-        }
-        else
-        {
-            position = new Vector3(position.x + randomSectionOffset, position.y, position.z );
-        }
-        
-        return position;
+            BridgeDirection.HorizontalRight => new Vector3(position.x, position.y, position.z - randomSectionOffset),
+            BridgeDirection.HorizontalLeft  => new Vector3(position.x, position.y, position.z + randomSectionOffset),
+            BridgeDirection.VerticalUp      => new Vector3(position.x + randomSectionOffset, position.y, position.z),
+            _ => position
+        };
     }
 
     public void CreateRandomSide()
     {
         int randomMonsterPosition = GetRandomIndex(0, _maxRandomValue);
 
-        _isMonsterPositionRight = randomMonsterPosition > 0;
+        _obstacleSide = randomMonsterPosition > 0 ? ObstacleSide.Right : ObstacleSide.Left;
     }
     
     public Vector3 GetObstaclePosition(Vector3 basePosition)
     {
-        if (_isHorizontal)
+        return _currentDirection switch
         {
-            float zOffset = _isMonsterPositionRight ? _monsterRightOffset : -_monsterLeftOffset;
-            if (!_isTurnedRight) zOffset *= -1;
+            BridgeDirection.HorizontalRight => new Vector3(
+                basePosition.x, 
+                basePosition.y, 
+                basePosition.z + (_obstacleSide == ObstacleSide.Right ? _monsterRightOffset : -_monsterLeftOffset)),
 
-            return new Vector3(basePosition.x, basePosition.y, basePosition.z + zOffset);
-        }
-        else
-        {
-            float xOffset = _isMonsterPositionRight ? -_monsterRightOffset : _monsterLeftOffset;
-            return new Vector3(basePosition.x + xOffset, basePosition.y, basePosition.z);
-        }
+            BridgeDirection.HorizontalLeft => new Vector3(
+                basePosition.x, 
+                basePosition.y, 
+                basePosition.z + (_obstacleSide == ObstacleSide.Right ? -_monsterRightOffset : _monsterLeftOffset)),
+
+            BridgeDirection.VerticalUp => new Vector3(
+                basePosition.x + (_obstacleSide == ObstacleSide.Right ? -_monsterRightOffset : _monsterLeftOffset), 
+                basePosition.y, 
+                basePosition.z),
+            
+            _ => basePosition
+        };
     }
     
     public int GetIndexNumberPosition()
     {
         return GetRandomIndex(0, _maxIndexExclusive);
+    }
+    
+    private void UpdateRotationForNextSegment()
+    {
+        _lastHorizontalRotation = _lastHorizontalRotation == BridgeDirection.HorizontalRight ? 
+                BridgeDirection.HorizontalLeft : 
+                BridgeDirection.HorizontalRight;
     }
     
     private int GetRandomIndex(int minValue, int maxValue)

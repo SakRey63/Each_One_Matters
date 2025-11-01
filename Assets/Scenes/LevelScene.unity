@@ -18825,7 +18825,6 @@ GameObject:
   - component: {fileID: 949993453}
   - component: {fileID: 949993454}
   - component: {fileID: 949993455}
-  - component: {fileID: 949993468}
   - component: {fileID: 949993456}
   - component: {fileID: 949993457}
   - component: {fileID: 949993458}
@@ -19139,22 +19138,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _object: {fileID: 7116066529373102101, guid: 6ecf919fa01bd91488477618c881b083, type: 3}
   _initialPoolSize: 20
---- !u!114 &949993468
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 949993450}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 35828c31e2aefd54da5a0300a87105f9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _sectionOffset: 5
-  _maxIndexExclusive: 3
-  _monsterRightOffset: 3.5
-  _monsterLeftOffset: 13.5
 --- !u!1 &950859230
 GameObject:
   m_ObjectHideFlags: 0

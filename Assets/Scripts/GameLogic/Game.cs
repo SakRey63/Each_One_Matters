@@ -280,7 +280,7 @@ public class Game : MonoBehaviour
         
         if (_countPoint == 0)
         {
-            _isTurnRight = _bridgeGenerator.IsTurnRight;
+            _isTurnRight = BridgeDirection.HorizontalRight == _bridgeGenerator.FirstTurn;
         }
         else
         {

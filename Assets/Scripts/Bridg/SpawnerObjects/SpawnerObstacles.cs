@@ -12,13 +12,13 @@ public class SpawnerObstacles : MonoBehaviour
     [SerializeField] private float _yOffsetHammer = 2;
     [SerializeField] private float _verticalPositionRotatingBlade;
 
-    public void CreateHummer(Vector3 positionHammer, bool isMonsterPositionRight, Quaternion targetRotation)
+    public void CreateHummer(Vector3 positionHammer, ObstacleSide side, Quaternion targetRotation)
     {
         positionHammer = new Vector3(positionHammer.x, _yOffsetHammer, positionHammer.z);
             
         Quaternion rotationHammer = targetRotation;
             
-        if (isMonsterPositionRight == false)
+        if (side == ObstacleSide.Left)
         {
             float currentYAngle = targetRotation.eulerAngles.y;
             currentYAngle -= _turnAngle;
@@ -28,12 +28,12 @@ public class SpawnerObstacles : MonoBehaviour
         Instantiate(_hammer, positionHammer, rotationHammer);
     }
     
-    public void CreateSpikePress(Vector3 positionSpikePress, bool isMonsterPositionRight, Quaternion targetRotation)
+    public void CreateSpikePress(Vector3 positionSpikePress, ObstacleSide side, Quaternion targetRotation)
     {
         Quaternion rotationSpikePress = targetRotation;
         positionSpikePress = new Vector3(positionSpikePress.x, _verticalPositionRotatingBlade, positionSpikePress.z);
         
-        if (isMonsterPositionRight == false)
+        if (side == ObstacleSide.Left)
         {
             float currentYAngle = targetRotation.eulerAngles.y;
             currentYAngle -= _turnAngle;

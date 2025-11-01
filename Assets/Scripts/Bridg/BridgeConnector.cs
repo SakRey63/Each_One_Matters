@@ -26,17 +26,17 @@ public class BridgeConnector : MonoBehaviour
         }
     }
     
-    public void SetIndex(int index, bool isTurnRight)
+    public void SetIndex(int index, BridgeDirection isTurnRight)
     {
         _index = index;
         SetObstaclePosition(isTurnRight);
     }
 
-    private void SetObstaclePosition(bool isTurnRight)
+    private void SetObstaclePosition(BridgeDirection isTurnRight)
     {
         Vector3 position = _obstacleCratesBlocking.localPosition;
 
-        if (isTurnRight)
+        if (isTurnRight == BridgeDirection.HorizontalRight)
         {
             position = new Vector3(-_xOffset, position.y, position.z);
         }
