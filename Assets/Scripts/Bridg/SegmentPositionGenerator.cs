@@ -16,20 +16,20 @@ public class SegmentPositionGenerator : MonoBehaviour
     private int _maxIndexExclusive = 3;
     private int _maxRandomValue = 2;
     private int _rotationCount;
+    private BridgeDirection _currentDirection;
 
     public Transform StartPositionBridgeSegments => _startPositionBridgeSegments;
     public bool IsMonsterPositionRight => _isMonsterPositionRight;
-    public bool IsHorizontal => _isHorizontal;
     public bool IsFirstTurnedRight => _isFirstTurnedRight;
-    public bool IsTurnedRight => _isTurnedRight;
 
-    public void ToggleMovementDirection()
+    public bool ToggleMovementDirection()
     {
         _isHorizontal = !_isHorizontal;
 
         if (_rotationCount == 0)
         {
             int randomNumber = GetRandomIndex(0, _maxRandomValue);
+            
                 
             if (randomNumber > 0)
             {
@@ -47,6 +47,8 @@ public class SegmentPositionGenerator : MonoBehaviour
         {
             _isTurnedRight = !_isTurnedRight;
         }
+
+        return _isTurnedRight;
     }
     
     public Vector3 GetNextPositionAlongLength(Vector3 nextPosition)
@@ -106,29 +108,6 @@ public class SegmentPositionGenerator : MonoBehaviour
 
         return position;
     }
-    
-    public Vector3 GetPositionCenterLevel(Vector3 position, float verticalPosition)
-    {
-        if (_isHorizontal)
-        {
-            if (_isTurnedRight)
-            {
-                position = new Vector3(position.x, verticalPosition, position.z - _sectionOffset);
-            }
-            else
-            {
-                position = new Vector3(position.x, verticalPosition, position.z + _sectionOffset);
-            }
-            
-        }
-        else
-        {
-            position = new Vector3(position.x + _sectionOffset, verticalPosition, position.z);
-
-        }
-
-        return position;
-    }
 
     public Vector3 GetPositionToBaseOfConnector(Vector3 nextPosition, float offset)
     {
@@ -175,53 +154,33 @@ public class SegmentPositionGenerator : MonoBehaviour
         
         return position;
     }
-    
-    public Vector3 GetObstaclePosition(Vector3 positionMonster)
+
+    public void CreateRandomSide()
     {
         int randomMonsterPosition = GetRandomIndex(0, _maxRandomValue);
 
-        if (randomMonsterPosition > 0)
+        _isMonsterPositionRight = randomMonsterPosition > 0;
+    }
+    
+    public Vector3 GetObstaclePosition(Vector3 basePosition)
+    {
+        if (_isHorizontal)
         {
-            _isMonsterPositionRight = true;
-            
-            if (_isHorizontal)
-            {
-                if (_isTurnedRight)
-                {
-                    positionMonster = new Vector3(positionMonster.x , positionMonster.y, positionMonster.z + _monsterRightOffset); 
-                }
-                else
-                {
-                   positionMonster = new Vector3(positionMonster.x , positionMonster.y, positionMonster.z - _monsterRightOffset); 
-                }
-            }
-            else
-            {
-                positionMonster = new Vector3(positionMonster.x - _monsterRightOffset , positionMonster.y, positionMonster.z );
-            }
+            float zOffset = _isMonsterPositionRight ? _monsterRightOffset : -_monsterLeftOffset;
+            if (!_isTurnedRight) zOffset *= -1;
+
+            return new Vector3(basePosition.x, basePosition.y, basePosition.z + zOffset);
         }
         else
         {
-            _isMonsterPositionRight = false;
-            
-            if (_isHorizontal)
-            {
-                if (_isTurnedRight)
-                {
-                    positionMonster = new Vector3(positionMonster.x , positionMonster.y, positionMonster.z - _monsterLeftOffset);
-                }
-                else
-                {
-                    positionMonster = new Vector3(positionMonster.x , positionMonster.y, positionMonster.z + _monsterLeftOffset);
-                }
-            }
-            else
-            {
-                positionMonster = new Vector3(positionMonster.x + _monsterLeftOffset , positionMonster.y, positionMonster.z );
-            }
+            float xOffset = _isMonsterPositionRight ? -_monsterRightOffset : _monsterLeftOffset;
+            return new Vector3(basePosition.x + xOffset, basePosition.y, basePosition.z);
         }
-        
-        return positionMonster;
+    }
+    
+    public int GetIndexNumberPosition()
+    {
+        return GetRandomIndex(0, _maxIndexExclusive);
     }
     
     private int GetRandomIndex(int minValue, int maxValue)

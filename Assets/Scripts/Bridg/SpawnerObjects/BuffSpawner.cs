@@ -12,24 +12,21 @@ public class BuffSpawner : MonoBehaviour
     
     private int _maxRandomValue = 2;
 
-    public event Action<RecruitPolice> OnPoliceRecruitSpawned;
-    public event Action<FireRateBooster> OnFireRateBoostSpawned;
-
-    public void CreateFireRateBooster(Vector3 basePosition, Quaternion targetRotation, Vector3 randomPositionSection)
+    public FireRateBooster GetFireRateBooster(Quaternion targetRotation, Vector3 randomPositionSection)
     {
-        basePosition = new Vector3(randomPositionSection.x, _verticalPositionFireRateBoosted, randomPositionSection.z);
-        FireRateBooster fireRateBooster = Instantiate(_fireRateBooster, basePosition, targetRotation);
+        Vector3 position = new Vector3(randomPositionSection.x, _verticalPositionFireRateBoosted, randomPositionSection.z);
+        FireRateBooster fireRateBooster = Instantiate(_fireRateBooster, position, targetRotation);
         fireRateBooster.SetDurationTimeImprovedRange(YG2.saves.upgrades.BuffDuration);
-        OnFireRateBoostSpawned?.Invoke(fireRateBooster);
+        return fireRateBooster;
     }
 
-    public void CreateRecruitPolice(SegmentPositionGenerator positionGenerator, Vector3 basePosition, Quaternion targetRotation)
+    public RecruitPolice GetRecruitPolice(Vector3 basePosition, Quaternion targetRotation)
     {
         int randomPositionSquad = GetRandomIndex(0, _maxRandomValue);
+
+        Vector3 position = new Vector3(basePosition.x, _verticalPositionRecuruitPolicePoint, basePosition.z);
                 
-        basePosition =  positionGenerator.GetPositionCenterLevel(basePosition, _verticalPositionRecuruitPolicePoint);
-                
-        RecruitPolice recruitPolice = Instantiate(_recruitPolice, basePosition, targetRotation);
+        RecruitPolice recruitPolice = Instantiate(_recruitPolice, position, targetRotation);
 
         if (randomPositionSquad == 0)
         { 
@@ -39,8 +36,8 @@ public class BuffSpawner : MonoBehaviour
         {
             recruitPolice.SetBonusCount(true);
         }
-                
-        OnPoliceRecruitSpawned?.Invoke(recruitPolice);
+
+        return recruitPolice;
     }
     
     private int GetRandomIndex(int minValue, int maxValue)

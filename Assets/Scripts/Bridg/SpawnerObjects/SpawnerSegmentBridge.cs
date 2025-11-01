@@ -8,45 +8,33 @@ public class SpawnerSegmentBridge : MonoBehaviour
     [SerializeField] private SegmentDamagedBridge _damagedBridge;
     [SerializeField] private BridgeConnector _bridgeConnector;
     [SerializeField] private Base _base;
-    [SerializeField] private float _bridgeConnectorOffset = 23f;
-    [SerializeField] private float _baseOffset = 13f;
     [SerializeField] private float _rotationAngle = 180;
     
-    public event Action<BridgeConnector, Quaternion, Transform> OnBridgeConnectorSpawned;
-    public event Action<Base> OnBaseSpawned;
-    
-    public void CreateDemagSegmentBridge(Vector3 positionSegment, Quaternion targetRotation, int numberPosition)
+    public void CreateDamageSegmentBridge(Vector3 positionSegment, Quaternion targetRotation, int numberPosition, int indexDamageSegment)
     {
-        SegmentDamagedBridge damagedBridge = Instantiate(_damagedBridge, positionSegment, targetRotation);
-        damagedBridge.SetStatus(numberPosition);
-    }
-
-    public void SetBridgeConnectorOrFinish(int index, Vector3 nextSpawnPosition, SegmentPositionGenerator positionGenerator, Quaternion targetRotation, BridgeCheckpointStore checkpointStore, int spanCount)
-    {
-        int number = index;
-
-        if (++number < spanCount)
+        if (numberPosition == indexDamageSegment)
         {
-            nextSpawnPosition = positionGenerator.GetPositionToBaseOfConnector(nextSpawnPosition, _bridgeConnectorOffset);
-
-            BridgeConnector connector = Instantiate(_bridgeConnector, nextSpawnPosition, targetRotation);
-            checkpointStore.AddCheckpointAtIndex(index, connector.RotationTarget);
-            positionGenerator.ToggleMovementDirection();
-            connector.SetIndex(number,positionGenerator.IsTurnedRight);
-            float  currentYAngle = positionGenerator.GetAngelAndCreateNextStartPositionBridgeSegment(targetRotation.eulerAngles.y, connector.BridgeStartPointRight, connector.BridgeStartPointLeft);
-            Transform startPositionBridgeSegments = positionGenerator.StartPositionBridgeSegments;
-            targetRotation = Quaternion.Euler(targetRotation.x, currentYAngle, targetRotation.z);
-                
-            OnBridgeConnectorSpawned?.Invoke(connector, targetRotation, startPositionBridgeSegments);
+            SegmentDamagedBridge damagedBridge = Instantiate(_damagedBridge, positionSegment, targetRotation);
+                    damagedBridge.SetStatus(numberPosition);
         }
         else
         {
-            nextSpawnPosition = positionGenerator.GetPositionToBaseOfConnector(nextSpawnPosition, _baseOffset);
-
-            Base basePoliceOfficer = Instantiate(_base, nextSpawnPosition, targetRotation);
-            checkpointStore.AddCheckpointAtIndex(index, basePoliceOfficer.BaseEntryTransform);
-            OnBaseSpawned?.Invoke(basePoliceOfficer);
+            CreatedNormalSegmentBridge(positionSegment, targetRotation, numberPosition);
         }
+        
+    }
+
+    public BridgeConnector GetBridgeConnector(Vector3 nextSpawnPosition, Quaternion targetRotation)
+    {
+        BridgeConnector connector = Instantiate(_bridgeConnector, nextSpawnPosition, targetRotation);
+        return connector;
+    }
+
+    public Base GetBase(Vector3 nextSpawnPosition, Quaternion targetRotation)
+    {
+        Base basePoliceOfficer = Instantiate(_base, nextSpawnPosition, targetRotation);
+        
+        return basePoliceOfficer;
     }
 
     public void CreateNormalSegment(Vector3 position, Quaternion rotation, int number)

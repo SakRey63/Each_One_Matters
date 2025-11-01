@@ -6,11 +6,11 @@ public class BridgeConnector : MonoBehaviour
     [SerializeField] private Transform _target;
     [SerializeField] private Transform _bridgeStartPointLeft;
     [SerializeField] private Transform _bridgeStartPointRight;
-    [SerializeField] private Transform _placeholderPoint;
     [SerializeField] private Transform _obstacleCratesBlocking;
     [SerializeField] private float _xOffset = 16;
 
     private int _index;
+    
     public Transform RotationTarget => _target;
     public Transform BridgeStartPointRight => _bridgeStartPointRight;
     public Transform BridgeStartPointLeft => _bridgeStartPointLeft;

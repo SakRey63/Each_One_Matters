@@ -12,15 +12,13 @@ public class SpawnerObstacles : MonoBehaviour
     [SerializeField] private float _yOffsetHammer = 2;
     [SerializeField] private float _verticalPositionRotatingBlade;
 
-    public void CreateHummer(Vector3 positionHammer, SegmentPositionGenerator positionGenerator, Quaternion targetRotation)
+    public void CreateHummer(Vector3 positionHammer, bool isMonsterPositionRight, Quaternion targetRotation)
     {
-        positionHammer = positionGenerator.GetObstaclePosition(positionHammer);
-
         positionHammer = new Vector3(positionHammer.x, _yOffsetHammer, positionHammer.z);
             
         Quaternion rotationHammer = targetRotation;
             
-        if (positionGenerator.IsMonsterPositionRight == false)
+        if (isMonsterPositionRight == false)
         {
             float currentYAngle = targetRotation.eulerAngles.y;
             currentYAngle -= _turnAngle;
@@ -30,13 +28,12 @@ public class SpawnerObstacles : MonoBehaviour
         Instantiate(_hammer, positionHammer, rotationHammer);
     }
     
-    public void CreateSpikePress(Vector3 positionSpikePress, SegmentPositionGenerator positionGenerator, Quaternion targetRotation)
+    public void CreateSpikePress(Vector3 positionSpikePress, bool isMonsterPositionRight, Quaternion targetRotation)
     {
-        positionGenerator.GetObstaclePosition(positionSpikePress);
         Quaternion rotationSpikePress = targetRotation;
-        positionSpikePress = positionGenerator.GetPositionCenterLevel(positionSpikePress, _verticalPositionRotatingBlade);
+        positionSpikePress = new Vector3(positionSpikePress.x, _verticalPositionRotatingBlade, positionSpikePress.z);
         
-        if (positionGenerator.IsMonsterPositionRight == false)
+        if (isMonsterPositionRight == false)
         {
             float currentYAngle = targetRotation.eulerAngles.y;
             currentYAngle -= _turnAngle;
@@ -46,28 +43,28 @@ public class SpawnerObstacles : MonoBehaviour
         Instantiate(_spikePress, positionSpikePress, rotationSpikePress);
     }
 
-    public void CreateSpikes(Vector3 positionSpikes, SegmentPositionGenerator segmentPositionGenerator, Quaternion targetRotation)
+    public void CreateSpikes(Vector3 positionSpikes, Quaternion targetRotation)
     {
-        positionSpikes = segmentPositionGenerator.GetRandomPositionToLevel(positionSpikes);
         positionSpikes = new Vector3(positionSpikes.x, _verticalPositionRotatingBlade, positionSpikes.z);
         Instantiate(_spikes, positionSpikes, targetRotation);
     }
 
-    public void CreateRotatingBlade(Vector3 positionRotatingBlade, SegmentPositionGenerator positionGenerator, Quaternion targetRotation)
+    public void CreateRotatingBlade(Vector3 positionRotatingBlade, Quaternion targetRotation)
     {
-        positionRotatingBlade = positionGenerator.GetPositionCenterLevel(positionRotatingBlade, _verticalPositionRotatingBlade);
+        positionRotatingBlade = new Vector3(positionRotatingBlade.x, _verticalPositionRotatingBlade, positionRotatingBlade.z);
+        
         Instantiate(_rotatingBlade, positionRotatingBlade, targetRotation);
     }
 
-    public void CreateSawBlade(Vector3 positionSawBlade, SegmentPositionGenerator positionGenerator, Quaternion targetRotation)
+    public void CreateSawBlade(Vector3 positionSawBlade, Quaternion targetRotation)
     {
-        positionSawBlade = positionGenerator.GetPositionCenterLevel(positionSawBlade, _verticalPositionRotatingBlade);
+        positionSawBlade = new Vector3(positionSawBlade.x, _verticalPositionRotatingBlade, positionSawBlade.z);
         Instantiate(_sawBlade, positionSawBlade, targetRotation);
     }
     
-    public void CreateSpikedCylinder(Vector3 positionSpikedCylinder, SegmentPositionGenerator positionGenerator, Quaternion targetRotation)
+    public void CreateSpikedCylinder(Vector3 positionSpikedCylinder, Quaternion targetRotation)
     {
-        positionSpikedCylinder = positionGenerator.GetPositionCenterLevel(positionSpikedCylinder, _verticalPositionRotatingBlade);
+        positionSpikedCylinder = new Vector3(positionSpikedCylinder.x, _verticalPositionRotatingBlade, positionSpikedCylinder.z);
         Instantiate(_spikedCylinder, positionSpikedCylinder, targetRotation);
     }
 }

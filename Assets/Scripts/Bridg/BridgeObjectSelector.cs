@@ -10,9 +10,10 @@ public class BridgeObjectSelector : MonoBehaviour
     private GameObject _currentSpawnObject;
     private int _randomFirstSpawnObject;
     private int _indexSpawnObject;
-    private BridgeObjectType _currentObjectType;
+    
+    public BridgeObjectType CurrentType { get; private set; }
 
-    public GameObject GetObjectToBridge()
+    public void CreateObjectToBridge()
     {
         if (_randomFirstSpawnObject > 0)
         {
@@ -31,7 +32,10 @@ public class BridgeObjectSelector : MonoBehaviour
             _randomFirstSpawnObject++;
         }
 
-        return _currentSpawnObject;
+        if (_currentSpawnObject.TryGetComponent<IBridgeObject>(out var bridgeObject))
+        {
+            CurrentType = bridgeObject.Type;
+        }
     }
     
     public void CreateFirstSpawnObject()
