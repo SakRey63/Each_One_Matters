@@ -3,7 +3,6 @@ using UnityEngine;
 public class SegmentPositionGenerator : MonoBehaviour
 {
     [SerializeField] private float _sectionOffset = 5f;
-    [SerializeField] private float _angleRotate = 90f;
     [SerializeField] private float _monsterRightOffset = 3.5f;
     [SerializeField] private float _monsterLeftOffset = 13.5f;
     [SerializeField] private Transform _startPositionAllTriggers;
@@ -39,20 +38,11 @@ public class SegmentPositionGenerator : MonoBehaviour
         else
         {
             _currentDirection = _currentDirection == BridgeDirection.VerticalUp 
-                ? GetDirection()
+                ? _lastHorizontalDirection
                 : BridgeDirection.VerticalUp;
         }
-
-        return _lastHorizontalRotation;
-    }
-    
-    private BridgeDirection GetDirection()
-    {
-        BridgeDirection tempDirection = _lastHorizontalDirection == BridgeDirection.HorizontalLeft ? BridgeDirection.HorizontalRight : BridgeDirection.HorizontalLeft;
         
-        _lastHorizontalDirection = tempDirection;
-
-        return tempDirection;
+        return _lastHorizontalRotation;
     }
     
     public Vector3 GetNextPositionAlongLength(Vector3 currentPosition)
@@ -66,22 +56,11 @@ public class SegmentPositionGenerator : MonoBehaviour
         };
     }
     
-    public float GetAngelAndCreateNextStartPositionBridgeSegment(float currentYAngle, Transform targetRight, Transform targetLeft)
+    public void GetAngelAndCreateNextStartPositionBridgeSegment(Transform targetRight, Transform targetLeft)
     {
         _startPositionBridgeSegments = _lastHorizontalRotation == BridgeDirection.HorizontalRight ? targetRight : targetLeft;
-
-        if (_lastHorizontalRotation == BridgeDirection.HorizontalRight)
-        {
-            currentYAngle += _angleRotate;
-        }
-        else
-        {
-            currentYAngle -= _angleRotate;
-        }
-
+        
         UpdateRotationForNextSegment();
-
-        return currentYAngle;
     }
     
     public Vector3 GetNextPositionAlongWidth(Vector3 currentPosition)

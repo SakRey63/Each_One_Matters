@@ -18,6 +18,7 @@ public class LevelMenuHandler : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _callHelpPoliceOfficerText;
     [SerializeField] private TextMeshProUGUI _callHelpPauseText;
     [SerializeField] private TextMeshProUGUI _callHelpPoliceOfficerPrice;
+    [SerializeField] private TextMeshProUGUI _warningMaxPoliceReached;
     [SerializeField] private Button _reviveWithAd;
     [SerializeField] private Button _continueGame;
     [SerializeField] private Button _nextLevel;
@@ -29,12 +30,14 @@ public class LevelMenuHandler : MonoBehaviour
     [SerializeField] private UIElementToggler _elementToggler;
     [SerializeField] private float _delay = 1;
     [SerializeField] private float _delayAlert = 1.5f;
+    [SerializeField] private float _durationWarningMessage = 3f;
     [SerializeField] private int _cooldown = 5;
 
     private bool _isEnableGameMenu;
     private bool _isEnableUpgradeMenu;
     private Coroutine _cooldownCoroutine;
     private Coroutine _displayAlertCoroutine;
+    private Coroutine _warningMessageCoroutine;
     private LevelSounds _levelSounds;
 
     public event Action OnLevelUp;
@@ -55,6 +58,16 @@ public class LevelMenuHandler : MonoBehaviour
     private void Awake()
     {
         _levelSounds = GetComponent<LevelSounds>();
+    }
+    
+    public void ShowMaxPoliceWarning()
+    {
+        if (_warningMessageCoroutine != null)
+        {
+            StopCoroutine(_warningMessageCoroutine);
+        }
+        
+        _warningMessageCoroutine = StartCoroutine(ShowTemporaryWarning());
     }
 
     public void InitializeLevelMenu()
@@ -246,6 +259,16 @@ public class LevelMenuHandler : MonoBehaviour
         _gameOverText.gameObject.SetActive(false);
         
         StartCoroutine(RestoreGameStateAfterAd(isRewarded));
+    }
+    
+    private IEnumerator ShowTemporaryWarning()
+    {
+        WaitForSeconds delay = new WaitForSeconds(_durationWarningMessage);
+        _warningMaxPoliceReached.gameObject.SetActive(true);
+
+        yield return delay;
+
+        _warningMaxPoliceReached.gameObject.SetActive(false);
     }
     
     private IEnumerator RestoreGameStateAfterAd(bool isRewarded)

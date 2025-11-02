@@ -10,6 +10,7 @@ public class Upgrade : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _extendFireRateDurationPrices;
     [SerializeField] private TextMeshProUGUI _callHelpOnBasePrices;
     [SerializeField] private TextMeshProUGUI _errorText;
+    [SerializeField] private TextMeshProUGUI _warningMaxSquadSize;
     [SerializeField] private TextMeshProUGUI _balanceText;
     [SerializeField] private TextMeshProUGUI _callHelpOnBaseText;
     [SerializeField] private TextMeshProUGUI _uguipgradeCallHelpOnBaseText;
@@ -19,16 +20,25 @@ public class Upgrade : MonoBehaviour
     [SerializeField] private int _callHelpUpgradeButtonPrice = 50;
     
     private Shop _shop;
-    private Coroutine _coroutine;
-    private bool _canIncreaseSquad;
-    private bool _canExtendFireRate;
-    private bool _canCallHelpOnBase;
+    private Coroutine _errorTextCoroutine;
+    private UpgradeType _pendingUpgrade;
+
+    private enum UpgradeType
+    {
+        None,
+        IncreaseSquad,
+        ExtendFireRate,
+        CallHelpOnBase
+    }
 
     private void OnEnable()
     {
         UpdateTextMenu();
+        _errorText.gameObject.SetActive(false);
+        _warningMaxSquadSize.gameObject.SetActive(false);
+        _balanceText.gameObject.SetActive(true);
     }
-
+    
     private void Start()
     {
         _shop = new Shop();
@@ -39,19 +49,43 @@ public class Upgrade : MonoBehaviour
 
     public void AddPoliceToSquad()
     {
-        _canIncreaseSquad = true;
+        if (YG2.saves.player.CountPoliceOfficer >= YG2.saves.player.MaxPoliceCount)
+        {
+            if (_errorTextCoroutine != null)
+            {
+                StopCoroutine(_errorTextCoroutine);
+            }
+                    
+            _errorTextCoroutine = StartCoroutine(ShowTemporaryWarning(_warningMaxSquadSize));
+           
+            return;
+        }
+        
+        _pendingUpgrade = UpgradeType.IncreaseSquad;
         TryApplyUpgrade(YG2.saves.upgrades.IncreaseSquadPrices);
     }
 
     public void ExtendFireRateDuration()
     {
-        _canExtendFireRate = true;
+        _pendingUpgrade = UpgradeType.ExtendFireRate;
         TryApplyUpgrade(YG2.saves.upgrades.ExtendFireRateDurationPrices);
     }
 
     public void CallReinforcements()
     {
-        _canCallHelpOnBase = true;
+        if (YG2.saves.gameplay.CountHelpPoliceOfficer >= YG2.saves.player.MaxPoliceCount)
+        {
+            if (_errorTextCoroutine != null)
+            {
+                StopCoroutine(_errorTextCoroutine);
+            }
+                    
+            _errorTextCoroutine = StartCoroutine(ShowTemporaryWarning(_warningMaxSquadSize));
+            
+            return;
+        }
+        
+        _pendingUpgrade = UpgradeType.CallHelpOnBase;
         TryApplyUpgrade(YG2.saves.upgrades.CallHelpOnBasePrices);
     }
     
@@ -65,44 +99,38 @@ public class Upgrade : MonoBehaviour
         if (YG2.saves.gameplay.Score >= price)
         {
             int newPrice = _shop.ProcessTransaction(price);
-            
-            if (_canIncreaseSquad)
+
+            switch (_pendingUpgrade)
             {
-                int countPolice = YG2.saves.player.CountPoliceOfficer;
-                countPolice++;
-                YG2.saves.player.CountPoliceOfficer = countPolice;
-                YG2.saves.upgrades.IncreaseSquadPrices = newPrice;
-                _increaseSquadPrices.text = Convert.ToString(newPrice);
-                _canIncreaseSquad = false;
-            }
-            else if (_canExtendFireRate)
-            {
-                float buffDuration = YG2.saves.upgrades.BuffDuration;
-                buffDuration++;
-                YG2.saves.upgrades.BuffDuration = buffDuration;
-                YG2.saves.upgrades.ExtendFireRateDurationPrices = newPrice;
-                _extendFireRateDurationPrices.text = Convert.ToString(newPrice);
-                _canExtendFireRate = false;
-            }
-            else if (_canCallHelpOnBase)
-            {
-                if (YG2.saves.gameplay.IsCallHelpUpgradePurchased)
-                {
-                    int countHelpPoliceOfficer = YG2.saves.gameplay.CountHelpPoliceOfficer;
-                    countHelpPoliceOfficer++;
-                    YG2.saves.gameplay.CountHelpPoliceOfficer = countHelpPoliceOfficer;
-                    int priceButton = YG2.saves.gameplay.CallHelpButtonPrice;
-                    priceButton += _callHelpUpgradeButtonPrice;
-                    YG2.saves.gameplay.CallHelpButtonPrice = priceButton;
-                }
-                else
-                {
-                    YG2.saves.gameplay.IsCallHelpUpgradePurchased = true;
-                }
+                case UpgradeType.IncreaseSquad:
+                    YG2.saves.player.CountPoliceOfficer++;
+                    YG2.saves.upgrades.IncreaseSquadPrices = newPrice;
+                    _increaseSquadPrices.text = Convert.ToString(newPrice);
+                    break;
                 
-                YG2.saves.upgrades.CallHelpOnBasePrices = newPrice;
-                _callHelpOnBasePrices.text = Convert.ToString(newPrice);
-                _canCallHelpOnBase = false;
+                case UpgradeType.ExtendFireRate:
+                    YG2.saves.upgrades.BuffDuration++;
+                    YG2.saves.upgrades.ExtendFireRateDurationPrices = newPrice;
+                    _extendFireRateDurationPrices.text = Convert.ToString(newPrice);
+                    break;
+                
+                case UpgradeType.CallHelpOnBase:
+                    
+                    if (YG2.saves.gameplay.IsCallHelpUpgradePurchased)
+                    {
+                        YG2.saves.gameplay.CountHelpPoliceOfficer++;
+                        int priceButton = YG2.saves.gameplay.CallHelpButtonPrice;
+                        priceButton += _callHelpUpgradeButtonPrice;
+                        YG2.saves.gameplay.CallHelpButtonPrice = priceButton;
+                    }
+                    else
+                    {
+                        YG2.saves.gameplay.IsCallHelpUpgradePurchased = true;
+                    }
+                        
+                    YG2.saves.upgrades.CallHelpOnBasePrices = newPrice;
+                    _callHelpOnBasePrices.text = Convert.ToString(newPrice);
+                    break;
             }
             
             _levelSounds.PlayUpgradeSound();
@@ -111,13 +139,18 @@ public class Upgrade : MonoBehaviour
         }
         else
         {
-            if (_coroutine != null)
+            if (YG2.saves.gameplay.Score < price)
             {
-                StopCoroutine(_coroutine);
-            }
+                if (_errorTextCoroutine != null)
+                {
+                    StopCoroutine(_errorTextCoroutine);
+                }
             
-            _coroutine = StartCoroutine(ShowErrorMessage());
+                _errorTextCoroutine = StartCoroutine(ShowTemporaryWarning(_errorText));
+            }
         }
+
+        _pendingUpgrade = UpgradeType.None;
     }
 
     private void UpdateTextMenu()
@@ -134,24 +167,21 @@ public class Upgrade : MonoBehaviour
             _callHelpOnBaseText.gameObject.SetActive(true);
         }
     }
-
-    private IEnumerator ShowErrorMessage()
+    
+    private IEnumerator ShowTemporaryWarning(TextMeshProUGUI text)
     {
-        float delay = _duration;
-        _levelSounds.PlayErrorSound();
-        _balanceText.gameObject.SetActive(false);
-        _errorText.gameObject.SetActive(true);
-        
-        while (delay >= 0)
-        {
-            delay -= Time.deltaTime;
-            
-            yield return null;
-        }
-        
+        WaitForSeconds delay = new WaitForSeconds(_duration);
         _errorText.gameObject.SetActive(false);
+        _balanceText.gameObject.SetActive(false);
+        _warningMaxSquadSize.gameObject.SetActive(false);
+        _levelSounds.PlayErrorSound();
+        
+        text.gameObject.SetActive(true);
+
+        yield return delay;
+
+        text.gameObject.SetActive(false);
         _balanceText.gameObject.SetActive(true);
-        UpdatePriceText();
-        _coroutine = null;
+        _errorTextCoroutine = null;
     }
 }

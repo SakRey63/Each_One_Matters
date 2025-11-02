@@ -112,9 +112,9 @@ public class BridgeGenerator : MonoBehaviour
             _checkpointStore.AddCheckpointAtIndex(index, connector.RotationTarget);
             BridgeDirection isTurnedRight = _positionGenerator.ToggleMovementDirection();
             connector.SetIndex(number, isTurnedRight);
-            float  currentYAngle = _positionGenerator.GetAngelAndCreateNextStartPositionBridgeSegment(_targetRotation.eulerAngles.y, connector.BridgeStartPointRight, connector.BridgeStartPointLeft);
+            _positionGenerator.GetAngelAndCreateNextStartPositionBridgeSegment(connector.BridgeStartPointRight, connector.BridgeStartPointLeft);
             _startPositionBridgeSegments = _positionGenerator.StartPositionBridgeSegments;
-            _targetRotation = Quaternion.Euler(_targetRotation.x, currentYAngle, _targetRotation.z);
+            _targetRotation = _startPositionBridgeSegments.rotation;
             _indexZombieWaveTrigger = 0;
             OnBridgeConnectorCreated?.Invoke(connector);
         }

@@ -89,6 +89,12 @@ public class Game : MonoBehaviour
 
     public void StartNewLevel()
     {
+        if (YG2.saves.player.CountPoliceOfficer > YG2.saves.player.MaxPoliceCount)
+        {
+            YG2.saves.player.CountPoliceOfficer = YG2.saves.player.MaxPoliceCount;
+            YG2.SaveProgress();
+        }
+        
         _cameraController.ConfigureCameraForPlatform();
         _cameraController.OnUnitCountChanged(YG2.saves.player.CountPoliceOfficer);
             
@@ -214,10 +220,16 @@ public class Game : MonoBehaviour
                 Cursor.visible = false; 
             }
             
-            _playerInput.DirectionChanged += OnDirectionChanged;
-            _player.SpawnPoliceOfficer(_countAdRevival);
-            _player.KeepMoving();
-            _enemyGroup.ResumeAllZombies();
+            int maxAllowed = YG2.saves.player.MaxPoliceCount - _player.PoliceCount;
+            int reviveCount = Mathf.Min(_countAdRevival, maxAllowed);
+
+            if (reviveCount > 0)
+            {
+                _playerInput.DirectionChanged += OnDirectionChanged;
+                _player.SpawnPoliceOfficer(reviveCount);
+                _player.KeepMoving();
+                _enemyGroup.ResumeAllZombies();
+            }
         }
         else
         {
@@ -230,11 +242,26 @@ public class Game : MonoBehaviour
 
     private void HandleCallHelpPolice()
     {
+        if (_player.PoliceCount >= YG2.saves.player.MaxPoliceCount)
+        {
+            _levelMenuHandler.ShowMaxPoliceWarning();
+            return;
+        }
+        
         if (_scoreHandler.CurrentScore >= YG2.saves.gameplay.CallHelpButtonPrice)
         {
             _scoreHandler.DeductPointsForHelp(YG2.saves.gameplay.CallHelpButtonPrice);
             _levelMenuHandler.LockButtonDuringCooldown();
-            _player.SpawnPoliceOfficer(YG2.saves.gameplay.CountHelpPoliceOfficer);
+            
+            int spawnCount = Mathf.Min(YG2.saves.gameplay.CountHelpPoliceOfficer, 
+                YG2.saves.player.MaxPoliceCount - _player.PoliceCount);
+            
+            _player.SpawnPoliceOfficer(spawnCount);
+            
+            if (_player.PoliceCount >= YG2.saves.player.MaxPoliceCount)
+            {
+                _levelMenuHandler.ShowMaxPoliceWarning();
+            }
         }
         else
         {
@@ -361,10 +388,23 @@ public class Game : MonoBehaviour
         bool isPositiveX = _player.SquadPosition.transform.localPosition.x >= 0;
         int spawnCount = recruitPolice.GetCountSpawnPoliceOfficers(isPositiveX, _player.PoliceCount);
 
+        if (_player.PoliceCount >= YG2.saves.player.MaxPoliceCount)
+        {
+            _levelMenuHandler.ShowMaxPoliceWarning();
+            return;
+        }
+        
+        spawnCount = Mathf.Min(spawnCount, YG2.saves.player.MaxPoliceCount - _player.PoliceCount);
+        
         if (spawnCount > 0)
         {
             _player.SpawnPoliceOfficer(spawnCount);
             _cameraController.OnUnitCountChanged(_player.PoliceCount);
+            
+            if (_player.PoliceCount == YG2.saves.player.MaxPoliceCount)
+            {
+                _levelMenuHandler.ShowMaxPoliceWarning();
+            }
         }
     }
     
