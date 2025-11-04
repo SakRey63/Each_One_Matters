@@ -1,0 +1,37 @@
+{
+  "intExample": 5,
+  "strExample": "Hello!",
+  "boolExample": [
+    false,
+    false,
+    false,
+    false
+  ],
+  "idSave": 372,
+  "gameplay": {
+    "Level": 20,
+    "Score": 1400,
+    "CallHelpButtonPrice": 200,
+    "CountHelpPoliceOfficer": 4,
+    "IsCallHelpUpgradePurchased": true,
+    "IsFirstLaunch": false,
+    "IsLoadedMainMenu": true
+  },
+  "player": {
+    "MaxPoliceCount": 44,
+    "CountPoliceOfficer": 5,
+    "HasSavedPlayer": true
+  },
+  "settings": {
+    "VolumeMusic": -17.86028,
+    "VolumeSFX": -14.7736645,
+    "VolumeUi": 0.0,
+    "SpeedSideMovement": 59.70184
+  },
+  "upgrades": {
+    "IncreaseSquadPrices": 1000,
+    "ExtendFireRateDurationPrices": 1200,
+    "CallHelpOnBasePrices": 1440,
+    "BuffDuration": 6.0
+  }
+}

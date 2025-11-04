@@ -14,27 +14,29 @@ public class PlayerRotation : MonoBehaviour
         _transform = transform;
     }
 
-    public void Rotate(bool turnRight)
+    public void Rotate(BridgeDirection rotation)
     {
         if (_coroutine == null)
         {
-            _coroutine = StartCoroutine(PerformRotation(turnRight));
+            _coroutine = StartCoroutine(PerformRotation(rotation));
         }
     }
 
-    private IEnumerator PerformRotation(bool turnRight)
+    private IEnumerator PerformRotation(BridgeDirection rotation)
     {
-        float targetAngle;
+        float targetAngle = 0;
         
         float currentYAngle = _transform.eulerAngles.y;
-        
-        if (turnRight == false)
+
+        switch (rotation)
         {
-            targetAngle = currentYAngle -_currentAngle;
-        }
-        else
-        {
-            targetAngle = currentYAngle + _currentAngle;
+            case BridgeDirection.HorizontalRight:
+                targetAngle = currentYAngle + _currentAngle;
+                break;
+            
+            case BridgeDirection.HorizontalLeft:
+                targetAngle = currentYAngle -_currentAngle;
+                break;
         }
         
         targetAngle = Mathf.Repeat(targetAngle, 360f);

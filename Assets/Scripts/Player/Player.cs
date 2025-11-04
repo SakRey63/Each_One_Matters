@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
+    [SerializeField] private PlayerInput _playerInput;
     [SerializeField] private float _borderOffset = 5.7f;
     [SerializeField] private Transform _positionSpawnPoliceOfficer;
     [SerializeField] private float _reorganizationDelay = 0.7f;
@@ -12,6 +13,7 @@ public class Player : MonoBehaviour
     [SerializeField] private ParticleSystem _effectPlexus;
     [SerializeField] private UnityEngine.UI.Image _buffTimerBar;
     [SerializeField] private float _defaultRepeatShooting = 0.8f;
+    [SerializeField] private PoleceOfficerSpawner _officerSpawner;
 
     private Base _base;
     private Transform _moveTarget;
@@ -20,7 +22,7 @@ public class Player : MonoBehaviour
     private PlayerRotation _playerRotation;
     private Dictionary<int, PoliceOfficer> _policeOfficers;
     private PlayerSideMovement _playerSideMovement;
-    private PoleceOfficerSpawner _officerSpawner;
+    
     private PositionGeneratorSquad _positionGeneratorSquad;
     private BulletPool _bulletPool;
     private ChunkPool _chunkPool;
@@ -31,17 +33,17 @@ public class Player : MonoBehaviour
     private Coroutine _coroutineBuff;
     private bool _isMoving;
     private bool _isFinished;
-    private bool _isHorizontal;
     private bool _isPoliceOfficerOnBase;
     private bool _isStoppedWar;
     private float _maxBorderPosition;
     private float _minBorderPosition;
     private float _repeatShooting;
+    private ProgressionState _currentState;
+    private BridgeDirection _currentDirection = BridgeDirection.VerticalUp;
     
     public int PoliceCount => _policeCount;
     public Transform SquadPosition => _playerSideMovement.SquadPosition;
     public bool IsPoliceOfficerOnBase => _isPoliceOfficerOnBase;
-    public PoleceOfficerSpawner PoliceOfficerSpawner => _officerSpawner;
 
     public event Action OnCheckpointReached;
     public event Action OnAllPoliceOfficersDied;
@@ -55,6 +57,7 @@ public class Player : MonoBehaviour
 
     private void OnDisable()
     {
+        _playerInput.DirectionChanged -= OnDirectionInput;
         _backwardMovement.OnPlayerFinish -= HandlePlayerFinish;
     }
 
@@ -66,7 +69,6 @@ public class Player : MonoBehaviour
         _policeOfficers = new Dictionary<int, PoliceOfficer>();
         _backwardMovement = GetComponent<PlayerBackwardMovement>();
         _playerSideMovement = GetComponent<PlayerSideMovement>();
-        _officerSpawner = GetComponent<PoleceOfficerSpawner>();
         _positionGeneratorSquad = GetComponent<PositionGeneratorSquad>();
     }
 
@@ -78,8 +80,14 @@ public class Player : MonoBehaviour
         }
     }
     
+    private void OnDirectionInput(float direction)
+    {
+        _playerSideMovement.Move(direction);
+    }
+    
     public void SetupObjectsPool(BulletPool bulletPool, ChunkPool chunkPool)
     {
+        _playerInput.DirectionChanged += OnDirectionInput;
         _bulletPool = bulletPool;
         _chunkPool = chunkPool;
     }
@@ -102,17 +110,17 @@ public class Player : MonoBehaviour
         _coroutineBuff = StartCoroutine(BuffTimer(buffDuration));
     }
     
-    public void SetNextTargetPosition(Transform moveTarget, bool isHorizontal)
+    public void SetNextTargetPosition(Transform moveTarget, BridgeDirection direction)
     {
-        _isHorizontal = isHorizontal;
+        _currentDirection = direction;
         _isMoving = true;
         _moveTarget = moveTarget;
         _backwardMovement.SetTargetPosition(_moveTarget);
     }
     
-    public void SetPlayerFinishPosition(Transform moveTarget, bool isFinished, bool isHorizontal)
+    public void SetPlayerFinishPosition(Transform moveTarget, bool isFinished, BridgeDirection direction)
     {
-        _isHorizontal = isHorizontal;
+        _currentDirection = direction;
         _isFinished = isFinished;
         _isMoving = true;
         _moveTarget = moveTarget;
@@ -121,20 +129,22 @@ public class Player : MonoBehaviour
     
     public void UpdatePoliceHorizontalStatus()
     {
-        if (_isHorizontal)
+        switch (_currentDirection)
         {
-            _maxBorderPosition =_moveTarget.position.z + _borderOffset;
-            _minBorderPosition =_moveTarget.position.z - _borderOffset;
-        }
-        else
-        {
-            _maxBorderPosition =_moveTarget.position.x + _borderOffset;
-            _minBorderPosition =_moveTarget.position.x - _borderOffset;
+            case BridgeDirection.VerticalUp:
+                _maxBorderPosition =_moveTarget.position.x + _borderOffset;
+                _minBorderPosition =_moveTarget.position.x - _borderOffset;
+                break;
+            
+            default:
+                _maxBorderPosition =_moveTarget.position.z + _borderOffset;
+                _minBorderPosition =_moveTarget.position.z - _borderOffset;
+                break;
         }
         
         foreach (PoliceOfficer policeOfficer in _policeOfficers.Values)
         {
-            policeOfficer.SetHorizontalAndBorderStatus(_isHorizontal, _minBorderPosition, _maxBorderPosition);
+            policeOfficer.SetHorizontalAndBorderStatus(_currentDirection, _minBorderPosition, _maxBorderPosition);
         }
     }
 
@@ -143,9 +153,9 @@ public class Player : MonoBehaviour
         _playerSideMovement.Move(direction);
     }
     
-    public void RotateInDirection(bool isTurnRight)
+    public void RotateInDirection(BridgeDirection rotation)
     {
-        _playerRotation.Rotate(isTurnRight);
+        _playerRotation.Rotate(rotation);
     }
 
     public void CeaseSquadFire()
@@ -166,28 +176,30 @@ public class Player : MonoBehaviour
 
             PoliceOfficer policeOfficer = _officerSpawner.CreatePoliceUnits();
             
+            
             if (_isPoliceOfficerOnBase == false)
             {
+                _currentState = ProgressionState.Idle;
                 policeOfficer.transform.parent = _positionSpawnPoliceOfficer;
-                policeOfficer.transform.position = _positionSpawnPoliceOfficer.position;
+                policeOfficer.transform.localPosition = _positionSpawnPoliceOfficer.localPosition;
+                
                 policeOfficer.transform.rotation = _positionSpawnPoliceOfficer.rotation;
                 policeOfficer.SetRotationPositionToDamageBridge(_positionSpawnPoliceOfficer.localRotation);
                 policeOfficer.SetTargetPositionInGroup(positionToGroup);
-                
             }
             else
             {
+                _currentState = ProgressionState.BaseEntryCompleted;
                 _base.SetTargetPoliceHelps(policeOfficer);
             }
             
+            policeOfficer.SetPoliceOfficerActive(_bulletPool, _chunkPool, _currentState);
             policeOfficer.SetNumberOfficer(_numberOfficer);
-            policeOfficer.SetPoliceOfficerActive(_bulletPool, _chunkPool, _isPoliceOfficerOnBase);
-            policeOfficer.SetHorizontalAndBorderStatus(_isHorizontal, _minBorderPosition, _maxBorderPosition);
+            policeOfficer.SetHorizontalAndBorderStatus(_currentDirection, _minBorderPosition, _maxBorderPosition);
             policeOfficer.SetSpeed(_backwardMovement.Speed);
             policeOfficer.SetHealthPoint(_healthPoliceOfficer);
             policeOfficer.OnPoliceDeath += HandlePoliceDeath;
             
-
             if (_isStoppedWar == false)
             {
                 policeOfficer.Shooting(_repeatShooting);
@@ -202,16 +214,19 @@ public class Player : MonoBehaviour
     
     public void StopMoving()
     {
+        _playerInput.DirectionChanged -= OnDirectionInput;
         _isMoving = false;
     }
 
     public void KeepMoving()
     {
+        _playerInput.DirectionChanged += OnDirectionInput;
         _isMoving = true;
     }
     
     public void ResetPositionUiElements()
     {
+        _playerInput.DirectionChanged -= OnDirectionInput;
         _playerSideMovement.ResetPositionSquad();
     }
 
@@ -219,8 +234,10 @@ public class Player : MonoBehaviour
     {
         if (_isPoliceOfficerOnBase || basePolice == null) return;
 
+        _playerInput.DirectionChanged -= OnDirectionInput;
         _base = basePolice;
         _isPoliceOfficerOnBase = true;
+        _currentState = ProgressionState.MovingToBase;
         
         if (_coroutineReorganize != null)
         {
@@ -230,7 +247,7 @@ public class Player : MonoBehaviour
         foreach (PoliceOfficer policeOfficer in _policeOfficers.Values)
         {
             _base.SetTargetPoliceOfficers(policeOfficer);
-            policeOfficer.SetFinishingTargets(_base.BaseEntryTransform.localPosition, _base.StartPositionGeneration);
+            policeOfficer.SetFinishingTargets(_base.BaseEntryTransform.localPosition, _base.StartPositionGeneration, _currentState);
         }
             
         OnPlayerReachedBase?.Invoke();

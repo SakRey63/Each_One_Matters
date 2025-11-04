@@ -18,6 +18,11 @@ public class BridgeConnector : MonoBehaviour
 
     public event Action<Zombie, BridgeConnector> OnZombieDetected;
 
+    private void OnDestroy()
+    {
+        OnZombieDetected = null;
+    }
+
     private void OnTriggerEnter(Collider other)
     {
         if (other.TryGetComponent(out Zombie zombie))

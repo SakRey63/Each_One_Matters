@@ -11,15 +11,15 @@ public class BridgeGenerator : MonoBehaviour
     [SerializeField] private  int _laneCount = 3;
     [SerializeField] private Transform _startPositionBridgeSegments;
     [SerializeField] private Transform _positionZombieWaveTrigger;
+    [SerializeField] private SpawnerSegmentBridge _spawnerSegmentBridge;
+    [SerializeField] private SpawnerZombieWaveTrigger _spawnerZombieWaveTrigger;
+    [SerializeField] private BuffSpawner _buffSpawner;
+    [SerializeField] private SpawnerObstacles _spawnerObstacles;
 
     private BridgeObjectSelector _objectSelector;
     private BridgeLengthCalculator _lengthCalculator;
     private SegmentPositionGenerator _positionGenerator;
     private BridgeCheckpointStore _checkpointStore;
-    private SpawnerSegmentBridge _spawnerSegmentBridge;
-    private SpawnerZombieWaveTrigger _spawnerZombieWaveTrigger;
-    private BuffSpawner _buffSpawner;
-    private SpawnerObstacles _spawnerObstacles;
     private int _indexZombieWaveTrigger;
     private int _indexLevel;
     private int _indexDamageSegment;
@@ -38,10 +38,6 @@ public class BridgeGenerator : MonoBehaviour
 
     private void Awake()
     {
-        _spawnerObstacles = GetComponent<SpawnerObstacles>();
-        _buffSpawner = GetComponent<BuffSpawner>();
-        _spawnerZombieWaveTrigger = GetComponent<SpawnerZombieWaveTrigger>();
-        _spawnerSegmentBridge = GetComponent<SpawnerSegmentBridge>();
         _checkpointStore = GetComponent<BridgeCheckpointStore>();
         _objectSelector = GetComponent<BridgeObjectSelector>();
         _positionGenerator = GetComponent<SegmentPositionGenerator>();

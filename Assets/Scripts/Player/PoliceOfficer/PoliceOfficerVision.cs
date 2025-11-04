@@ -38,7 +38,7 @@ public class PoliceOfficerVision : MonoBehaviour
        
             foreach (var hit in hits)
             {
-                if (hit.TryGetComponent(out Zombie zombie) && !zombie.IsKilledByBullet)
+                if (hit.TryGetComponent(out Zombie zombie) && zombie.Status == UnitStatus.Alive)
                 {
                     OnZombieDetected?.Invoke(zombie);
                     break; 

@@ -6,6 +6,7 @@ public enum SquadFormationPhase
     MovingRight,
     MovingDownRight,
     MovingDownLeft,
+    MovingDown,
     MovingLeft,
     MovingUpLeft
 }

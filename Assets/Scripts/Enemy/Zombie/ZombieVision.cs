@@ -41,7 +41,7 @@ public class ZombieVision : MonoBehaviour
 
             foreach (var hit in hits)
             {
-                if (hit.TryGetComponent<PoliceOfficer>(out var police) && !police.IsDead)
+                if (hit.TryGetComponent<PoliceOfficer>(out var police) && police.Status == UnitStatus.Alive)
                 {
                     OnPoliceDetected?.Invoke(police);
                     yield break;
@@ -49,6 +49,8 @@ public class ZombieVision : MonoBehaviour
             }
 
             yield return delay;
+            
+            _coroutine = null;
         }
     }
 }

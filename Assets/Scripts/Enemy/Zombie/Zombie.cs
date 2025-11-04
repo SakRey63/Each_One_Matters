@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-public class Zombie : MonoBehaviour
+public class Zombie : MonoBehaviour, IBridgeObject, IUnitState
 {
     [SerializeField] private ZombieVision _zombieVision;
     [SerializeField] private ZombieSensor _zombieSensor;
@@ -19,16 +19,14 @@ public class Zombie : MonoBehaviour
     private Transform _enterToBase;
     private Transform _startPositionToScanEnemy;
     private bool _isMoving;
-    private bool _isBaseEntryCompleted;
-    private bool _isKilledByBullet;
-    private bool _isFoundBase;
     private bool _isAttacked;
     private int _id;
-    private int _stopSpeed;
+    private ProgressionState _progressionState;
 
+    public UnitStatus Status { get; private set; }
     public int Id => _id;
-    public bool IsKilledByBullet => _isKilledByBullet;
-
+    public BridgeObjectType Type => BridgeObjectType.Zombie;
+    
     public event Action<Zombie> OnZombieDeath;
 
     private void Awake()
@@ -81,13 +79,13 @@ public class Zombie : MonoBehaviour
     {
         _target = _finish;
         _isMoving = true;
+        _progressionState = ProgressionState.Idle;
+        Status = UnitStatus.Alive;
         _enemyWave.ResumeAnimation();
         _zombieMovement.ResetSpeed();
         _isAttacked = false;
-        _isKilledByBullet = false;
         _enterToBase = null;
         _policeOfficer = null;
-        _isBaseEntryCompleted = false;
         _zombieVision.ScanForEnemies();
     }
     
@@ -96,13 +94,13 @@ public class Zombie : MonoBehaviour
         _id = zombieId;
     }
 
-    public void TakeDamage(int damage, bool isKilledByBullet)
+    public void TakeDamage(int damage, UnitStatus killedStatus)
     {
         _health.TakeDamage(damage);
         
         if (_health.HealthPoint <= 0)
         {
-            _isKilledByBullet = isKilledByBullet;
+            Status = killedStatus;
             _zombieVision.ScanOff();
             OnZombieDeath?.Invoke(this);
         }
@@ -128,6 +126,7 @@ public class Zombie : MonoBehaviour
         }
         else
         {
+            _progressionState = ProgressionState.Idle;
             _isAttacked = false;
             _zombieVision.ScanForEnemies();
         }
@@ -135,39 +134,40 @@ public class Zombie : MonoBehaviour
     
     private void HandleTargetReached()
     {
-        if (_isFoundBase)
+        switch (_progressionState)
         {
-            if (_isBaseEntryCompleted)
-            {
+            case ProgressionState.BaseEntryCompleted:
+                _progressionState = ProgressionState.ReachedBaseEntry;
                 _finish.position = new Vector3(_startPositionToScanEnemy.position.x, _transform.position.y, _startPositionToScanEnemy.position.z);
                 _target = _finish;
-                _isBaseEntryCompleted = false;
-            }
-            else
-            {
+                break;
+            case ProgressionState.ReachedBaseEntry:
                 _zombieVision.ScanForEnemies();
-                _enterToBase = null;
-            }
-        }
-        else
-        {
-            _target = _finish;
+                break;
+            case ProgressionState.Idle:
+                _target = _finish;
+                break;
         }
     }
     
     private void ToggleVisionOnBaseDetected(Base policeBase)
     {
-        if (_isFoundBase == false)
+        if (_progressionState == ProgressionState.BaseEntryCompleted) 
+            return;
+        
+        if (_policeOfficer != null)
         {
-            _isFoundBase = true;
-            _zombieMovement.ResetSpeed();
-            _zombieVision.ScanOff();
-            _enterToBase = policeBase.BaseEntryTransform;
-            _startPositionToScanEnemy = policeBase.StartPositionGeneration;
-            _isBaseEntryCompleted = true;
-            _finish.position = new Vector3(_enterToBase.position.x, _transform.position.y, _enterToBase.position.z);
-            _target = _finish;
+            _policeOfficer.OnPoliceDeath -= LookingNewTarget;
+            _policeOfficer = null;
         }
+
+        _progressionState = ProgressionState.BaseEntryCompleted;
+        _zombieMovement.ResetSpeed();
+        _zombieVision.ScanOff();
+        _enterToBase = policeBase.BaseEntryTransform;
+        _startPositionToScanEnemy = policeBase.StartPositionGeneration;
+        _finish.position = new Vector3(_enterToBase.position.x, _transform.position.y, _enterToBase.position.z);
+        _target = _finish;
     }
 
     private void ApplyDamageToPolice(PoliceOfficer policeOfficer)
@@ -190,6 +190,7 @@ public class Zombie : MonoBehaviour
         _policeOfficer = policeOfficer;
         _policeOfficer.OnPoliceDeath += LookingNewTarget;
         _target = _policeOfficer.transform;
+        _progressionState = ProgressionState.MovingToEnemy;
         _zombieMovement.Accelerate();
     }
 
@@ -200,6 +201,7 @@ public class Zombie : MonoBehaviour
         
         if (gameObject.activeInHierarchy)
         {
+            _progressionState = ProgressionState.Idle;
             _target = _finish;
             _zombieMovement.ResetSpeed();
             _zombieVision.ScanForEnemies();

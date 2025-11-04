@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-public class PoliceOfficer : MonoBehaviour
+public class PoliceOfficer : MonoBehaviour, IUnitState
 {
     [SerializeField] private float _delay = 1f;
     [SerializeField] private float _tiltAngle = 90f;
@@ -21,16 +21,12 @@ public class PoliceOfficer : MonoBehaviour
     private ChunkPool _chunkPool;
     private Transform _targetCenterPoint;
     private int _officerId;
-    private bool _isDead;
-    private bool _isFallingToDie;
-    private bool _isReachedBaseEntry;
-    private bool _isFoundBase;
-    private bool _isBaseEntryCompleted;
     private bool _isLeadingZombie;
+    private ProgressionState _currentState;
     
+    public UnitStatus Status { get; private set; }
     public int OfficerId => _officerId;
     public float SpeedOfficer => _officerMovement.Speed;
-    public bool IsDead => _isDead;
 
     public event Action<PoliceOfficer> OnPoliceDeath;
     public event Action<PoliceOfficer> OnDeathAnimationFinished;
@@ -59,7 +55,7 @@ public class PoliceOfficer : MonoBehaviour
 
     private void Update()
     {
-        _officerMovement.Move(_isFoundBase);
+        _officerMovement.Move(_currentState);
 
         if (_isLeadingZombie)
         {
@@ -73,8 +69,8 @@ public class PoliceOfficer : MonoBehaviour
 
         if (_health.HealthPoint <= 0)
         {
-            _isDead = true;
-            _officerMovement.StopMove(false);
+            Status = UnitStatus.Dead;
+            _officerMovement.StopMoving();
             _officerVision.ScanOff();
             _weapon.StopShooting();
             OnPoliceDeath?.Invoke(this);
@@ -95,14 +91,13 @@ public class PoliceOfficer : MonoBehaviour
         _rotationPositionToDamageBridge = rotation;
     }
     
-    public void SetPoliceOfficerActive(BulletPool bulletPool, ChunkPool chunkPool, bool isBaseEntryCompleted)
+    public void SetPoliceOfficerActive(BulletPool bulletPool, ChunkPool chunkPool, ProgressionState progressionState)
     {
         _chunkPool = chunkPool;
         _weapon.SetBulletPool(bulletPool, _policeOfficerSound);
-        _isDead = false;
+        Status = UnitStatus.Alive;
         _isLeadingZombie = false;
-        _isFoundBase = isBaseEntryCompleted;
-        _isBaseEntryCompleted = isBaseEntryCompleted;
+        _currentState = progressionState;
     }
 
     public void SetTargetPositionInGroup(Vector3 position)
@@ -127,6 +122,8 @@ public class PoliceOfficer : MonoBehaviour
 
     public void SetCenterPoint(Transform point)
     {
+        Status = UnitStatus.Dead;
+        
         _policeOfficerSound.PlayScream();
         _targetCenterPoint = point;
         _weapon.StopShooting();
@@ -151,15 +148,14 @@ public class PoliceOfficer : MonoBehaviour
         _officerMovement.SetSpeed(backwardMovementSpeed);
     }
     
-    public void SetHorizontalAndBorderStatus(bool isHorizontal, float minBorderPosition, float maxBorderPosition)
+    public void SetHorizontalAndBorderStatus(BridgeDirection direction, float minBorderPosition, float maxBorderPosition)
     {
-        _officerMovement.SetHorizontalAndBorder(isHorizontal, maxBorderPosition, minBorderPosition);
+        _officerMovement.SetHorizontalAndBorder(direction, maxBorderPosition, minBorderPosition);
     }
 
-    public void SetFinishingTargets(Vector3 enteredPosition, Transform startPositionGeneration)
+    public void SetFinishingTargets(Vector3 enteredPosition, Transform startPositionGeneration, ProgressionState state)
     {
-        _isFoundBase = true;
-        _isReachedBaseEntry = true;
+        _currentState = state;
         _officerMovement.SetTargetPosition(enteredPosition, true);
         _startPositionGenerationSquad = startPositionGeneration;
     }
@@ -180,38 +176,34 @@ public class PoliceOfficer : MonoBehaviour
 
     private void SubscribeAndHandleBaseDetection()
     {
-        if (_isFoundBase)
+        switch (_currentState)
         {
-            if (_isReachedBaseEntry)
-            {
-                _isReachedBaseEntry = false;
+            case ProgressionState.MovingToBase:
+                _currentState = ProgressionState.ReachedBaseEntry;
                 _officerMovement.SetTargetPosition(_startPositionGenerationSquad.localPosition, true);
-            }
-            else
-            {
-                if (_isBaseEntryCompleted)
-                {
-                    _officerMovement.SetSpeed(0);
-                    _animations.MoveRunAnimation(false);
+                break;
+            
+            case ProgressionState.ReachedBaseEntry:
+                OnPoliceReachedToGeneratePositionOnBase?.Invoke(this);
+                _currentState = ProgressionState.BaseEntryCompleted;
+                break;
+            
+            case ProgressionState.BaseEntryCompleted:
+                _officerMovement.StopMoving();
+                _animations.MoveRunAnimation(false);
+                _currentState = ProgressionState.Idle;
 
-                    if (_isLeadingZombie == false)
-                    {
-                        _officerVision.ScanForEnemies();
-                    }
-                }
-                else
+                if (_isLeadingZombie == false)
                 {
-                    OnPoliceReachedToGeneratePositionOnBase?.Invoke(this);
-                    _isBaseEntryCompleted = true;
+                    _officerVision.ScanForEnemies();
                 }
-            }
+                break;
         }
     }
     
     private IEnumerator TurnModelToCenter()
     {
-        _isDead = true;
-        _officerMovement.StopMove(false);
+        _officerMovement.StopMoving();
         _animations.MoveFallingAnimation();
         OnPoliceDeath?.Invoke(this);
         transform.rotation = _rotationPositionToDamageBridge;

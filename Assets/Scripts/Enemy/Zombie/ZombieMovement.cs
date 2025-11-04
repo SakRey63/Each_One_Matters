@@ -33,7 +33,7 @@ public class ZombieMovement : MonoBehaviour
                 _transform.position = Vector3.MoveTowards(_transform.position, target.position, _movementSpeed * Time.deltaTime);
             }
 
-            if (_transform.position.y < _minBorderY)
+            if (_transform.position.y <= _minBorderY)
             {
                 Vector3 stabilizationOffsetY = new Vector3(_transform.position.x, _minBorderY, _transform.position.z);
                 _transform.position = stabilizationOffsetY;

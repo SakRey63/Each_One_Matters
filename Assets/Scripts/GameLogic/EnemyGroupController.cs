@@ -8,12 +8,12 @@ public class EnemyGroupController : MonoBehaviour
 
     private int _indexEnemy;
     private Dictionary<int, Zombie> _activeZombies;
-
     private int _countAllZombies;
     private bool _isMovingStop;
+    
     public int CountAllZombies => _countAllZombies;
     
-    public event Action<bool> OnZombieKilled;
+    public event Action<UnitStatus> OnZombieKilled;
 
     private void Awake()
     {
@@ -69,7 +69,7 @@ public class EnemyGroupController : MonoBehaviour
         _countAllZombies--;
         
         zombie.OnZombieDeath -= RemoveZombies;
-        OnZombieKilled?.Invoke(zombie.IsKilledByBullet);
+        OnZombieKilled?.Invoke(zombie.Status);
 
         _activeZombies.Remove(zombie.Id);
     }

@@ -20,9 +20,9 @@ public class Bullet : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.TryGetComponent(out Zombie zombie))
+        if (other.TryGetComponent(out Zombie zombie) && zombie.Status == UnitStatus.Alive)
         {
-            zombie.TakeDamage(_damage, true);
+            zombie.TakeDamage(_damage, UnitStatus.KilledByBullet);
             StopCoroutine(_coroutineShot);
             OnHit?.Invoke(this);
         }

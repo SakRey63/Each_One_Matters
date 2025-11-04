@@ -13,14 +13,14 @@ public class DemoModeController : MonoBehaviour
     [SerializeField] private int _minCountUnits = 1;
     [SerializeField] private int _maxContSpawnZombie = 11;
     [SerializeField] private int _maxContSpawnPolice = 6;
-    [SerializeField] private float _stepOffset = 1f; 
-    [SerializeField] private float _repeatShooting = 1f; 
+    [SerializeField] private float _stepOffset = 1f;
+    [SerializeField] private float _repeatShooting = 1f;
     [SerializeField] private int _healthPoint = 75;
+    [SerializeField] private BulletPool _bulletPool;
+    [SerializeField] private ChunkPool _chunkPool;
+    [SerializeField] private SpawnerZombie _spawnerZombie;
+    [SerializeField] private PoleceOfficerSpawner _officerSpawner;
     
-    private SpawnerZombie _spawnerZombie;
-    private PoleceOfficerSpawner _officerSpawner;
-    private BulletPool _bulletPool;
-    private ChunkPool _chunkPool;
     private Vector3 _nexPositionSpawn;
     private Vector3 _lastPositionToBaseRight;
     private Vector3 _lastPositionToBaseLeft;
@@ -34,6 +34,7 @@ public class DemoModeController : MonoBehaviour
     private Dictionary<int, PoliceOfficer> _activePoliceOfficers;
     private Dictionary<int, Zombie> _activeZombies;
     private Coroutine _coroutine;
+    private SquadFormationPhase _currentPhase;
     
     private void Awake()
     {
@@ -41,13 +42,8 @@ public class DemoModeController : MonoBehaviour
         _activeZombies = new Dictionary<int, Zombie>();
     }
 
-    public void SetupDemoScene(SpawnerZombie zombieSpawner, PoleceOfficerSpawner spawnerOfficer, BulletPool bulletPool, ChunkPool chunkPool)
+    public void SetupDemoScene()
     {
-        _chunkPool = chunkPool;
-        _bulletPool = bulletPool;
-        _spawnerZombie = zombieSpawner;
-        _officerSpawner = spawnerOfficer;
-
         StartDemoScene();
     }
     
@@ -116,9 +112,7 @@ public class DemoModeController : MonoBehaviour
 
     private void StartDemoScene()
     {
-        _isStart = true;
-        _isRight = false;
-        _isLeft = false;
+        _currentPhase = SquadFormationPhase.Centered;
         
         _countSpawnPolice = GetRandomCountUnits(_minCountUnits, _maxContSpawnPolice);
         _countSpawnZombie = GetRandomCountUnits(_minCountUnits, _maxContSpawnZombie);
@@ -128,7 +122,7 @@ public class DemoModeController : MonoBehaviour
             PoliceOfficer officer = _officerSpawner.CreatePoliceUnits();
             officer.transform.position = GetPositionOnBase(_policeSpawnPosition.position);
             officer.transform.rotation = _policeSpawnPosition.rotation;
-            officer.SetPoliceOfficerActive(_bulletPool, _chunkPool, true);
+            officer.SetPoliceOfficerActive(_bulletPool, _chunkPool, ProgressionState.BaseEntryCompleted);
             officer.Shooting(_repeatShooting);
             officer.SetNumberOfficer(_officerId);
             officer.ScanningEnemiesActive();
@@ -160,31 +154,29 @@ public class DemoModeController : MonoBehaviour
     
     private Vector3 GetPositionOnBase(Vector3 startPositionToBase)
     {
-        if (_isStart)
+        switch (_currentPhase)
         {
-            _lastPositionToBaseRight = startPositionToBase;
-            _lastPositionToBaseLeft= startPositionToBase;
-            _nexPositionSpawn = startPositionToBase;
-            _isLeft = true;
-            _isStart = false;
-        }
-        else if (_isLeft)
-        {
-            _lastPositionToBaseLeft = new Vector3(_lastPositionToBaseLeft.x, _lastPositionToBaseLeft.y,
-                _lastPositionToBaseLeft.z - _stepOffset);
+            case SquadFormationPhase.Centered:
+                _lastPositionToBaseRight = startPositionToBase;
+                _lastPositionToBaseLeft= startPositionToBase;
+                _nexPositionSpawn = startPositionToBase;
+                _currentPhase = SquadFormationPhase.MovingRight;
+                break;
+            case SquadFormationPhase.MovingRight:
+                _lastPositionToBaseRight = new Vector3(_lastPositionToBaseRight.x, _lastPositionToBaseRight.y,
+                    _lastPositionToBaseRight.z + _stepOffset);
             
-            _nexPositionSpawn = _lastPositionToBaseLeft;
-            _isRight = true;
-            _isLeft = false;
-        }
-        else if (_isRight)
-        {
-            _lastPositionToBaseRight = new Vector3(_lastPositionToBaseRight.x, _lastPositionToBaseRight.y,
-                _lastPositionToBaseRight.z + _stepOffset);
+                _nexPositionSpawn = _lastPositionToBaseRight;
+                _currentPhase = SquadFormationPhase.MovingLeft;
+                
+                break;
+            case SquadFormationPhase.MovingLeft:
+                _lastPositionToBaseLeft = new Vector3(_lastPositionToBaseLeft.x, _lastPositionToBaseLeft.y,
+                    _lastPositionToBaseLeft.z - _stepOffset);
             
-            _nexPositionSpawn = _lastPositionToBaseRight;
-            _isRight = false;
-            _isLeft = true;
+                _nexPositionSpawn = _lastPositionToBaseLeft;
+                _currentPhase = SquadFormationPhase.MovingRight;
+                break;
         }
 
         return _nexPositionSpawn;

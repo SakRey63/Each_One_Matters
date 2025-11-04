@@ -11,7 +11,7 @@ public class ZombieWeapon : MonoBehaviour
     {
         bool isKilledUnit = false;
         
-        if (policeOfficer.IsDead == false)
+        if (policeOfficer.Status == UnitStatus.Alive)
         {
             policeOfficer.TakeDamage(_damage);
             isKilledUnit = true;

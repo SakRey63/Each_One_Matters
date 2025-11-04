@@ -15,7 +15,7 @@ public class ZombieSensor : MonoBehaviour
         }
         else if(other.TryGetComponent(out PoliceOfficer policeOfficer))
         {
-            if (policeOfficer.IsDead == false)
+            if (policeOfficer.Status == UnitStatus.Alive)
             {
                 OnPoliceContact?.Invoke(policeOfficer);
             }

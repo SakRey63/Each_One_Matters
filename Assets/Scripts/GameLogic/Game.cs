@@ -1,460 +1,54 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using YG;
 
 public class Game : MonoBehaviour
 {
-    private const string LeaderboardId = "EachOfMatersLB";
-    
-    [SerializeField] private Player _player;
-    [SerializeField] private EnemyGroupController _enemyGroup;
-    [SerializeField] private SpawnerZombie _spawnerZombie;
-    [SerializeField] private TutorialUI _tutorialUI;
-    [SerializeField] private float _xOffsetOcean = 59f;
-    [SerializeField] private float _searchRadius = 5f;
-    [SerializeField] private int _countAdRevival = 5;
-    [SerializeField] private int _damageZombie = 100;
+    [SerializeField] private GameSessionSystem _gameSessionSystem;
+    [SerializeField] private ProgressSystem _progressSystem;
+    [SerializeField] private PlayerInputCoordinator _playerInputCoordinator;
     [SerializeField] private LevelMenuHandler _levelMenuHandler;
-    [SerializeField] private ScoreHandler _scoreHandler;
-    [SerializeField] private Ocean _ocean;
+    [SerializeField] private DemoModeController _demoMode;
     
-    private CameraController _cameraController;
-    private PlayerInput _playerInput;
-    private BridgeGenerator _bridgeGenerator;
-    private DemoModeController _demoMode;
-    private ChunkPool _chunkPool;
-    private BulletPool _bulletPool;
     private int _levelPlayer;
-    private int _nextCountPoint;
-    private int _countPoint;
-    private int _currentScore;
-    private bool _isHorizontal;
-    private bool _isTurnRight;
-    private List<BridgeConnector> _connectors;
-    private Coroutine _buffCoroutine;
     
-    private void Awake()
-    {
-        _bulletPool = GetComponent<BulletPool>();
-        _chunkPool = GetComponent<ChunkPool>();
-        _demoMode = GetComponent<DemoModeController>();
-        _cameraController = GetComponent<CameraController>();
-        _connectors = new List<BridgeConnector>();
-        _playerInput = GetComponent<PlayerInput>();
-        _bridgeGenerator = GetComponent<BridgeGenerator>();
-    }
+    private int _currentScore;
+    private Coroutine _buffCoroutine;
 
     private void OnEnable()
     {
-        _player.OnUnitDied += HandleUnitDead;
-        _levelMenuHandler.OnLevelUp += HandleOnLevelUp;
-        _levelMenuHandler.OnRewardedAdClicked += RevealAndRemoveKillerObstacle;
-        _levelMenuHandler.OnCallHelpPoliceOfficer += HandleCallHelpPolice;
+        _playerInputCoordinator.OnLevelMenuClicked += ShowLevelMenu;
         _levelMenuHandler.OnRewardedAdWatched += SetupRevivalWithAd;
-        _bridgeGenerator.OnPointSpawnedTrigger += SpawnedTrigger;
-        _bridgeGenerator.OnFireRateBoostedCreated += SubscribeToFireRateCreated;
-        _bridgeGenerator.OnRecruitPoliceCreated += SubscribeToRecruitPoliced;
-        _bridgeGenerator.OnBridgeConnectorCreated += SubscribeToBridgeConnectorCreation;
-        _bridgeGenerator.OnBasePoliceOfficerCreated += SubscribeToBasePoliceOfficer;
-        _player.OnCheckpointReached += UpdatePlayerTargetPosition;
-        _player.OnAllPoliceOfficersDied += HandleAllPoliceOfficerDied;
-        _player.OnPlayerReachedBase += ActivateCallHelpButton;
-        _enemyGroup.OnZombieKilled += HandleZombieKilled;
     }
 
     private void OnDisable()
     {
-        _player.OnUnitDied += HandleUnitDead;
-        _playerInput.OnEscapePressed -= HandleEscapePressed;
+        _playerInputCoordinator.OnLevelMenuClicked -= ShowLevelMenu;
         _levelMenuHandler.OnRewardedAdWatched -= SetupRevivalWithAd;
-        _levelMenuHandler.OnRewardedAdClicked -= RevealAndRemoveKillerObstacle;
-        _levelMenuHandler.OnLevelUp -= HandleOnLevelUp;
-        _levelMenuHandler.OnCallHelpPoliceOfficer -= HandleCallHelpPolice;
-        _bridgeGenerator.OnBridgeConnectorCreated -= SubscribeToBridgeConnectorCreation;
-        _bridgeGenerator.OnPointSpawnedTrigger -= SpawnedTrigger;
-        _bridgeGenerator.OnFireRateBoostedCreated -= SubscribeToFireRateCreated;
-        _bridgeGenerator.OnRecruitPoliceCreated -= SubscribeToRecruitPoliced;
-        _bridgeGenerator.OnBasePoliceOfficerCreated -= SubscribeToBasePoliceOfficer;
-        _player.OnCheckpointReached -= UpdatePlayerTargetPosition;
-        _player.OnAllPoliceOfficersDied -= HandleAllPoliceOfficerDied;
-        _player.OnPlayerReachedBase -= ActivateCallHelpButton;
-        _enemyGroup.OnZombieKilled -= HandleZombieKilled;
-        
-        foreach (BridgeConnector connector in _connectors)
-        {
-            connector.OnZombieDetected -= BindNewTargetOnZombieDetected;
-        }
     }
 
     public void StartNewLevel()
     {
-        if (YG2.saves.player.CountPoliceOfficer > YG2.saves.player.MaxPoliceCount)
-        {
-            YG2.saves.player.CountPoliceOfficer = YG2.saves.player.MaxPoliceCount;
-            YG2.SaveProgress();
-        }
-        
-        _cameraController.ConfigureCameraForPlatform();
-        _cameraController.OnUnitCountChanged(YG2.saves.player.CountPoliceOfficer);
-            
-        if (YG2.envir.isDesktop)
-        {
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
-        }
-            
-        _playerInput.OnEscapePressed += HandleEscapePressed;
-        _playerInput.DirectionChanged += OnDirectionChanged;
-        _levelPlayer = YG2.saves.gameplay.Level;
-        _scoreHandler.SetInitialScore(_currentScore);
-        _bridgeGenerator.Generate(_levelPlayer);
-        _player.SetupObjectsPool(_bulletPool, _chunkPool);
-            
-        if (YG2.saves.gameplay.IsFirstLaunch)
-        {
-            StartCoroutine(WaitForFirstInput());
-        }
-        else
-        {
-            _levelMenuHandler.InitializeLevelMenu();
-            _player.SpawnPoliceOfficer(YG2.saves.player.CountPoliceOfficer);
-            UpdatePlayerTargetPosition();
-        }
+        _gameSessionSystem.StartNewLevel();
     }
 
     public void StartDemoScene()
     {
-        _demoMode.SetupDemoScene(_spawnerZombie, _player.PoliceOfficerSpawner, _bulletPool, _chunkPool);
+        _demoMode.SetupDemoScene();
     }
     
-    private void HandleUnitDead(int number)
+    private void ShowLevelMenu()
     {
-        _cameraController.OnUnitCountChanged(number);
+        _levelMenuHandler.ShowPauseGameMenu();
     }
     
-    private IEnumerator WaitForFirstInput()
-    {
-        _tutorialUI.PlayGameGuide();
-        
-        yield return new WaitUntil(() => Input.anyKeyDown);
-        
-        _tutorialUI.CloseGameGuide();
-        _levelMenuHandler.InitializeLevelMenu();
-        _player.SpawnPoliceOfficer(YG2.saves.player.CountPoliceOfficer);
-        UpdatePlayerTargetPosition();
-        YG2.saves.gameplay.IsFirstLaunch = false;
-        YG2.SaveProgress();
-    }
-    
-    private void RevealAndRemoveKillerObstacle()
-    {
-        Collider[] hits = Physics.OverlapSphere(_player.SquadPosition.position, _searchRadius);
-
-        foreach (Collider collider in hits)
-        {
-            if (collider.TryGetComponent<Hammer>(out _))
-            {
-                Destroy(collider.gameObject);
-            }
-            else if (collider.TryGetComponent<RotatingBlade>(out _))
-            {
-                Destroy(collider.gameObject);
-            }
-            else if (collider.TryGetComponent<SawBlade>(out _))
-            {
-                Destroy(collider.gameObject);
-            }
-            else if (collider.TryGetComponent<SpikedCylinder>(out _))
-            {
-                Destroy(collider.gameObject);
-            }
-            else if (collider.TryGetComponent<SpikePress>(out _))
-            {
-                Destroy(collider.gameObject);
-            }
-            else if (collider.TryGetComponent<ScannerObstacle>(out _))
-            {
-                Destroy(collider.gameObject);
-            }
-            else if (collider.TryGetComponent(out SegmentDamagedBridge damagedBridge))
-            {
-                foreach (Collider police in hits)
-                {
-                    if (police.TryGetComponent(out PoliceOfficer policeOfficer))
-                    {
-                        policeOfficer.OnDeathAnimationComplete();
-                    }
-                }
-                
-                Transform transform = damagedBridge.transform;
-                int number = damagedBridge.NumberPosition;
-                Destroy(collider.gameObject);
-                _bridgeGenerator.SpawnNormalSegment(transform.position, transform.rotation, number);
-            }
-            else if (collider.TryGetComponent(out Zombie zombie))
-            {
-                zombie.TakeDamage(_damageZombie, false);
-            }
-        }
-    }
-    
-    private void SubscribeToBasePoliceOfficer(Base basePoliceOfficer)
-    {
-        basePoliceOfficer.OnPoliceOfficerDetected += HandlePoliceOfficerDetected;
-    }
-
-    private void HandlePoliceOfficerDetected(Base basePoliceOfficer)
-    {
-        basePoliceOfficer.OnPoliceOfficerDetected -= HandlePoliceOfficerDetected;
-        _player.HandlePoliceReachedBase(basePoliceOfficer);
-    }
-
     private void SetupRevivalWithAd(bool isRewarded)
     {
         if (isRewarded)
         {
-            if (YG2.envir.isDesktop)
-            {
-                Cursor.lockState = CursorLockMode.Locked;
-                Cursor.visible = false; 
-            }
-            
-            int maxAllowed = YG2.saves.player.MaxPoliceCount - _player.PoliceCount;
-            int reviveCount = Mathf.Min(_countAdRevival, maxAllowed);
-
-            if (reviveCount > 0)
-            {
-                _playerInput.DirectionChanged += OnDirectionChanged;
-                _player.SpawnPoliceOfficer(reviveCount);
-                _player.KeepMoving();
-                _enemyGroup.ResumeAllZombies();
-            }
+            _gameSessionSystem.ResumeAfterAd();
         }
         else
         {
-            if (YG2.envir.isDesktop)
-            {
-                _levelMenuHandler.ShowGameOverMenu(true);
-            }
-        }
-    }
-
-    private void HandleCallHelpPolice()
-    {
-        if (_player.PoliceCount >= YG2.saves.player.MaxPoliceCount)
-        {
-            _levelMenuHandler.ShowMaxPoliceWarning();
-            return;
-        }
-        
-        if (_scoreHandler.CurrentScore >= YG2.saves.gameplay.CallHelpButtonPrice)
-        {
-            _scoreHandler.DeductPointsForHelp(YG2.saves.gameplay.CallHelpButtonPrice);
-            _levelMenuHandler.LockButtonDuringCooldown();
-            
-            int spawnCount = Mathf.Min(YG2.saves.gameplay.CountHelpPoliceOfficer, 
-                YG2.saves.player.MaxPoliceCount - _player.PoliceCount);
-            
-            _player.SpawnPoliceOfficer(spawnCount);
-            
-            if (_player.PoliceCount >= YG2.saves.player.MaxPoliceCount)
-            {
-                _levelMenuHandler.ShowMaxPoliceWarning();
-            }
-        }
-        else
-        {
-            _levelMenuHandler.ShowNotEnoughPointsWindow();
-        }
-    }
-    
-    private void ActivateCallHelpButton()
-    {
-        _playerInput.DirectionChanged -= OnDirectionChanged;
-        _player.ResetPositionUiElements();
-
-        if (YG2.envir.isDesktop)
-        {
-            Cursor.lockState = CursorLockMode.Confined;
-            Cursor.visible = true; 
-        }
-        
-        if (YG2.saves.gameplay.IsCallHelpUpgradePurchased)
-        {
-            _levelMenuHandler.ActivateCallHelp();
-        }
-
-        CheckForWinnings();
-    }
-
-    private void HandleOnLevelUp()
-    {
-        _levelPlayer++;
-        YG2.saves.gameplay.Level = _levelPlayer;
-        YG2.SaveProgress();
-    } 
-    
-    private void HandleEscapePressed()
-    {
-        _levelMenuHandler.ShowPauseGameMenu();
-    }
-
-    private void UpdatePlayerTargetPosition()
-    {
-        _countPoint = _nextCountPoint;
-        _nextCountPoint++;
-        
-        if (_countPoint == 0)
-        {
-            _isTurnRight = BridgeDirection.HorizontalRight == _bridgeGenerator.FirstTurn;
-        }
-        else
-        {
-            _player.RotateInDirection(_isTurnRight);
-
-            _isTurnRight = !_isTurnRight;
-        }
-        
-        if (_nextCountPoint == _bridgeGenerator.BridgeSpanCount)
-        {
-            _player.SetPlayerFinishPosition(_bridgeGenerator.EndPositionPlayer, true, _isHorizontal);
-        }
-        else
-        {
-            _player.SetNextTargetPosition(_bridgeGenerator.GetTargetPoint(_countPoint), _isHorizontal);
-        }
-
-        _player.UpdatePoliceHorizontalStatus();
-
-        UpdateOceanPositionRelativeToPlayer();
-        
-        _isHorizontal = !_isHorizontal;
-    }
-
-    private void UpdateOceanPositionRelativeToPlayer()
-    {
-        Vector3 position = _player.transform.position;
-            
-        if (_isHorizontal)
-        {
-            if (_isTurnRight)
-            {
-                position = new Vector3(position.x - _xOffsetOcean, _ocean.transform.position.y, position.z);
-            }
-            else
-            {
-                position = new Vector3(position.x + _xOffsetOcean, _ocean.transform.position.y, position.z);
-            }
-        }
-        else
-        {
-            position = new Vector3(position.x, _ocean.transform.position.y, position.z + _xOffsetOcean);
-        }
-            
-        _ocean.gameObject.transform.position = position;
-    }
-    
-    private void SubscribeToBridgeConnectorCreation(BridgeConnector bridgeConnector)
-    {
-        bridgeConnector.OnZombieDetected += BindNewTargetOnZombieDetected;
-        _connectors.Add(bridgeConnector);
-    }
-
-    private void BindNewTargetOnZombieDetected(Zombie zombie, BridgeConnector connector)
-    {
-        zombie.SetFinish(_bridgeGenerator.GetTargetPoint(connector.Index));
-    }
-
-    private void SubscribeToFireRateCreated(FireRateBooster fireRateBooster)
-    {
-        fireRateBooster.OnFirstOfficerEntered += IncreaseGroupFireRate;
-    }
-    
-    private void IncreaseGroupFireRate(FireRateBooster fireRateBooster)
-    {
-        fireRateBooster.OnFirstOfficerEntered -= IncreaseGroupFireRate;
-        _player.ApplyBuffToParty(fireRateBooster.BuffDuration, fireRateBooster.IncreasedRateOfFire);
-    } 
-    
-    private void SubscribeToRecruitPoliced(RecruitPolice recruitPolice)
-    {
-        recruitPolice.OnRecruitPoliceTriggered += IncreasePoliceOfficerSize;
-    }
-
-    private void IncreasePoliceOfficerSize(RecruitPolice recruitPolice)
-    {
-        recruitPolice.OnRecruitPoliceTriggered -= IncreasePoliceOfficerSize;
-        bool isPositiveX = _player.SquadPosition.transform.localPosition.x >= 0;
-        int spawnCount = recruitPolice.GetCountSpawnPoliceOfficers(isPositiveX, _player.PoliceCount);
-
-        if (_player.PoliceCount >= YG2.saves.player.MaxPoliceCount)
-        {
-            _levelMenuHandler.ShowMaxPoliceWarning();
-            return;
-        }
-        
-        spawnCount = Mathf.Min(spawnCount, YG2.saves.player.MaxPoliceCount - _player.PoliceCount);
-        
-        if (spawnCount > 0)
-        {
-            _player.SpawnPoliceOfficer(spawnCount);
-            _cameraController.OnUnitCountChanged(_player.PoliceCount);
-            
-            if (_player.PoliceCount == YG2.saves.player.MaxPoliceCount)
-            {
-                _levelMenuHandler.ShowMaxPoliceWarning();
-            }
-        }
-    }
-    
-    private void SpawnedTrigger(PointSpawnTrigger spawnTrigger)
-    {
-        spawnTrigger.OnHordeSpawning += SpawnZombie;
-        spawnTrigger.AssignSpawnerAndGroup(_spawnerZombie, _enemyGroup);
-    }
-
-    private void SpawnZombie(PointSpawnTrigger spawnTrigger)
-    {
-        spawnTrigger.OnHordeSpawning -= SpawnZombie;
-        spawnTrigger.SpawnAdaptiveWave(_player.PoliceCount, _bridgeGenerator.GetTargetPoint(spawnTrigger.Index));
-    }
-
-    private void OnDirectionChanged(float direction)
-    {
-        _player.MoveSideways(direction);
-    }
-    
-    private void HandleAllPoliceOfficerDied()
-    {
-        _playerInput.DirectionChanged -= OnDirectionChanged;
-        _player.StopMoving();
-        _player.ResetPositionUiElements();
-        _enemyGroup.StopAllZombies();
-        _levelMenuHandler.ShowGameOverMenu(_player.IsPoliceOfficerOnBase);
-    }
-    
-    private void HandleZombieKilled(bool isKilledByBullet)
-    {
-        if (isKilledByBullet)
-        {
-            _scoreHandler.AddPointsForZombie();
-        }
-
-        CheckForWinnings();
-    }
-
-    private void CheckForWinnings()
-    {
-        if (_enemyGroup.CountAllZombies == 0 && _player.IsPoliceOfficerOnBase && _player.PoliceCount > 0)
-        {
-            int score = YG2.saves.gameplay.Score;
-            score += _scoreHandler.CurrentScore;
-            YG2.saves.gameplay.Score = score;
-            YG2.SetLeaderboard(LeaderboardId, score);
-            YG2.SaveProgress();
-            _levelMenuHandler.ShowWinGameMenu();
-            _player.CeaseSquadFire();
+            _levelMenuHandler.ShowGameOverMenu(true);
         }
     }
 }

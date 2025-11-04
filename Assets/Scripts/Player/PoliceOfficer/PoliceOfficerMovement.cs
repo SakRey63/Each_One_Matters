@@ -9,8 +9,8 @@ public class PoliceOfficerMovement : MonoBehaviour
     private Transform _transform;
     private Vector3 _targetPositionInGroup;
     private bool _isTargetToPoint;
-    private bool _isHorizontal;
     private float _threshold = 0.001f;
+    private BridgeDirection _currentDirection;
 
     public float Speed => _speed;
 
@@ -21,61 +21,50 @@ public class PoliceOfficerMovement : MonoBehaviour
         _transform = transform;
     }
 
-    public void Move(bool isFoundBase)
+    public void Move(ProgressionState state)
     {
         if (_isTargetToPoint)
         {
-            if (_isHorizontal)
+            switch (_currentDirection)
             {
-                if (_transform.position.z <= _minBorderPosition && isFoundBase == false)
-                {
-                    _transform.position = new Vector3(_transform.position.x, _transform.position.y, _minBorderPosition);
-                }
-                else if (_transform.position.z >= _maxBorderPosition && isFoundBase == false)
-                {
-                    _transform.position = new Vector3(_transform.position.x, _transform.position.y, _maxBorderPosition);
-                }
-                else
-                {
-                    if ((_transform.localPosition - _targetPositionInGroup).sqrMagnitude < _threshold)
+                case BridgeDirection.VerticalUp:
+                    
+                    if (_transform.position.x <= _minBorderPosition && state == ProgressionState.Idle)
                     {
-                        OnReachedRegroupPoint?.Invoke();
-                    }                                                                                                                                                                                                                                                                                                                                                               
-                    else
-                    {
-                        
-                        MoveTowardsTarget(_targetPositionInGroup);
+                        _transform.position = new Vector3(_minBorderPosition, _transform.position.y, _transform.position.z);
                     }
-                }
-            }
-            else
-            {
-                if (_transform.position.x <= _minBorderPosition && isFoundBase == false)
-                {
-                    _transform.position = new Vector3(_minBorderPosition, _transform.position.y, _transform.position.z);
-                }
-                else if (_transform.position.x >= _maxBorderPosition && isFoundBase == false)
-                {
-                    _transform.position = new Vector3(_maxBorderPosition, _transform.position.y, _transform.position.z);
-                }
-                else
-                {
-                    if ((_transform.localPosition - _targetPositionInGroup).sqrMagnitude < _threshold)
+                    else if (_transform.position.x >= _maxBorderPosition && state == ProgressionState.Idle)
                     {
-                        OnReachedRegroupPoint?.Invoke();
-                    }                                                                                                                                                                                                                                                                                                                                                               
+                        _transform.position = new Vector3(_maxBorderPosition, _transform.position.y, _transform.position.z);
+                    }
                     else
                     {
                         MoveTowardsTarget(_targetPositionInGroup);
                     }
-                }
+                    break;
+                
+                default:
+                    
+                    if (_transform.position.z <= _minBorderPosition && state == ProgressionState.Idle)
+                    {
+                        _transform.position = new Vector3(_transform.position.x, _transform.position.y, _minBorderPosition);
+                    }
+                    else if (_transform.position.z >= _maxBorderPosition && state == ProgressionState.Idle)
+                    {
+                        _transform.position = new Vector3(_transform.position.x, _transform.position.y, _maxBorderPosition);
+                    }
+                    else
+                    {
+                        MoveTowardsTarget(_targetPositionInGroup);
+                    }
+                    break;
             }
         }
     }
 
-    public void SetHorizontalAndBorder(bool isHorizontal, float maxBorder, float minBorder)
+    public void SetHorizontalAndBorder(BridgeDirection direction, float maxBorder, float minBorder)
     {
-        _isHorizontal = isHorizontal;
+        _currentDirection = direction;
         _maxBorderPosition = maxBorder;
         _minBorderPosition = minBorder;
     }
@@ -85,9 +74,9 @@ public class PoliceOfficerMovement : MonoBehaviour
         _speed = backwardMovementSpeed;
     }
 
-    public void StopMove(bool isTargetToPoint)
+    public void StopMoving()
     {
-        _isTargetToPoint = isTargetToPoint;
+        _isTargetToPoint = false;
     }
     
     public void SetTargetPosition(Vector3 position, bool isTargetPoint)
@@ -100,5 +89,10 @@ public class PoliceOfficerMovement : MonoBehaviour
     {
         _transform.localPosition = Vector3.MoveTowards(_transform.localPosition, 
             position, _speed * Time.deltaTime);
+        
+        if ((_transform.localPosition - _targetPositionInGroup).sqrMagnitude < _threshold)
+        {
+            OnReachedRegroupPoint?.Invoke();
+        }      
     }
 }

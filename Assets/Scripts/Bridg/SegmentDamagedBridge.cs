@@ -13,7 +13,7 @@ public class SegmentDamagedBridge : MonoBehaviour, IBridgeObject
     {
         if (other.TryGetComponent(out PoliceOfficer policeOfficer))
         {
-            if (policeOfficer.IsDead == false)
+            if (policeOfficer.Status == UnitStatus.Alive)
             {
                 policeOfficer.SetCenterPoint(_centrPoint);
             }

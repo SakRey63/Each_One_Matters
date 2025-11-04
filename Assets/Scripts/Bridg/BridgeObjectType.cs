@@ -8,5 +8,7 @@ public enum BridgeObjectType
     SawBlade,
     SpikedCylinder,
     SpikePress,
-    Spikes
+    Spikes,
+    Zombie,
+    ScannerObstacle
 }
