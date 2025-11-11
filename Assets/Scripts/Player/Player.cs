@@ -121,8 +121,8 @@ public class Player : MonoBehaviour
     public void SetPlayerFinishPosition(Transform moveTarget, bool isFinished, BridgeDirection direction)
     {
         _currentDirection = direction;
-        _isFinished = isFinished;
         _isMoving = true;
+        _isFinished = isFinished;
         _moveTarget = moveTarget;
         _backwardMovement.SetTargetPosition(_moveTarget);
     }
@@ -146,11 +146,6 @@ public class Player : MonoBehaviour
         {
             policeOfficer.SetHorizontalAndBorderStatus(_currentDirection, _minBorderPosition, _maxBorderPosition);
         }
-    }
-
-    public void MoveSideways(float direction)
-    {
-        _playerSideMovement.Move(direction);
     }
     
     public void RotateInDirection(BridgeDirection rotation)

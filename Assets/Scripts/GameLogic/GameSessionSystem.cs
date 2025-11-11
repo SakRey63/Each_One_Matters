@@ -121,7 +121,7 @@ public class GameSessionSystem : MonoBehaviour
         yield return new WaitUntil(() => Input.anyKeyDown);
         
         _tutorialUI.CloseGameGuide();
-        _levelMenuHandler.InitializeLevelMenu();
+        _levelMenuHandler.InitializeLevelMenu(); 
         UpdatePlayerTargetPosition();
         _player.SpawnPoliceOfficer(YG2.saves.player.CountPoliceOfficer);
         YG2.saves.gameplay.IsFirstLaunch = false;
@@ -211,16 +211,6 @@ public class GameSessionSystem : MonoBehaviour
         _levelMenuHandler.ShowGameOverMenu(_player.IsPoliceOfficerOnBase);
     }
 
-    private void HandleZombieKilled(UnitStatus killedStatus)
-    {
-        if (killedStatus == UnitStatus.KilledByBullet)
-        {
-            _scoreHandler.AddPointsForZombie();
-        }
-
-        CheckForWinnings();
-    }
-
     private void CheckForWinnings()
     {
         if (_enemyGroup.CountAllZombies == 0 && _player.IsPoliceOfficerOnBase && _player.PoliceCount > 0)
@@ -230,7 +220,7 @@ public class GameSessionSystem : MonoBehaviour
             _player.CeaseSquadFire();
         }
     }
-    
+
     private void SpawnedTrigger(PointSpawnTrigger spawnTrigger)
     {
         spawnTrigger.OnHordeSpawning += SpawnZombie;
@@ -242,18 +232,28 @@ public class GameSessionSystem : MonoBehaviour
         spawnTrigger.OnHordeSpawning -= SpawnZombie;
         spawnTrigger.SpawnAdaptiveWave(_player.PoliceCount, _bridgeGenerator.GetTargetPoint(spawnTrigger.Index));
     }
-    
-    private void SubscribeToFireRateCreated(FireRateBooster fireRateBooster)
+
+    private void HandleZombieKilled(UnitStatus killedStatus)
     {
-        fireRateBooster.OnFirstOfficerEntered += IncreaseGroupFireRate;
+        if (killedStatus == UnitStatus.KilledByBullet)
+        {
+            _scoreHandler.AddPointsForZombie();
+        }
+
+        CheckForWinnings();
     }
-    
+
     private void IncreaseGroupFireRate(FireRateBooster fireRateBooster)
     {
         fireRateBooster.OnFirstOfficerEntered -= IncreaseGroupFireRate;
         _player.ApplyBuffToParty(fireRateBooster.BuffDuration, fireRateBooster.IncreasedRateOfFire);
-    } 
-    
+    }
+
+    private void SubscribeToFireRateCreated(FireRateBooster fireRateBooster)
+    {
+        fireRateBooster.OnFirstOfficerEntered += IncreaseGroupFireRate;
+    }
+
     private void SubscribeToRecruitPoliced(RecruitPolice recruitPolice)
     {
         recruitPolice.OnRecruitPoliceTriggered += IncreasePoliceOfficerSize;
@@ -284,7 +284,7 @@ public class GameSessionSystem : MonoBehaviour
             }
         }
     }
-    
+
     private void SubscribeToBridgeConnectorCreation(BridgeConnector bridgeConnector)
     {
         bridgeConnector.OnZombieDetected += BindNewTargetOnZombieDetected;

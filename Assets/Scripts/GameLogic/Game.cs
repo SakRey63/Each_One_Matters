@@ -7,7 +7,7 @@ public class Game : MonoBehaviour
     [SerializeField] private PlayerInputCoordinator _playerInputCoordinator;
     [SerializeField] private LevelMenuHandler _levelMenuHandler;
     [SerializeField] private DemoModeController _demoMode;
-    
+
     private int _levelPlayer;
     
     private int _currentScore;

@@ -8,7 +8,7 @@ public class Health
     {
         _healthPoint = healthPoint;
     }
-    
+
     public void TakeDamage(int damage)
     {
         if (damage > 0)

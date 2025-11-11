@@ -25,15 +25,15 @@ public class ProgressSystem : MonoBehaviour
         SaveProgress();
     }
 
-    public int GetCurrentScore()
-    {
-        return YG2.saves.gameplay.Score;
-    }
-
     public void SetPlayerCount(int count)
     {
         YG2.saves.player.CountPoliceOfficer = count;
         SaveProgress();
+    }
+
+    public int GetCurrentScore()
+    {
+        return YG2.saves.gameplay.Score;
     }
 
     public int GetPlayerCount()
@@ -45,15 +45,14 @@ public class ProgressSystem : MonoBehaviour
     {
         return YG2.saves.player.MaxPoliceCount;
     }
-
+    
     public int GetCallHelpPrice()
     {
         return YG2.saves.gameplay.CallHelpButtonPrice;
     }
-    
+
     private void SaveProgress()
     {
         YG2.SaveProgress();
     }
-    
 }
