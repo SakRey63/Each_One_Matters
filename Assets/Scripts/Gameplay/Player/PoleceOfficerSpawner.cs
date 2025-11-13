@@ -1,15 +1,21 @@
-public class PoleceOfficerSpawner : ObjectPool<PoliceOfficer>
-{
-    public PoliceOfficer CreatePoliceUnits()
-    {
-        PoliceOfficer policeOfficer = GetObject();
-        policeOfficer.OnDeathAnimationFinished += ReturnPoliceOfficer;
-        return policeOfficer;
-    }
+using EachOneMatters.Gameplay.PlayerUnits;
+using EachOneMatters.Pool;
 
-    private void ReturnPoliceOfficer(PoliceOfficer policeOfficer)
+namespace EachOneMatters.Gameplay.Player.Class
+{
+    public class PoleceOfficerSpawner : ObjectPool<PoliceOfficer>
     {
-        policeOfficer.OnDeathAnimationFinished -= ReturnPoliceOfficer;
-        ReturnObject(policeOfficer);
+        public PoliceOfficer CreatePoliceUnits()
+        {
+            PoliceOfficer policeOfficer = GetObject();
+            policeOfficer.OnDeathAnimationFinished += ReturnPoliceOfficer;
+            return policeOfficer;
+        }
+
+        private void ReturnPoliceOfficer(PoliceOfficer policeOfficer)
+        {
+            policeOfficer.OnDeathAnimationFinished -= ReturnPoliceOfficer;
+            ReturnObject(policeOfficer);
+        }
     }
 }

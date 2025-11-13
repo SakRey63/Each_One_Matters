@@ -1,5 +1,8 @@
-public enum ObstacleSide
+namespace EachOneMatters.Generation.Bridge
 {
-    Left, 
-    Right
+    public enum ObstacleSide
+    {
+        Left, 
+        Right,
+    }
 }

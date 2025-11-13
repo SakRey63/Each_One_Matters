@@ -1,6 +1,9 @@
-public enum BridgeDirection
+namespace EachOneMatters.Generation.Bridge
 {
-    HorizontalRight,
-    HorizontalLeft,
-    VerticalUp,
+    public enum BridgeDirection
+    {
+        HorizontalRight,
+        HorizontalLeft,
+        VerticalUp,
+    }
 }

@@ -1,4 +1,7 @@
 using UnityEngine;
 
-public class GameMenu : MonoBehaviour
-{ }
+namespace EachOneMatters.UI.GameplayUI
+{
+    public class GameMenu : MonoBehaviour
+    { }
+}

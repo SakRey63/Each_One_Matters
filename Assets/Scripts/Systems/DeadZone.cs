@@ -1,13 +1,18 @@
+using EachOneMatters.Common;
+using EachOneMatters.Gameplay.EnemyUnits;
 using UnityEngine;
 
-public class DeadZone : MonoBehaviour
+namespace EachOneMatters.Systems
 {
-    [SerializeField] private int _damage = 100;
-    private void OnTriggerEnter(Collider other)
+    public class DeadZone : MonoBehaviour
     {
-        if (other.TryGetComponent(out Zombie zombie) && zombie.Status == UnitStatus.Alive)
+        [SerializeField] private int _damage = 100;
+        private void OnTriggerEnter(Collider other)
         {
-            zombie.TakeDamage(_damage, UnitStatus.Dead);
+            if (other.TryGetComponent(out Zombie zombie) && zombie.Status == UnitStatus.Alive)
+            {
+                zombie.TakeDamage(_damage, UnitStatus.Dead);
+            }
         }
     }
 }

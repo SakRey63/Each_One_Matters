@@ -1,63 +1,69 @@
 using System;
+using EachOneMatters.Gameplay.PlayerUnits;
+using EachOneMatters.Generation.PositionGeneration;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-public class Base : MonoBehaviour
+namespace EachOneMatters.Generation.Bridge
 {
-    [SerializeField] private Transform _baseEntryTransform;
-    [SerializeField] private Transform _startPositionGeneration;
-    [SerializeField] private Transform _endPositionToPlayer;
-    [SerializeField] private Transform _parentToSquad;
-    [SerializeField] private Transform _spawnHelpPoliceOfficer;
-    [SerializeField] private float _xOffset = 5.5f;
-
-    private PositionGenerationBase _positionGenerationBase;
-
-    public event Action<Base> OnPoliceOfficerDetected;
-
-    private void Awake()
+    public class Base : MonoBehaviour
     {
-        _positionGenerationBase = GetComponent<PositionGenerationBase>();
-    }
+        [SerializeField] private Transform _baseEntryTransform;
+        [SerializeField] private Transform _startPositionGeneration;
+        [SerializeField] private Transform _endPositionToPlayer;
+        [SerializeField] private Transform _parentToSquad;
+        [SerializeField] private Transform _spawnHelpPoliceOfficer;
+        [SerializeField] private float _xOffset = 5.5f;
 
-    public Transform BaseEntryTransform => _baseEntryTransform;
-    public Transform StartPositionGeneration => _startPositionGeneration;
-    public Transform EndPositionPlayer => _endPositionToPlayer;
+        private PositionGenerationBase _positionGenerationBase;
 
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.TryGetComponent<PoliceOfficer>(out _))
+        public event Action<Base> OnPoliceOfficerDetected;
+
+        public Transform BaseEntryTransform => _baseEntryTransform;
+        public Transform StartPositionGeneration => _startPositionGeneration;
+        public Transform EndPositionPlayer => _endPositionToPlayer;
+
+        private void Awake()
         {
-            OnPoliceOfficerDetected?.Invoke(this);
+            _positionGenerationBase = GetComponent<PositionGenerationBase>();
         }
-    }
 
-    public void SetTargetPoliceOfficers(PoliceOfficer policeOfficer)
-    {
-        policeOfficer.OnPoliceReachedToGeneratePositionOnBase += AssignNewPositionOnBase;
-        policeOfficer.transform.parent = _parentToSquad;
-    }
-    
-    public void SetTargetPoliceHelps(PoliceOfficer policeOfficer)
-    {
-        policeOfficer.transform.parent = _parentToSquad;
-        policeOfficer.transform.localPosition = GetRandomPositionToBase();
-        policeOfficer.transform.rotation = _spawnHelpPoliceOfficer.rotation;
-            
-        Vector3 positionOnBase = _positionGenerationBase.GetPositionOnBase(_startPositionGeneration.localPosition);
-        policeOfficer.SetTargetPositionInGroup(positionOnBase);
-    }
+        private void OnTriggerEnter(Collider other)
+        {
+            if (other.TryGetComponent<PoliceOfficer>(out _))
+            {
+                OnPoliceOfficerDetected?.Invoke(this);
+            }
+        }
 
-    private Vector3 GetRandomPositionToBase()
-    {
-        Vector3 randomSpawnPosition = new Vector3(Random.Range(-_xOffset, _xOffset), _spawnHelpPoliceOfficer.localPosition.y, _spawnHelpPoliceOfficer.localPosition.z);
-        return randomSpawnPosition;
-    }
-    
-    private void AssignNewPositionOnBase(PoliceOfficer policeOfficer)
-    {
-        policeOfficer.OnPoliceReachedToGeneratePositionOnBase -= AssignNewPositionOnBase;
-        Vector3 positionOnBase = _positionGenerationBase.GetPositionOnBase(_startPositionGeneration.localPosition);
-        policeOfficer.SetTargetPositionInGroup(positionOnBase);
+        public void SetTargetPoliceOfficers(PoliceOfficer policeOfficer)
+        {
+            policeOfficer.OnPoliceReachedToGeneratePositionOnBase += AssignNewPositionOnBase;
+            policeOfficer.transform.parent = _parentToSquad;
+        }
+
+        public void SetTargetPoliceHelps(PoliceOfficer policeOfficer)
+        {
+            policeOfficer.transform.parent = _parentToSquad;
+            policeOfficer.transform.localPosition = GetRandomPositionToBase();
+            policeOfficer.transform.rotation = _spawnHelpPoliceOfficer.rotation;
+
+            Vector3 positionOnBase = _positionGenerationBase.GetPositionOnBase(_startPositionGeneration.localPosition);
+            policeOfficer.SetTargetPositionInGroup(positionOnBase);
+        }
+
+        private Vector3 GetRandomPositionToBase()
+        {
+            Vector3 randomSpawnPosition = new Vector3(Random.Range(-_xOffset, _xOffset),
+                _spawnHelpPoliceOfficer.localPosition.y, _spawnHelpPoliceOfficer.localPosition.z);
+            return randomSpawnPosition;
+        }
+
+        private void AssignNewPositionOnBase(PoliceOfficer policeOfficer)
+        {
+            policeOfficer.OnPoliceReachedToGeneratePositionOnBase -= AssignNewPositionOnBase;
+            Vector3 positionOnBase = _positionGenerationBase.GetPositionOnBase(_startPositionGeneration.localPosition);
+            policeOfficer.SetTargetPositionInGroup(positionOnBase);
+        }
     }
 }

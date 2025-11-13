@@ -1,6 +1,10 @@
+using EachOneMatters.Generation.Bridge;
 using UnityEngine;
 
-public class SpikedCylinder : MonoBehaviour, IBridgeObject
+namespace EachOneMatters.Generation.Obstacle
 {
-    public BridgeObjectType Type => BridgeObjectType.SpikedCylinder;
+    public class SpikedCylinder : MonoBehaviour, IBridgeObject
+    {
+        public BridgeObjectType Type => BridgeObjectType.SpikedCylinder;
+    }
 }

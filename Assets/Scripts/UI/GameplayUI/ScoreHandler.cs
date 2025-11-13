@@ -3,32 +3,35 @@ using TMPro;
 using UnityEngine;
 using YG;
 
-public class ScoreHandler : MonoBehaviour
+namespace EachOneMatters.UI.GameplayUI
 {
-    [SerializeField] private TextMeshProUGUI _score;
-    [SerializeField] private TextMeshProUGUI _level;
-    [SerializeField] private int _pointsPerZombie;
-
-    private int _currentScore;
-
-    public int CurrentScore => _currentScore;
-
-    public void SetInitialScore(int score)
+    public class ScoreHandler : MonoBehaviour
     {
-        _currentScore = score;
-        _score.text = Convert.ToString(_currentScore);
-        _level.text = Convert.ToString(YG2.saves.gameplay.Level);
-    }
+        [SerializeField] private TextMeshProUGUI _score;
+        [SerializeField] private TextMeshProUGUI _level;
+        [SerializeField] private int _pointsPerZombie;
 
-    public void AddPointsForZombie()
-    {
-        _currentScore += _pointsPerZombie;
-        _score.text = Convert.ToString(_currentScore);
-    }
+        private int _currentScore;
 
-    public void DeductPointsForHelp(int price)
-    {
-        _currentScore -= price;
-        _score.text = _currentScore.ToString();
+        public int CurrentScore => _currentScore;
+
+        public void SetInitialScore(int score)
+        {
+            _currentScore = score;
+            _score.text = Convert.ToString(_currentScore);
+            _level.text = Convert.ToString(YG2.saves.gameplay.Level);
+        }
+
+        public void AddPointsForZombie()
+        {
+            _currentScore += _pointsPerZombie;
+            _score.text = Convert.ToString(_currentScore);
+        }
+
+        public void DeductPointsForHelp(int price)
+        {
+            _currentScore -= price;
+            _score.text = _currentScore.ToString();
+        }
     }
 }

@@ -1,20 +1,26 @@
+using EachOneMatters.Common;
+using EachOneMatters.Gameplay.PlayerUnits;
+using EachOneMatters.Generation.Bridge;
 using UnityEngine;
 
-public class ScannerObstacle : MonoBehaviour, IBridgeObject
+namespace EachOneMatters.Generation.Obstacle
 {
-    [SerializeField] private int _damage = 100;
-    [SerializeField] private AudioSource _sound;
-
-    public BridgeObjectType Type => BridgeObjectType.ScannerObstacle;
-    
-    private void OnTriggerEnter(Collider other)
+    public class ScannerObstacle : MonoBehaviour, IBridgeObject
     {
-        if (other.TryGetComponent(out PoliceOfficer policeOfficer))
+        [SerializeField] private int _damage = 100;
+        [SerializeField] private AudioSource _sound;
+
+        public BridgeObjectType Type => BridgeObjectType.ScannerObstacle;
+    
+        private void OnTriggerEnter(Collider other)
         {
-            if (policeOfficer.Status == UnitStatus.Alive)
+            if (other.TryGetComponent(out PoliceOfficer policeOfficer))
             {
-                _sound.Play();
-                policeOfficer.TakeDamage(_damage);
+                if (policeOfficer.Status == UnitStatus.Alive)
+                {
+                    _sound.Play();
+                    policeOfficer.TakeDamage(_damage);
+                }
             }
         }
     }

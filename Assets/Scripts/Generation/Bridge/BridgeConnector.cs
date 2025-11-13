@@ -1,55 +1,59 @@
 using System;
+using EachOneMatters.Gameplay.EnemyUnits;
 using UnityEngine;
 
-public class BridgeConnector : MonoBehaviour
+namespace EachOneMatters.Generation.Bridge
 {
-    [SerializeField] private Transform _target;
-    [SerializeField] private Transform _bridgeStartPointLeft;
-    [SerializeField] private Transform _bridgeStartPointRight;
-    [SerializeField] private Transform _obstacleCratesBlocking;
-    [SerializeField] private float _xOffset = 16;
+    public class BridgeConnector : MonoBehaviour
+    {
+        [SerializeField] private Transform _target;
+        [SerializeField] private Transform _bridgeStartPointLeft;
+        [SerializeField] private Transform _bridgeStartPointRight;
+        [SerializeField] private Transform _obstacleCratesBlocking;
+        [SerializeField] private float _xOffset = 16;
 
-    private int _index;
+        private int _index;
     
-    public Transform RotationTarget => _target;
-    public Transform BridgeStartPointRight => _bridgeStartPointRight;
-    public Transform BridgeStartPointLeft => _bridgeStartPointLeft;
-    public int Index => _index;
-
-    public event Action<Zombie, BridgeConnector> OnZombieDetected;
-
-    private void OnDestroy()
-    {
-        OnZombieDetected = null;
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.TryGetComponent(out Zombie zombie))
-        {
-            OnZombieDetected?.Invoke(zombie, this);
-        }
-    }
+        public event Action<Zombie, BridgeConnector> OnZombieDetected;
     
-    public void SetIndex(int index, BridgeDirection isTurnRight)
-    {
-        _index = index;
-        SetObstaclePosition(isTurnRight);
-    }
+        public Transform RotationTarget => _target;
+        public Transform BridgeStartPointRight => _bridgeStartPointRight;
+        public Transform BridgeStartPointLeft => _bridgeStartPointLeft;
+        public int Index => _index;
 
-    private void SetObstaclePosition(BridgeDirection isTurnRight)
-    {
-        Vector3 position = _obstacleCratesBlocking.localPosition;
-
-        if (isTurnRight == BridgeDirection.HorizontalRight)
+        private void OnDestroy()
         {
-            position = new Vector3(-_xOffset, position.y, position.z);
-        }
-        else
-        {
-            position = new Vector3(_xOffset, position.y, position.z);
+            OnZombieDetected = null;
         }
 
-        _obstacleCratesBlocking.localPosition = position;
+        private void OnTriggerEnter(Collider other)
+        {
+            if (other.TryGetComponent(out Zombie zombie))
+            {
+                OnZombieDetected?.Invoke(zombie, this);
+            }
+        }
+    
+        public void SetIndex(int index, BridgeDirection isTurnRight)
+        {
+            _index = index;
+            SetObstaclePosition(isTurnRight);
+        }
+
+        private void SetObstaclePosition(BridgeDirection isTurnRight)
+        {
+            Vector3 position = _obstacleCratesBlocking.localPosition;
+
+            if (isTurnRight == BridgeDirection.HorizontalRight)
+            {
+                position = new Vector3(-_xOffset, position.y, position.z);
+            }
+            else
+            {
+                position = new Vector3(_xOffset, position.y, position.z);
+            }
+
+            _obstacleCratesBlocking.localPosition = position;
+        }
     }
 }

@@ -1,14 +1,17 @@
-public enum BridgeObjectType
+namespace EachOneMatters.Generation.Bridge
 {
-    DamagedSegment,
-    FireRateBooster,
-    RecruitPolice,
-    Hammer,
-    RotatingBlade,
-    SawBlade,
-    SpikedCylinder,
-    SpikePress,
-    Spikes,
-    Zombie,
-    ScannerObstacle
+    public enum BridgeObjectType
+    {
+        DamagedSegment,
+        FireRateBooster,
+        RecruitPolice,
+        Hammer,
+        RotatingBlade,
+        SawBlade,
+        SpikedCylinder,
+        SpikePress,
+        Spikes,
+        Zombie,
+        ScannerObstacle,
+    }
 }

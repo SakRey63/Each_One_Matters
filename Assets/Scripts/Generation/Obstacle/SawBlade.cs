@@ -1,6 +1,10 @@
+using EachOneMatters.Generation.Bridge;
 using UnityEngine;
 
-public class SawBlade : MonoBehaviour, IBridgeObject
+namespace EachOneMatters.Generation.Obstacle
 {
-    public BridgeObjectType Type => BridgeObjectType.SawBlade;
+    public class SawBlade : MonoBehaviour, IBridgeObject
+    {
+        public BridgeObjectType Type => BridgeObjectType.SawBlade;
+    }
 }

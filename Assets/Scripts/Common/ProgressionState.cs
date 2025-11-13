@@ -1,8 +1,11 @@
-public enum ProgressionState
+namespace EachOneMatters.Common
 {
-    Idle,
-    MovingToBase,
-    ReachedBaseEntry,
-    BaseEntryCompleted,
-    MovingToEnemy
+    public enum ProgressionState
+    {
+        Idle,
+        MovingToBase,
+        ReachedBaseEntry,
+        BaseEntryCompleted,
+        MovingToEnemy,
+    }
 }

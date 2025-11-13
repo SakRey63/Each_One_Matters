@@ -1,18 +1,21 @@
 using UnityEngine;
 
-public class Ocean : MonoBehaviour
+namespace EachOneMatters.Gameplay.Ocean
 {
-    private Transform _transform;
-
-    private void Awake()
+    public class Ocean : MonoBehaviour
     {
-        _transform = transform;
-    }
+        private Transform _transform;
 
-    public void UpdateOceanPositionRelativeToPlayer(Transform player)
-    {
-        Vector3 position = new Vector3(player.position.x, _transform.position.y, player.position.z);
+        private void Awake()
+        {
+            _transform = transform;
+        }
 
-        _transform.position = position;
+        public void UpdateOceanPositionRelativeToPlayer(Transform player)
+        {
+            Vector3 position = new Vector3(player.position.x, _transform.position.y, player.position.z);
+
+            _transform.position = position;
+        }
     }
 }

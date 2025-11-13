@@ -1,55 +1,58 @@
 using UnityEngine;
 
-public class BridgeObjectSelector : MonoBehaviour
+namespace EachOneMatters.Generation.Bridge
 {
-    [SerializeField] private int _maxRandomValue = 2;
-    [SerializeField] private int _countBridgeObstacle = 2;
-    [SerializeField] private GameObject[] _bridgeObstacles;
-    [SerializeField] private GameObject[] _playerUpgrades;
-
-    private GameObject _currentSpawnObject;
-    private int _randomFirstSpawnObject;
-    private int _indexSpawnObject;
-    
-    public BridgeObjectType CurrentType { get; private set; }
-
-    public void CreateObjectToBridge()
+    public class BridgeObjectSelector : MonoBehaviour
     {
-        if (_randomFirstSpawnObject > 0)
+        [SerializeField] private int _maxRandomValue = 2;
+        [SerializeField] private int _countBridgeObstacle = 2;
+        [SerializeField] private GameObject[] _bridgeObstacles;
+        [SerializeField] private GameObject[] _playerUpgrades;
+
+        private GameObject _currentSpawnObject;
+        private int _randomFirstSpawnObject;
+        private int _indexSpawnObject;
+    
+        public BridgeObjectType CurrentType { get; private set; }
+
+        public void CreateObjectToBridge()
         {
-            _indexSpawnObject++;
-            _currentSpawnObject = GetRandomObjectBridge(_bridgeObstacles);
-           
-            if (_indexSpawnObject == _countBridgeObstacle)
+            if (_randomFirstSpawnObject > 0)
             {
-                _randomFirstSpawnObject--;
-                _indexSpawnObject = 0;
+                _indexSpawnObject++;
+                _currentSpawnObject = GetRandomObjectBridge(_bridgeObstacles);
+           
+                if (_indexSpawnObject == _countBridgeObstacle)
+                {
+                    _randomFirstSpawnObject--;
+                    _indexSpawnObject = 0;
+                }
+            }
+            else
+            {
+                _currentSpawnObject = GetRandomObjectBridge(_playerUpgrades);
+                _randomFirstSpawnObject++;
+            }
+
+            if (_currentSpawnObject.TryGetComponent<IBridgeObject>(out var bridgeObject))
+            {
+                CurrentType = bridgeObject.Type;
             }
         }
-        else
+    
+        public void CreateFirstSpawnObject()
         {
-            _currentSpawnObject = GetRandomObjectBridge(_playerUpgrades);
-            _randomFirstSpawnObject++;
+            _randomFirstSpawnObject = GetRandomIndex(0, _maxRandomValue);
         }
-
-        if (_currentSpawnObject.TryGetComponent<IBridgeObject>(out var bridgeObject))
+    
+        private GameObject GetRandomObjectBridge(GameObject[] objectsBridge)
         {
-            CurrentType = bridgeObject.Type;
+            return objectsBridge[Random.Range(0, objectsBridge.Length)];
         }
-    }
     
-    public void CreateFirstSpawnObject()
-    {
-        _randomFirstSpawnObject = GetRandomIndex(0, _maxRandomValue);
-    }
-    
-    private GameObject GetRandomObjectBridge(GameObject[] objectsBridge)
-    {
-        return objectsBridge[Random.Range(0, objectsBridge.Length)];
-    }
-    
-    private int GetRandomIndex(int minValue, int maxValue)
-    {
-        return Random.Range(minValue, maxValue);
+        private int GetRandomIndex(int minValue, int maxValue)
+        {
+            return Random.Range(minValue, maxValue);
+        }
     }
 }

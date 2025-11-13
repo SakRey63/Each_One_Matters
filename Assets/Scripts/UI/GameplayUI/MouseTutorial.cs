@@ -1,4 +1,7 @@
 using UnityEngine;
 
-public class MouseTutorial : MonoBehaviour
-{ }
+namespace EachOneMatters.UI.GameplayUI
+{
+    public class MouseTutorial : MonoBehaviour
+    { }
+}

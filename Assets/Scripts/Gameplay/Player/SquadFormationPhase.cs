@@ -1,12 +1,15 @@
-public enum SquadFormationPhase
+namespace EachOneMatters.Gameplay.Player.Class
 {
-    Centered,
-    ExpandingRadius,
-    MovingUpRight,
-    MovingRight,
-    MovingDownRight,
-    MovingDownLeft,
-    MovingDown,
-    MovingLeft,
-    MovingUpLeft
+    public enum SquadFormationPhase
+    {
+        Centered,
+        ExpandingRadius,
+        MovingUpRight,
+        MovingRight,
+        MovingDownRight,
+        MovingDownLeft,
+        MovingDown,
+        MovingLeft,
+        MovingUpLeft,
+    }   
 }

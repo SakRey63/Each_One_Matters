@@ -1,6 +1,10 @@
+using EachOneMatters.Generation.Bridge;
 using UnityEngine;
 
-public class Hammer : MonoBehaviour, IBridgeObject
+namespace EachOneMatters.Generation.Obstacle
 {
-    public BridgeObjectType Type => BridgeObjectType.Hammer;
+    public class Hammer : MonoBehaviour, IBridgeObject
+    {
+        public BridgeObjectType Type => BridgeObjectType.Hammer;
+    }
 }

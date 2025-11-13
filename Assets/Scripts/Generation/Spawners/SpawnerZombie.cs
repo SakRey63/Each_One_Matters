@@ -1,22 +1,28 @@
-public class SpawnerZombie : ObjectPool<Zombie>
+using EachOneMatters.Gameplay.EnemyUnits;
+using EachOneMatters.Pool;
+
+namespace EachOneMatters.Generation.Spawners
 {
-    public Zombie CreateEnemy()
+    public class SpawnerZombie : ObjectPool<Zombie>
     {
-        Zombie zombie = GetObject();
-        zombie.OnZombieDeath += ReturnZombie;
+        public Zombie CreateEnemy()
+        {
+            Zombie zombie = GetObject();
+            zombie.OnZombieDeath += ReturnZombie;
         
-        return zombie;
-    }
+            return zombie;
+        }
 
-    public void ReturnDemoEnemies(Zombie zombie)
-    {
-        zombie.OnZombieDeath -= ReturnZombie;
-        ReturnObject(zombie);
-    }
+        public void ReturnDemoEnemies(Zombie zombie)
+        {
+            zombie.OnZombieDeath -= ReturnZombie;
+            ReturnObject(zombie);
+        }
 
-    private void ReturnZombie(Zombie zombie)
-    {
-        zombie.OnZombieDeath -= ReturnZombie;
-        ReturnObject(zombie);
+        private void ReturnZombie(Zombie zombie)
+        {
+            zombie.OnZombieDeath -= ReturnZombie;
+            ReturnObject(zombie);
+        }
     }
 }

@@ -1,18 +1,22 @@
+using EachOneMatters.Gameplay.PlayerUnits;
 using UnityEngine;
 
-public class ChunkPool : ObjectPool<Chunk>
+namespace EachOneMatters.Pool
 {
-    public void GetEffect(Transform transform)
+    public class ChunkPool : ObjectPool<Chunk>
     {
-        Chunk effect = GetObject();
-        effect.transform.position = transform.position;
-        effect.transform.rotation = Quaternion.LookRotation(transform.forward);
-        effect.OnFinishedEffect += ReturnEffect;
-    }
+        public void GetEffect(Transform transform)
+        {
+            Chunk effect = GetObject();
+            effect.transform.position = transform.position;
+            effect.transform.rotation = Quaternion.LookRotation(transform.forward);
+            effect.OnFinishedEffect += ReturnEffect;
+        }
 
-    private void ReturnEffect(Chunk effect)
-    {
-        effect.OnFinishedEffect -= ReturnEffect;
-        ReturnObject(effect);
+        private void ReturnEffect(Chunk effect)
+        {
+            effect.OnFinishedEffect -= ReturnEffect;
+            ReturnObject(effect);
+        }
     }
 }

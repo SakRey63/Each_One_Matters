@@ -1,6 +1,10 @@
+using EachOneMatters.Generation.Bridge;
 using UnityEngine;
 
-public class Spikes : MonoBehaviour, IBridgeObject
+namespace EachOneMatters.Generation.Obstacle
 {
-    public BridgeObjectType Type => BridgeObjectType.Spikes;
+    public class Spikes : MonoBehaviour, IBridgeObject
+    {
+        public BridgeObjectType Type => BridgeObjectType.Spikes;
+    }
 }

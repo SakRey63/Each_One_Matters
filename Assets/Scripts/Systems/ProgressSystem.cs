@@ -1,58 +1,61 @@
 using UnityEngine;
 using YG;
 
-public class ProgressSystem : MonoBehaviour
+namespace EachOneMatters.Systems
 {
-    private const string LeaderboardId = "EachOfMatersLB";
+    public class ProgressSystem : MonoBehaviour
+    {
+        private const string LeaderboardId = "EachOfMatersLB";
     
-    public void SetCurrentLevel(int level)
-    {
-        YG2.saves.gameplay.Level = level;
-        SaveProgress();
-    }
+        public void SetCurrentLevel(int level)
+        {
+            YG2.saves.gameplay.Level = level;
+            SaveProgress();
+        }
 
-    public int GetCurrentLevel()
-    {
-        return YG2.saves.gameplay.Level;
-    }
+        public int GetCurrentLevel()
+        {
+            return YG2.saves.gameplay.Level;
+        }
 
-    public void AddScore(int scoreToAdd)
-    {
-        int currentTotalScore = YG2.saves.gameplay.Score;
-        currentTotalScore += scoreToAdd;
-        YG2.saves.gameplay.Score = currentTotalScore;
-        YG2.SetLeaderboard(LeaderboardId, currentTotalScore);
-        SaveProgress();
-    }
+        public void AddScore(int scoreToAdd)
+        {
+            int currentTotalScore = YG2.saves.gameplay.Score;
+            currentTotalScore += scoreToAdd;
+            YG2.saves.gameplay.Score = currentTotalScore;
+            YG2.SetLeaderboard(LeaderboardId, currentTotalScore);
+            SaveProgress();
+        }
 
-    public void SetPlayerCount(int count)
-    {
-        YG2.saves.player.CountPoliceOfficer = count;
-        SaveProgress();
-    }
+        public void SetPlayerCount(int count)
+        {
+            YG2.saves.player.CountPoliceOfficer = count;
+            SaveProgress();
+        }
 
-    public int GetCurrentScore()
-    {
-        return YG2.saves.gameplay.Score;
-    }
+        public int GetCurrentScore()
+        {
+            return YG2.saves.gameplay.Score;
+        }
 
-    public int GetPlayerCount()
-    {
-        return YG2.saves.player.CountPoliceOfficer;
-    }
+        public int GetPlayerCount()
+        {
+            return YG2.saves.player.CountPoliceOfficer;
+        }
 
-    public int GetMaxPlayerCount()
-    {
-        return YG2.saves.player.MaxPoliceCount;
-    }
+        public int GetMaxPlayerCount()
+        {
+            return YG2.saves.player.MaxPoliceCount;
+        }
     
-    public int GetCallHelpPrice()
-    {
-        return YG2.saves.gameplay.CallHelpButtonPrice;
-    }
+        public int GetCallHelpPrice()
+        {
+            return YG2.saves.gameplay.CallHelpButtonPrice;
+        }
 
-    private void SaveProgress()
-    {
-        YG2.SaveProgress();
+        private void SaveProgress()
+        {
+            YG2.SaveProgress();
+        }
     }
 }

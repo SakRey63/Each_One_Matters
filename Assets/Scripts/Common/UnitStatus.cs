@@ -1,6 +1,9 @@
-public enum UnitStatus
+namespace EachOneMatters.Common
 {
-    Alive,
-    Dead,
-    KilledByBullet
+    public enum UnitStatus
+    {
+        Alive,
+        Dead,
+        KilledByBullet,
+    }
 }

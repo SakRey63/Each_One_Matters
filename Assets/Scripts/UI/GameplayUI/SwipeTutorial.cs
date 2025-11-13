@@ -1,4 +1,7 @@
 using UnityEngine;
 
-public class SwipeTutorial : MonoBehaviour
-{ }
+namespace EachOneMatters.UI.GameplayUI
+{
+    public class SwipeTutorial : MonoBehaviour
+    { }
+}

@@ -1,4 +1,7 @@
-public interface IBridgeObject
+namespace EachOneMatters.Generation.Bridge
 {
-    BridgeObjectType Type { get; }
+    public interface IBridgeObject
+    {
+        BridgeObjectType Type { get; }
+    }
 }

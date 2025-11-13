@@ -1,4 +1,7 @@
-public interface IUnitState
+namespace EachOneMatters.Common
 {
-    public UnitStatus Status { get; }
+    public interface IUnitState
+    {
+        public UnitStatus Status { get; }
+    }
 }

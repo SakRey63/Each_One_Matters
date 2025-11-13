@@ -1,76 +1,82 @@
 using System;
 using System.Collections.Generic;
+using EachOneMatters.Common;
+using EachOneMatters.Gameplay.EnemyUnits;
 using UnityEngine;
 
-public class EnemyGroupController : MonoBehaviour
+namespace EachOneMatters.Systems
 {
-    [SerializeField] private int _healthPoint = 75;
+    public class EnemyGroupController : MonoBehaviour
+    {
+        [SerializeField] private int _healthPoint = 75;
 
-    private int _indexEnemy;
-    private Dictionary<int, Zombie> _activeZombies;
-    private int _countAllZombies;
-    private bool _isMovingStop;
+        private int _indexEnemy;
+        private Dictionary<int, Zombie> _activeZombies;
+        private int _countAllZombies;
+        private bool _isMovingStop;
     
-    public int CountAllZombies => _countAllZombies;
+        public event Action<UnitStatus> OnZombieKilled;
     
-    public event Action<UnitStatus> OnZombieKilled;
+        public int CountAllZombies => _countAllZombies;
 
-    private void Awake()
-    {
-        _activeZombies = new Dictionary<int, Zombie>();
-    }
-
-    public void AddEnemy(Zombie zombie)
-    {
-        _countAllZombies++;
-        
-        zombie.OnZombieDeath += RemoveZombies;
-        zombie.SetNumberEnemy(_indexEnemy);
-        zombie.SetHealthPoint(_healthPoint);
-        zombie.SetSettingsToActivateUnit();
-        _activeZombies.Add(zombie.Id, zombie);
-        
-        if (_isMovingStop)
+        private void Awake()
         {
-            zombie.StopMoving();
+            _activeZombies = new Dictionary<int, Zombie>();
         }
-        
-        _indexEnemy++;
-    }
 
-    public void StopAllZombies()
-    {
-        _isMovingStop = true;
-        
-        foreach (Zombie zombie in _activeZombies.Values)
+        public void AddEnemy(Zombie zombie)
         {
-            if (zombie != null && zombie.gameObject.activeInHierarchy)
-            { 
-                zombie.StopMoving();  
-            }
-        }
-    }
-
-    public void ResumeAllZombies()
-    {
-        _isMovingStop = false;
+            _countAllZombies++;
         
-        foreach (Zombie zombie in _activeZombies.Values)
-        {
-            if (zombie != null && zombie.gameObject.activeInHierarchy)
+            zombie.OnZombieDeath += RemoveZombies;
+            zombie.SetNumberEnemy(_indexEnemy);
+            zombie.SetHealthPoint(_healthPoint);
+            zombie.SetSettingsToActivateUnit();
+            _activeZombies.Add(zombie.Id, zombie);
+        
+            if (_isMovingStop)
             {
-                zombie.SetSettingsToActivateUnit();
+                zombie.StopMoving();
             }
+        
+            _indexEnemy++;
+        }
+
+        public void StopAllZombies()
+        {
+            _isMovingStop = true;
+        
+            foreach (Zombie zombie in _activeZombies.Values)
+            {
+                if (zombie != null && zombie.gameObject.activeInHierarchy)
+                { 
+                    zombie.StopMoving();  
+                }
+            }
+        }
+
+        public void ResumeAllZombies()
+        {
+            _isMovingStop = false;
+        
+            foreach (Zombie zombie in _activeZombies.Values)
+            {
+                if (zombie != null && zombie.gameObject.activeInHierarchy)
+                {
+                    zombie.SetSettingsToActivateUnit();
+                }
+            }
+        }
+
+        private void RemoveZombies(Zombie zombie)
+        {
+            _countAllZombies--;
+        
+            zombie.OnZombieDeath -= RemoveZombies;
+            OnZombieKilled?.Invoke(zombie.Status);
+
+            _activeZombies.Remove(zombie.Id);
         }
     }
 
-    private void RemoveZombies(Zombie zombie)
-    {
-        _countAllZombies--;
-        
-        zombie.OnZombieDeath -= RemoveZombies;
-        OnZombieKilled?.Invoke(zombie.Status);
-
-        _activeZombies.Remove(zombie.Id);
-    }
 }

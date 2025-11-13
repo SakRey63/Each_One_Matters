@@ -2,12 +2,15 @@ using System;
 using TMPro;
 using UnityEngine;
 
-public class PlayerView : MonoBehaviour
+namespace EachOneMatters.Gameplay.Player
 {
-    [SerializeField] private TextMeshProUGUI _countPoliceOfficer;
-
-    public void ShowPoliceCount(int count)
+    public class PlayerView : MonoBehaviour
     {
-        _countPoliceOfficer.text = Convert.ToString(count);
+        [SerializeField] private TextMeshProUGUI _countPoliceOfficer;
+
+        public void ShowPoliceCount(int count)
+        {
+            _countPoliceOfficer.text = Convert.ToString(count);
+        }
     }
 }

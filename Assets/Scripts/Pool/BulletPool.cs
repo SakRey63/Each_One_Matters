@@ -1,15 +1,20 @@
-public class BulletPool : ObjectPool<Bullet>
-{
-    public Bullet GetBullet()
-    {
-        Bullet bullet = GetObject();
-        bullet.OnHit += ReturnBullet;
-        return bullet;
-    }
+using EachOneMatters.Gameplay.Weapons;
 
-    private void ReturnBullet(Bullet bullet)
+namespace EachOneMatters.Pool
+{
+    public class BulletPool : ObjectPool<Bullet>
     {
-        bullet.OnHit -= ReturnBullet;
-        ReturnObject(bullet);
+        public Bullet GetBullet()
+        {
+            Bullet bullet = GetObject();
+            bullet.OnHit += ReturnBullet;
+            return bullet;
+        }
+
+        private void ReturnBullet(Bullet bullet)
+        {
+            bullet.OnHit -= ReturnBullet;
+            ReturnObject(bullet);
+        }
     }
 }

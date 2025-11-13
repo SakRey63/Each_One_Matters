@@ -1,53 +1,58 @@
 using System.Collections;
+using EachOneMatters.Gameplay.PlayerUnits;
+using EachOneMatters.Pool;
 using UnityEngine;
 
-public class Weapon : MonoBehaviour
+namespace EachOneMatters.Gameplay.Weapons
 {
-    [SerializeField] private Transform _bulletSpawnPosition;
-
-    private BulletPool _bulletPool;
-    private Coroutine _coroutineRepeatShooting;
-    private PoliceOfficerSound _officerSound;
-
-    public void SetBulletPool(BulletPool bulletPool, PoliceOfficerSound sound)
+    public class Weapon : MonoBehaviour
     {
-        _bulletPool = bulletPool;
-        _officerSound = sound;
-    }
+        [SerializeField] private Transform _bulletSpawnPosition;
 
-    public void Shooting(float repeat)
-    {
-        if (_coroutineRepeatShooting != null)
+        private BulletPool _bulletPool;
+        private Coroutine _coroutineRepeatShooting;
+        private PoliceOfficerSound _officerSound;
+
+        public void SetBulletPool(BulletPool bulletPool, PoliceOfficerSound sound)
         {
-            StopCoroutine(_coroutineRepeatShooting);
+            _bulletPool = bulletPool;
+            _officerSound = sound;
         }
 
-        _coroutineRepeatShooting = StartCoroutine(RepeatShooting(repeat));
-    }
-    
-    public void StopShooting()
-    {
-        if (_coroutineRepeatShooting != null)
+        public void Shooting(float repeat)
         {
-            StopCoroutine(_coroutineRepeatShooting);
-        }
-    }
-    
-    private IEnumerator RepeatShooting(float repeatShoot)
-    {
-        WaitForSeconds delay = new WaitForSeconds(repeatShoot);
-        
-        if (_bulletPool != null && _officerSound != null)
-        {
-            while (enabled)
+            if (_coroutineRepeatShooting != null)
             {
-                Bullet bullet = _bulletPool.GetBullet();
-                bullet.transform.position = _bulletSpawnPosition.position;
-                bullet.transform.rotation = _bulletSpawnPosition.rotation;
-                bullet.MakeShot();
-                _officerSound.PlayShoot();
+                StopCoroutine(_coroutineRepeatShooting);
+            }
+
+            _coroutineRepeatShooting = StartCoroutine(RepeatShooting(repeat));
+        }
+    
+        public void StopShooting()
+        {
+            if (_coroutineRepeatShooting != null)
+            {
+                StopCoroutine(_coroutineRepeatShooting);
+            }
+        }
+    
+        private IEnumerator RepeatShooting(float repeatShoot)
+        {
+            WaitForSeconds delay = new WaitForSeconds(repeatShoot);
+        
+            if (_bulletPool != null && _officerSound != null)
+            {
+                while (enabled)
+                {
+                    Bullet bullet = _bulletPool.GetBullet();
+                    bullet.transform.position = _bulletSpawnPosition.position;
+                    bullet.transform.rotation = _bulletSpawnPosition.rotation;
+                    bullet.MakeShot();
+                    _officerSound.PlayShoot();
                 
-                yield return delay;
+                    yield return delay;
+                }
             }
         }
     }

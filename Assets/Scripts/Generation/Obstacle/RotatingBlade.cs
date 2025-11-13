@@ -1,6 +1,10 @@
+using EachOneMatters.Generation.Bridge;
 using UnityEngine;
 
-public class RotatingBlade : MonoBehaviour, IBridgeObject
+namespace EachOneMatters.Generation.Obstacle
 {
-    public BridgeObjectType Type => BridgeObjectType.RotatingBlade;
+    public class RotatingBlade : MonoBehaviour, IBridgeObject
+    {
+        public BridgeObjectType Type => BridgeObjectType.RotatingBlade;
+    }
 }

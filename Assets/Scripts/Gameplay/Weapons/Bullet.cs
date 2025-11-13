@@ -1,50 +1,55 @@
 using System;
 using System.Collections;
 using UnityEngine;
+using EachOneMatters.Common;
+using EachOneMatters.Gameplay.EnemyUnits;
 
-public class Bullet : MonoBehaviour
+namespace EachOneMatters.Gameplay.Weapons
 {
-    [SerializeField] private float _speed = 6f;
-    [SerializeField] private float _delay = 5f;
-    [SerializeField] private int _damage = 50;
+    public class Bullet : MonoBehaviour
+    {
+        [SerializeField] private float _speed = 6f;
+        [SerializeField] private float _delay = 5f;
+        [SerializeField] private int _damage = 50;
 
-    private Transform _transform;
-    private Coroutine _coroutineShot;
+        private Transform _transform;
+        private Coroutine _coroutineShot;
     
-    public event Action<Bullet> OnHit;
+        public event Action<Bullet> OnHit;
 
-    private void Awake()
-    {
-        _transform = transform;
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.TryGetComponent(out Zombie zombie) && zombie.Status == UnitStatus.Alive)
+        private void Awake()
         {
-            zombie.TakeDamage(_damage, UnitStatus.KilledByBullet);
-            StopCoroutine(_coroutineShot);
-            OnHit?.Invoke(this);
+            _transform = transform;
         }
-    }
 
-    public void MakeShot()
-    {
-        _coroutineShot = StartCoroutine(TrackBulletLifecycle());
-    }
-
-    private IEnumerator TrackBulletLifecycle()
-    {
-        float elapsed = 0f;
-
-        while (elapsed < _delay)
+        private void OnTriggerEnter(Collider other)
         {
-            elapsed += Time.deltaTime;
-            _transform.Translate(Vector3.forward * _speed * Time.deltaTime, Space.Self);
+            if (other.TryGetComponent(out Zombie zombie) && zombie.Status == UnitStatus.Alive)
+            {
+                zombie.TakeDamage(_damage, UnitStatus.KilledByBullet);
+                StopCoroutine(_coroutineShot);
+                OnHit?.Invoke(this);
+            }
+        }
+
+        public void MakeShot()
+        {
+            _coroutineShot = StartCoroutine(TrackBulletLifecycle());
+        }
+
+        private IEnumerator TrackBulletLifecycle()
+        {
+            float elapsed = 0f;
+
+            while (elapsed < _delay)
+            {
+                elapsed += Time.deltaTime;
+                _transform.Translate(Vector3.forward * _speed * Time.deltaTime, Space.Self);
             
-            yield return null;
-        }
+                yield return null;
+            }
 
-        OnHit.Invoke(this);
+            OnHit.Invoke(this);
+        }
     }
 }

@@ -1,27 +1,32 @@
+using EachOneMatters.Common;
+using EachOneMatters.Gameplay.PlayerUnits;
 using UnityEngine;
 
-public class SegmentDamagedBridge : MonoBehaviour, IBridgeObject
+namespace EachOneMatters.Generation.Bridge
 {
-    [SerializeField] private Transform _centrPoint;
-
-    private int _number;
-
-    public BridgeObjectType Type => BridgeObjectType.DamagedSegment;
-    public int NumberPosition => _number;
-
-    private void OnTriggerEnter(Collider other)
+    public class SegmentDamagedBridge : MonoBehaviour, IBridgeObject
     {
-        if (other.TryGetComponent(out PoliceOfficer policeOfficer))
+        [SerializeField] private Transform _centrPoint;
+
+        private int _number;
+
+        public BridgeObjectType Type => BridgeObjectType.DamagedSegment;
+        public int NumberPosition => _number;
+
+        private void OnTriggerEnter(Collider other)
         {
-            if (policeOfficer.Status == UnitStatus.Alive)
+            if (other.TryGetComponent(out PoliceOfficer policeOfficer))
             {
-                policeOfficer.SetCenterPoint(_centrPoint);
+                if (policeOfficer.Status == UnitStatus.Alive)
+                {
+                    policeOfficer.SetCenterPoint(_centrPoint);
+                }
             }
         }
-    }
 
-    public void SetStatus(int numberPosition)
-    {
-        _number = numberPosition;
+        public void SetStatus(int numberPosition)
+        {
+            _number = numberPosition;
+        }
     }
 }

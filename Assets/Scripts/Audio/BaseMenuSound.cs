@@ -4,117 +4,109 @@ using UnityEngine.Audio;
 using UnityEngine.UI;
 using YG;
 
-public class BaseMenuSound : MonoBehaviour
+namespace EachOneMatters.Audio
 {
-    private const string MusicVolumeParam = "MusicVolume";
-    private const string SfxVolumeParam   = "SFXVolume";
-    private const string UiVolumeParam    = "UiVolume";
-
-    [Header("Настройки")]
-    [Tooltip("Основная музыка меню")]
-    [SerializeField] private AudioSource _baseMenuMusic;
-
-    [Tooltip("Слайдер громкости музыки")]
-    [SerializeField] private Slider _desctopSliderMusic;
-    [SerializeField] private Slider _mobileSliderMusic;
-
-    [Tooltip("Слайдер громкости интерфейса")]
-    [SerializeField] private Slider _desctopSliderUi;
-    [SerializeField] private Slider _mobileSliderUi;
-
-    [Tooltip("Слайдер громкости SFX")]
-    [SerializeField] private Slider _desctopSliderSFX;
-    [SerializeField] private Slider _mobileSliderSFX;
-
-    [Tooltip("Audio Mixer с настройками громкости")]
-    [SerializeField] private AudioMixer _audioMixer;
-
-    private Coroutine _waitForSavesLoad;
-    
-    private void OnDisable()
+    public class BaseMenuSound : MonoBehaviour
     {
-        if (_waitForSavesLoad != null)
+        private const string MusicVolumeParam = "MusicVolume";
+        private const string SfxVolumeParam = "SFXVolume";
+        private const string UiVolumeParam = "UiVolume";
+
+        [SerializeField] private AudioSource _baseMenuMusic;
+        [SerializeField] private Slider _desctopSliderMusic;
+        [SerializeField] private Slider _mobileSliderMusic;
+        [SerializeField] private Slider _desctopSliderUi;
+        [SerializeField] private Slider _mobileSliderUi; 
+        [SerializeField] private Slider _desctopSliderSFX;
+        [SerializeField] private Slider _mobileSliderSFX;
+        [SerializeField] private AudioMixer _audioMixer;
+
+        private Coroutine _waitForSavesLoad;
+
+        private void OnDisable()
         {
-            StopCoroutine(_waitForSavesLoad);
-        }
-    }
-    
-    private void Start()
-    {
-        _waitForSavesLoad = StartCoroutine(WaitForSavesLoad());
-    }
-    
-    public void CreateMainMenuMusic()
-    {
-        if (_baseMenuMusic != null && !_baseMenuMusic.isPlaying)
-        {
-            _baseMenuMusic.Play();
-        }
-    }
-    
-    private IEnumerator WaitForSavesLoad()
-    {
-        while (YG2.saves == null)
-        {
-            yield return null;
+            if (_waitForSavesLoad != null)
+            {
+                StopCoroutine(_waitForSavesLoad);
+            }
         }
 
-        Initialize();
-    }
-    
-    private void Initialize()
-    {
-        if (_audioMixer == null) return;
-        
-        float musicVol = YG2.saves.settings.VolumeMusic;
-        float sfxVol   = YG2.saves.settings.VolumeSFX;
-        float uiVol    = YG2.saves.settings.VolumeUi;
-        
-        ApplyVolume(MusicVolumeParam, musicVol);
-        ApplyVolume(SfxVolumeParam, sfxVol);
-        ApplyVolume(UiVolumeParam, uiVol);
-
-        if (_mobileSliderMusic) _mobileSliderMusic.SetValueWithoutNotify(musicVol);
-        if (_desctopSliderMusic) _desctopSliderMusic.SetValueWithoutNotify(musicVol);
-        if (_mobileSliderUi) _mobileSliderUi.SetValueWithoutNotify(musicVol);
-        if (_desctopSliderUi)    _desctopSliderUi.SetValueWithoutNotify(uiVol);
-        if (_mobileSliderSFX)   _mobileSliderSFX.SetValueWithoutNotify(sfxVol);
-        if (_desctopSliderSFX)   _desctopSliderSFX.SetValueWithoutNotify(sfxVol);
-        
-        if (_mobileSliderMusic) _mobileSliderMusic.onValueChanged.AddListener(OnMusicVolumeChanged);
-        if (_desctopSliderMusic) _desctopSliderMusic.onValueChanged.AddListener(OnMusicVolumeChanged);
-        if (_mobileSliderUi)    _mobileSliderUi.onValueChanged.AddListener(OnUiVolumeChanged);
-        if (_desctopSliderUi)    _desctopSliderUi.onValueChanged.AddListener(OnUiVolumeChanged);
-        if (_mobileSliderSFX)   _mobileSliderSFX.onValueChanged.AddListener(OnSfxVolumeChanged);
-        if (_desctopSliderSFX)   _desctopSliderSFX.onValueChanged.AddListener(OnSfxVolumeChanged);
-    }
-
-    private void ApplyVolume(string paramName, float value)
-    {
-        if (_audioMixer != null)
+        private void Start()
         {
-            _audioMixer.SetFloat(paramName, value);
+            _waitForSavesLoad = StartCoroutine(WaitForSavesLoad());
         }
-    }
 
-    private void OnMusicVolumeChanged(float value)
-    {
-        ApplyVolume(MusicVolumeParam, value);
-        YG2.saves.settings.VolumeMusic = value;
-        YG2.SaveProgress();
-    }
+        public void CreateMainMenuMusic()
+        {
+            if (_baseMenuMusic != null && !_baseMenuMusic.isPlaying)
+            {
+                _baseMenuMusic.Play();
+            }
+        }
 
-    private void OnUiVolumeChanged(float value)
-    {
-        ApplyVolume(UiVolumeParam, value);
-        YG2.saves.settings.VolumeUi = value;
-        YG2.SaveProgress();
-    }
+        private IEnumerator WaitForSavesLoad()
+        {
+            while (YG2.saves == null)
+            {
+                yield return null;
+            }
 
-    private void OnSfxVolumeChanged(float value)
-    {
-        ApplyVolume(SfxVolumeParam, value);
-        YG2.saves.settings.VolumeSFX = value;
-        YG2.SaveProgress();
+            Initialize();
+        }
+
+        private void Initialize()
+        {
+            if (_audioMixer == null) return;
+
+            float musicVol = YG2.saves.settings.VolumeMusic;
+            float sfxVol = YG2.saves.settings.VolumeSFX;
+            float uiVol = YG2.saves.settings.VolumeUi;
+
+            ApplyVolume(MusicVolumeParam, musicVol);
+            ApplyVolume(SfxVolumeParam, sfxVol);
+            ApplyVolume(UiVolumeParam, uiVol);
+
+            if (_mobileSliderMusic) _mobileSliderMusic.SetValueWithoutNotify(musicVol);
+            if (_desctopSliderMusic) _desctopSliderMusic.SetValueWithoutNotify(musicVol);
+            if (_mobileSliderUi) _mobileSliderUi.SetValueWithoutNotify(musicVol);
+            if (_desctopSliderUi) _desctopSliderUi.SetValueWithoutNotify(uiVol);
+            if (_mobileSliderSFX) _mobileSliderSFX.SetValueWithoutNotify(sfxVol);
+            if (_desctopSliderSFX) _desctopSliderSFX.SetValueWithoutNotify(sfxVol);
+            if (_mobileSliderMusic) _mobileSliderMusic.onValueChanged.AddListener(OnMusicVolumeChanged);
+            if (_desctopSliderMusic) _desctopSliderMusic.onValueChanged.AddListener(OnMusicVolumeChanged);
+            if (_mobileSliderUi) _mobileSliderUi.onValueChanged.AddListener(OnUiVolumeChanged);
+            if (_desctopSliderUi) _desctopSliderUi.onValueChanged.AddListener(OnUiVolumeChanged);
+            if (_mobileSliderSFX) _mobileSliderSFX.onValueChanged.AddListener(OnSfxVolumeChanged);
+            if (_desctopSliderSFX) _desctopSliderSFX.onValueChanged.AddListener(OnSfxVolumeChanged);
+        }
+
+        private void ApplyVolume(string paramName, float value)
+        {
+            if (_audioMixer != null)
+            {
+                _audioMixer.SetFloat(paramName, value);
+            }
+        }
+
+        private void OnMusicVolumeChanged(float value)
+        {
+            ApplyVolume(MusicVolumeParam, value);
+            YG2.saves.settings.VolumeMusic = value;
+            YG2.SaveProgress();
+        }
+
+        private void OnUiVolumeChanged(float value)
+        {
+            ApplyVolume(UiVolumeParam, value);
+            YG2.saves.settings.VolumeUi = value;
+            YG2.SaveProgress();
+        }
+
+        private void OnSfxVolumeChanged(float value)
+        {
+            ApplyVolume(SfxVolumeParam, value);
+            YG2.saves.settings.VolumeSFX = value;
+            YG2.SaveProgress();
+        }
     }
 }

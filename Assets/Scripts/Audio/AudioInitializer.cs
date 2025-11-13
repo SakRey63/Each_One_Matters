@@ -1,15 +1,18 @@
 using UnityEngine;
 
-public class AudioInitializer : MonoBehaviour
+namespace EachOneMatters.Audio
 {
-    private bool _audioInitialized;
-
-    private void Update()
+    public class AudioInitializer : MonoBehaviour
     {
-        if (_audioInitialized || !Input.anyKeyDown)
-            return;
+        private bool _audioInitialized;
+
+        private void Update()
+        {
+            if (_audioInitialized || !Input.anyKeyDown)
+                return;
         
-        AudioListener.volume = 1f;
-        _audioInitialized = true;
+            AudioListener.volume = 1f;
+            _audioInitialized = true;
+        }
     }
 }

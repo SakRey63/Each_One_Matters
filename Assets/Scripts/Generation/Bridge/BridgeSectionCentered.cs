@@ -1,4 +1,7 @@
 using UnityEngine;
 
-public class BridgeSectionCentered : MonoBehaviour
-{ }
+namespace EachOneMatters.Generation.Bridge
+{
+    public class BridgeSectionCentered : MonoBehaviour
+    { }
+}

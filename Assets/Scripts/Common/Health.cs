@@ -1,24 +1,27 @@
-public class Health
+namespace EachOneMatters.Common
 {
-    private int _healthPoint;
-
-    public int HealthPoint => _healthPoint;
-
-    public void SetHealthPoint(int healthPoint)
+    public class Health
     {
-        _healthPoint = healthPoint;
-    }
+        private int _healthPoint;
 
-    public void TakeDamage(int damage)
-    {
-        if (damage > 0)
+        public int HealthPoint => _healthPoint;
+
+        public void SetHealthPoint(int healthPoint)
         {
-            _healthPoint -= damage;
+            _healthPoint = healthPoint;
         }
 
-        if (_healthPoint < 0)
+        public void TakeDamage(int damage)
         {
-            _healthPoint = 0;
+            if (damage > 0)
+            {
+                _healthPoint -= damage;
+            }
+
+            if (_healthPoint < 0)
+            {
+                _healthPoint = 0;
+            }
         }
     }
 }

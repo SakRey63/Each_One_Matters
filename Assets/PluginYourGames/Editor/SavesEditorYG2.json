@@ -7,13 +7,13 @@
     false,
     false
   ],
-  "idSave": 391,
+  "idSave": 401,
   "gameplay": {
     "Level": 2,
-    "Score": 20,
+    "Score": 670,
     "CallHelpButtonPrice": 150,
     "CountHelpPoliceOfficer": 3,
-    "IsCallHelpUpgradePurchased": true,
+    "IsCallHelpUpgradePurchased": false,
     "IsFirstLaunch": false,
     "IsLoadedMainMenu": true
   },
@@ -31,7 +31,7 @@
   "upgrades": {
     "IncreaseSquadPrices": 1000,
     "ExtendFireRateDurationPrices": 1000,
-    "CallHelpOnBasePrices": 1200,
+    "CallHelpOnBasePrices": 1000,
     "BuffDuration": 5.0
   }
 }

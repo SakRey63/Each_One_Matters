@@ -1,6 +1,6 @@
 using YG;
 
-namespace EachOneMatters.Saving
+namespace EachOneMatters.Data
 {
     public static class PlayerSaveInitializer
     {
