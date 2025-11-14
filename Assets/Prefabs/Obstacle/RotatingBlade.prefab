@@ -45,6 +45,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d63c085df1e42c4dbaa34dd86b533a1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _type: 4
 --- !u!1001 &5406172629950527151
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -57,6 +58,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Props_1
+      objectReference: {fileID: 0}
+    - target: {fileID: 172217303782348944, guid: e898f64f4bb313b4093714a7f5141831,
+        type: 3}
+      propertyPath: m_Layer
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1242528905608908957, guid: e898f64f4bb313b4093714a7f5141831,
         type: 3}
@@ -148,6 +154,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6391233746760414441, guid: e898f64f4bb313b4093714a7f5141831,
+        type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -230,6 +241,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 01150d92eea62ca41ac3a080614a20c4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _type: 10
   _damage: 100
   _sound: {fileID: 4226478556874505605}
 --- !u!82 &4226478556874505605

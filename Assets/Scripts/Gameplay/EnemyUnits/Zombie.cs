@@ -3,11 +3,12 @@ using EachOneMatters.Animation;
 using EachOneMatters.Common;
 using EachOneMatters.Gameplay.PlayerUnits;
 using EachOneMatters.Generation.Bridge;
+using EachOneMatters.Systems;
 using UnityEngine;
 
 namespace EachOneMatters.Gameplay.EnemyUnits
 {
-    public class Zombie : MonoBehaviour, IBridgeObject, IUnitState
+    public class Zombie : MonoBehaviour, IUnitState, IReaction
     {
         [SerializeField] private ZombieVision _zombieVision;
         [SerializeField] private ZombieSensor _zombieSensor;
@@ -33,7 +34,6 @@ namespace EachOneMatters.Gameplay.EnemyUnits
         
         public UnitStatus Status { get; private set; }
         public int Id => _id;
-        public BridgeObjectType Type => BridgeObjectType.Zombie;
 
         private void Awake()
         {
@@ -116,6 +116,13 @@ namespace EachOneMatters.Gameplay.EnemyUnits
         {
             _isMoving = false;
             _enemyAnimation.PauseAnimation();
+        }
+        
+        public void HandleInteraction()
+        {
+            Status = UnitStatus.Dead;
+            _zombieVision.ScanOff();
+            OnZombieDeath?.Invoke(this);
         }
 
         private void ReactToFinishedAttack(bool isKilled)

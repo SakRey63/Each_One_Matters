@@ -19,6 +19,7 @@ namespace EachOneMatters.Generation.Spawners
             {
                 SegmentDamagedBridge damagedBridge = Instantiate(_damagedBridge, positionSegment, targetRotation);
                 damagedBridge.SetStatus(numberPosition);
+                damagedBridge.OnDestroyDamageSegmentBridge += HandleOnDestroyDamageSegmentBridge;
             }
             else
             {
@@ -44,6 +45,12 @@ namespace EachOneMatters.Generation.Spawners
             CreatedNormalSegmentBridge(position, rotation, number);
         }
 
+        private void HandleOnDestroyDamageSegmentBridge(SegmentDamagedBridge segmentDamagedBridge, Transform transform, int number)
+        {
+            segmentDamagedBridge.OnDestroyDamageSegmentBridge -= HandleOnDestroyDamageSegmentBridge;
+            CreatedNormalSegmentBridge(transform.position, transform.rotation, number);
+        }
+        
         private void CreatedNormalSegmentBridge(Vector3 positionSegment, Quaternion targetRotation, int numberPosition)
         {
             if (numberPosition == 0)

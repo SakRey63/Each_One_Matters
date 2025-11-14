@@ -14,6 +14,7 @@ namespace EachOneMatters.Generation.Bridge
         private int _indexSpawnObject;
     
         public BridgeObjectType CurrentType { get; private set; }
+        public GameObject CurrentSpawnObject => _currentSpawnObject;
 
         public void CreateObjectToBridge()
         {
@@ -34,7 +35,7 @@ namespace EachOneMatters.Generation.Bridge
                 _randomFirstSpawnObject++;
             }
 
-            if (_currentSpawnObject.TryGetComponent<IBridgeObject>(out var bridgeObject))
+            if (_currentSpawnObject.TryGetComponent<BridgeObject>(out var bridgeObject))
             {
                 CurrentType = bridgeObject.Type;
             }

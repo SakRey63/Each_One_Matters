@@ -219,6 +219,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d37edeb543ea77342bdc3c81e974420d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _type: 9
   _zombieVision: {fileID: 1881798834687319051}
   _zombieSensor: {fileID: 2388282474954286745}
 --- !u!114 &6184318563662895428

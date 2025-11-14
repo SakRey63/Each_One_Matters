@@ -106,7 +106,7 @@ MonoBehaviour:
   _tiltAngle: 90
   _duration: 1
   _basePoint: {fileID: 4011727563928251536}
-  _animations: {fileID: 326496776833045317}
+  _unitAnimation: {fileID: 326496776833045317}
 --- !u!114 &3735614992959210735
 MonoBehaviour:
   m_ObjectHideFlags: 0

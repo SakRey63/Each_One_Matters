@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 9057640227945661854}
   m_Layer: 0
   m_Name: Hammer
-  m_TagString: Untagged
+  m_TagString: BridgeObject
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -46,6 +46,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d8f3160b885b7e4fa0ae940eeb3bc54, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _type: 3
 --- !u!1 &9221312608328144244
 GameObject:
   m_ObjectHideFlags: 0
@@ -89,6 +90,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Props_7
+      objectReference: {fileID: 0}
+    - target: {fileID: 5003257899507768075, guid: de3df4a73a200dd4aab4b967d8702018,
+        type: 3}
+      propertyPath: m_Layer
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6768743221385502464, guid: de3df4a73a200dd4aab4b967d8702018,
         type: 3}
@@ -243,6 +249,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 01150d92eea62ca41ac3a080614a20c4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _type: 10
   _damage: 100
   _sound: {fileID: 225563385013539901}
 --- !u!82 &225563385013539901

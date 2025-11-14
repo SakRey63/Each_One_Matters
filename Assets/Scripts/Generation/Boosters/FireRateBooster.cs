@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace EachOneMatters.Generation.Boosters
 {
-    public class FireRateBooster : MonoBehaviour, IBridgeObject
+    public class FireRateBooster : BridgeObject
     {
         [SerializeField] private ParticleSystem _buffEffect;
         [SerializeField] private ParticleSystem _constEffect;
@@ -20,7 +20,6 @@ namespace EachOneMatters.Generation.Boosters
 
         public event Action<FireRateBooster> OnFirstOfficerEntered;
     
-        public BridgeObjectType Type => BridgeObjectType.FireRateBooster;
         public float BuffDuration => _buffDuration;
         public float IncreasedRateOfFire => _increasedRateOfFire;
 
@@ -49,7 +48,9 @@ namespace EachOneMatters.Generation.Boosters
             _meshRenderer.enabled = false;
             _constEffect.Stop();
             _buffEffect.Play();
+            
             yield return delay;
+            
             _buffEffect.Stop();
             Destroy(gameObject);
         }

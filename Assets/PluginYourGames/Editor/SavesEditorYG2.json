@@ -7,10 +7,10 @@
     false,
     false
   ],
-  "idSave": 401,
+  "idSave": 534,
   "gameplay": {
-    "Level": 2,
-    "Score": 670,
+    "Level": 4,
+    "Score": 418070,
     "CallHelpButtonPrice": 150,
     "CountHelpPoliceOfficer": 3,
     "IsCallHelpUpgradePurchased": false,

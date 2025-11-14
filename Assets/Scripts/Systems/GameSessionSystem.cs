@@ -41,7 +41,6 @@ namespace EachOneMatters.Systems
 
         private void OnEnable()
         {
-            _killerObstacleHandler.OnDestroyDamageSegmentBridge += RestoreBridgeSegment;
             _player.OnUnitDied += HandleUnitDead;
             _player.OnAllPoliceOfficersDied += HandleAllPoliceOfficerDied;
             _player.OnCheckpointReached += UpdatePlayerTargetPosition;
@@ -59,7 +58,6 @@ namespace EachOneMatters.Systems
 
         private void OnDisable()
         {
-            _killerObstacleHandler.OnDestroyDamageSegmentBridge -= RestoreBridgeSegment;
             _player.OnCheckpointReached -= UpdatePlayerTargetPosition;
             _player.OnUnitDied -= HandleUnitDead;
             _player.OnAllPoliceOfficersDied -= HandleAllPoliceOfficerDied;
@@ -118,11 +116,6 @@ namespace EachOneMatters.Systems
                 _player.KeepMoving();
                 _enemyGroup.ResumeAllZombies();
             }
-        }
-
-        private void RestoreBridgeSegment(Transform transform, int number)
-        {
-            _bridgeGenerator.SpawnNormalSegment(transform.position, transform.rotation, number);
         }
 
         private IEnumerator WaitForFirstInput()

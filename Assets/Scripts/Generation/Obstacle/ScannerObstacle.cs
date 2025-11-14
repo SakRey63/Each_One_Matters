@@ -1,16 +1,14 @@
 using EachOneMatters.Common;
 using EachOneMatters.Gameplay.PlayerUnits;
-using EachOneMatters.Generation.Bridge;
+using EachOneMatters.Systems;
 using UnityEngine;
 
 namespace EachOneMatters.Generation.Obstacle
 {
-    public class ScannerObstacle : MonoBehaviour, IBridgeObject
+    public class ScannerObstacle : MonoBehaviour, IReaction
     {
         [SerializeField] private int _damage = 100;
         [SerializeField] private AudioSource _sound;
-
-        public BridgeObjectType Type => BridgeObjectType.ScannerObstacle;
     
         private void OnTriggerEnter(Collider other)
         {
@@ -22,6 +20,11 @@ namespace EachOneMatters.Generation.Obstacle
                     policeOfficer.TakeDamage(_damage);
                 }
             }
+        }
+
+        public void HandleInteraction()
+        {
+            Destroy(gameObject);
         }
     }
 }

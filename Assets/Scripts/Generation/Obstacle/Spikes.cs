@@ -3,8 +3,15 @@ using UnityEngine;
 
 namespace EachOneMatters.Generation.Obstacle
 {
-    public class Spikes : MonoBehaviour, IBridgeObject
+    public class Spikes : BridgeObject, IBridgeObjectInstantiator
     {
-        public BridgeObjectType Type => BridgeObjectType.Spikes;
+        private float _verticalPositionRotatingBlade = 0;
+        
+        public void InstantiateBridgeObstacle(Vector3 position, Quaternion rotation, ObstacleSide side)
+        {
+            position = new Vector3(position.x, _verticalPositionRotatingBlade, position.z);
+
+            Instantiate(this, position, rotation);
+        }
     }
 }

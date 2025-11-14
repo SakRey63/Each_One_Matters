@@ -8,7 +8,7 @@ using Random = UnityEngine.Random;
 
 namespace EachOneMatters.Generation.Boosters
 {
-    public class RecruitPolice : MonoBehaviour, IBridgeObject
+    public class RecruitPolice : BridgeObject
     {
         [SerializeField] private int _minNumber = 1;
         [SerializeField] private int _maxCumulativeIncrease = 6;
@@ -28,8 +28,6 @@ namespace EachOneMatters.Generation.Boosters
         private bool _isMultiplication;
 
         public event Action<RecruitPolice> OnRecruitPoliceTriggered;
-
-        public BridgeObjectType Type => BridgeObjectType.RecruitPolice;
 
         private void OnTriggerEnter(Collider other)
         {
@@ -70,7 +68,7 @@ namespace EachOneMatters.Generation.Boosters
         public int GetCountSpawnPoliceOfficers(bool isPositiveX, int policeCount)
         {
             int countSpawn;
-
+            
             _meshRenderer.gameObject.SetActive(false);
 
             if (_isMultiplication)

@@ -253,12 +253,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6f520097d4bcc4642b4169de804ab96d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _type: 1
   _buffEffect: {fileID: 3990118068639437463}
   _constEffect: {fileID: 3413935590848807702}
-  _squadEffect: {fileID: 3084059451720605310}
   _meshRenderer: {fileID: 3123877611283186691}
   _soundEffect: {fileID: 349221362233396881}
-  _delay: 2
+  _delayEffect: 2
+  _increasedRateOfFire: 0.4
 --- !u!1001 &836804065309098729
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -347,12 +348,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: bad5794a53f5c3645bb444b3a040ba01, type: 3}
---- !u!198 &3084059451720605310 stripped
-ParticleSystem:
-  m_CorrespondingSourceObject: {fileID: 2400466318854986903, guid: bad5794a53f5c3645bb444b3a040ba01,
-    type: 3}
-  m_PrefabInstance: {fileID: 836804065309098729}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &8624344788377235087 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8949566398710770790, guid: bad5794a53f5c3645bb444b3a040ba01,

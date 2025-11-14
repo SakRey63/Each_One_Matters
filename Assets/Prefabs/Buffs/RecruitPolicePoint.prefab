@@ -209,6 +209,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: efbc24ab6b704484387177c5c178f3c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _type: 2
   _minNumber: 1
   _maxCumulativeIncrease: 6
   _maxPopulationMultiplier: 4

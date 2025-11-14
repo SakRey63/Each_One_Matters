@@ -45,6 +45,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a0fff3ef76c03ad4ea9cfda153b94d05, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _type: 7
 --- !u!1001 &4108740174168873075
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -53,10 +54,20 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 336732750833862619}
     m_Modifications:
+    - target: {fileID: 5393459245724866854, guid: 524443b7797344d49a3a83c3cf3e0a60,
+        type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5428785273902133245, guid: 524443b7797344d49a3a83c3cf3e0a60,
         type: 3}
       propertyPath: m_Name
       value: Props_10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5428785273902133245, guid: 524443b7797344d49a3a83c3cf3e0a60,
+        type: 3}
+      propertyPath: m_Layer
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6975670680373123124, guid: 524443b7797344d49a3a83c3cf3e0a60,
         type: 3}
@@ -258,6 +269,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 01150d92eea62ca41ac3a080614a20c4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _type: 10
   _damage: 100
   _sound: {fileID: 4992419393559087059}
 --- !u!82 &4992419393559087059

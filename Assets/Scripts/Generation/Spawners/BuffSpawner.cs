@@ -30,14 +30,7 @@ namespace EachOneMatters.Generation.Spawners
                 
             RecruitPolice recruitPolice = Instantiate(_recruitPolice, position, targetRotation);
 
-            if (randomPositionSquad == 0)
-            { 
-                recruitPolice.SetBonusCount(false);
-            }
-            else
-            {
-                recruitPolice.SetBonusCount(true);
-            }
+            recruitPolice.SetBonusCount(randomPositionSquad == 0 ? false : true);
 
             return recruitPolice;
         }

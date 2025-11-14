@@ -19,7 +19,6 @@ namespace EachOneMatters.Generation.Bridge
         [SerializeField] private SpawnerSegmentBridge _spawnerSegmentBridge;
         [SerializeField] private SpawnerZombieWaveTrigger _spawnerZombieWaveTrigger;
         [SerializeField] private BuffSpawner _buffSpawner;
-        [SerializeField] private SpawnerObstacles _spawnerObstacles;
 
         private BridgeObjectSelector _objectSelector;
         private BridgeLengthCalculator _lengthCalculator;
@@ -48,11 +47,6 @@ namespace EachOneMatters.Generation.Bridge
             _positionGenerator = GetComponent<SegmentPositionGenerator>();
             _lengthCalculator = GetComponent<BridgeLengthCalculator>();
             _targetRotation = _startPositionBridgeSegments.rotation;
-        }
-
-        public void SpawnNormalSegment(Vector3 position, Quaternion rotation, int number)
-        {
-            _spawnerSegmentBridge.CreateNormalSegment(position, rotation, number);
         }
 
         public void Generate(int level)
@@ -190,33 +184,36 @@ namespace EachOneMatters.Generation.Bridge
 
         private void SpawnObstacles(Vector3 positionObstacle)
         {
-            switch (_objectSelector.CurrentType)
+            if (_objectSelector.CurrentSpawnObject.TryGetComponent<IBridgeObjectInstantiator>(out var component))
             {
-                case BridgeObjectType.Hammer:
-                    _positionGenerator.CreateRandomSide();
-                    _spawnerObstacles.CreateHummer(_positionGenerator.GetObstaclePosition(positionObstacle), _positionGenerator.Side, _targetRotation);
-                    break;
+                switch (_objectSelector.CurrentType)
+                {
+                    case BridgeObjectType.Hammer:
+                        _positionGenerator.CreateRandomSide();
+                        component.InstantiateBridgeObstacle(_positionGenerator.GetObstaclePosition(positionObstacle), _targetRotation, _positionGenerator.Side);
+                        break;
 
-                case BridgeObjectType.RotatingBlade:
-                    _spawnerObstacles.CreateRotatingBlade(_positionGenerator.GetNextPositionAlongWidth(positionObstacle), _targetRotation);
-                    break;
-
-                case BridgeObjectType.SawBlade:
-                    _spawnerObstacles.CreateSawBlade(_positionGenerator.GetNextPositionAlongWidth(positionObstacle), _targetRotation);
-                    break;
-
-                case BridgeObjectType.SpikedCylinder:
-                    _spawnerObstacles.CreateSpikedCylinder(_positionGenerator.GetNextPositionAlongWidth(positionObstacle), _targetRotation);
-                    break;
-
-                case BridgeObjectType.SpikePress:
-                    _positionGenerator.CreateRandomSide();
-                    _spawnerObstacles.CreateSpikePress(_positionGenerator.GetNextPositionAlongWidth(positionObstacle), _positionGenerator.Side, _targetRotation);
-                    break;
-
-                case BridgeObjectType.Spikes:
-                    _spawnerObstacles.CreateSpikes(_positionGenerator.GetRandomPositionToLevel(positionObstacle), _targetRotation);
-                    break;
+                    case BridgeObjectType.RotatingBlade:
+                        component.InstantiateBridgeObstacle(_positionGenerator.GetNextPositionAlongWidth(positionObstacle), _targetRotation, _positionGenerator.Side);
+                        break;
+                
+                    case BridgeObjectType.SawBlade:
+                        component.InstantiateBridgeObstacle(_positionGenerator.GetNextPositionAlongWidth(positionObstacle), _targetRotation, _positionGenerator.Side);
+                        break;
+                
+                    case BridgeObjectType.SpikedCylinder:
+                        component.InstantiateBridgeObstacle(_positionGenerator.GetNextPositionAlongWidth(positionObstacle), _targetRotation, _positionGenerator.Side);
+                        break;
+                
+                    case BridgeObjectType.SpikePress:
+                        _positionGenerator.CreateRandomSide();
+                        component.InstantiateBridgeObstacle(_positionGenerator.GetNextPositionAlongWidth(positionObstacle), _targetRotation, _positionGenerator.Side);
+                        break;
+                
+                    case BridgeObjectType.Spikes:
+                        component.InstantiateBridgeObstacle(_positionGenerator.GetRandomPositionToLevel(positionObstacle), _targetRotation, _positionGenerator.Side);
+                        break;
+                }
             }
         }
     }

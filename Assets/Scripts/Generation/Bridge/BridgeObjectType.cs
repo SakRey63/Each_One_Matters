@@ -11,7 +11,5 @@ namespace EachOneMatters.Generation.Bridge
         SpikedCylinder,
         SpikePress,
         Spikes,
-        Zombie,
-        ScannerObstacle,
     }
 }
